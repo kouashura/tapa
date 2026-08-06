@@ -1,0 +1,23 @@
+{
+  "name": "serveur-sms-africastalking",
+  "version": "1.0.0",
+  "description": "Serveur SMS OTP avec Africa's Talking pour TAPA Budget",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "africastalking": "^0.5.9",
+    "axios": "^1.19.0",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "express-rate-limit": "^6.11.2",
+    "firebase-admin": "^11.11.1",
+    "twilio": "^6.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

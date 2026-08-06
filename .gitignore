@@ -1,0 +1,35 @@
+# Flutter
+build/
+.dart_tool/
+.pub-cache/
+.pub/
+packages/
+*.lock
+
+# Android
+*.iml
+*.iws
+.idea/
+gradle/
+local.properties
+
+# iOS
+*.xcworkspace
+*.xcuserstate
+Pods/
+Podfile.lock
+
+# 🔐 Secrets à NE PAS partager
+.env
+*.env
+*.env.*
+serviceAccountKey.json
+firebase_app_id_file.json
+GoogleService-Info.plist
+google-services.json
+
+# Autres
+.DS_Store
+*.log
+*.pid
+*.tmp
