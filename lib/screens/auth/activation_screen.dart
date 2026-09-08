@@ -2,13 +2,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
+import '../../core/theme/app_theme.dart';  // ✅ CHEMIN CORRIGÉ
+import '../../presentation/providers/auth/auth_provider.dart';  // ✅ CHEMIN CORRIGÉ
+import 'package:tapa_budget/presentation/providers/providers.dart';
 import '../../services/firebase_service.dart';
 import '../../core/utils/logger.dart';
+import '../../data/models/models.dart';
 
 class ActivationScreen extends ConsumerStatefulWidget {
   const ActivationScreen({super.key});
@@ -26,22 +29,17 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   bool _accesActive = false;
   String _selectedPaymentMethod = '';
 
+  // ✅ UNE SEULE CLÉ ROOT (pour le développeur) - DEPUIS .env
+  static String get _rootDevKey => dotenv.env['ROOT_DEV_KEY'] ?? '';
+
   static const String _numeroWhatsApp = '2250160254102';
   static const int _montant = 5000;
-
-  // ============================================
-  // CLÉS ROOT
-  // ============================================
-  static const List<String> ROOT_KEYS = [
-    'TAPA-ROOT-2026-SUPER-ADMIN',
-    'TAPA-ROOT-2026-DEVELOPPER',
-    'TAPA-ROOT-2026-TESTER',
-  ];
 
   @override
   void initState() {
     super.initState();
     _verifierAcces();
+    _verifierConfiguration();
   }
 
   @override
@@ -51,8 +49,17 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
     super.dispose();
   }
 
+  // ✅ VÉRIFIER LA CONFIGURATION .env
+  void _verifierConfiguration() {
+    if (_rootDevKey.isEmpty) {
+      Logger.warning('⚠️ ROOT_DEV_KEY non définie dans .env');
+    } else {
+      Logger.info('✅ ROOT_DEV_KEY chargée avec succès');
+    }
+  }
+
   Future<void> _verifierAcces() async {
-    final hasAcces = ref.read(hasAccesVieProvider);
+    final hasAcces = ref.read(hasAccessVieProvider);
     setState(() {
       _accesActive = hasAcces;
     });
@@ -61,6 +68,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   // ============================================
   // OUVRIR WHATSAPP
   // ============================================
+
   Future<void> _ouvrirWhatsApp({String message = ''}) async {
     try {
       final encodedMessage = Uri.encodeComponent(message);
@@ -92,6 +100,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   // ============================================
   // AFFICHER LES COORDONNÉES WHATSAPP
   // ============================================
+
   void _showCoordonneesWhatsApp() {
     showModalBottomSheet(
       context: context,
@@ -233,6 +242,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   // ============================================
   // DEMANDER UNE CLÉ PAR WHATSAPP
   // ============================================
+
   void _demanderCleWhatsApp() {
     final message = 'Bonjour TAPA Budget ! 👋\n\n'
         'Je souhaite obtenir l\'accès à vie de TAPA Budget à ${_montant.toString()} FCFA.\n'
@@ -246,6 +256,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   // ============================================
   // SIMULER UN PAIEMENT
   // ============================================
+
   void _simulerPaiement(String method) {
     final numero = _numeroCtrl.text.trim();
 
@@ -283,6 +294,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   // ============================================
   // GÉNÉRER UNE CLÉ
   // ============================================
+
   String _genererCle(String numero, String method) {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final hash = (numero.hashCode + timestamp).abs().toString().substring(0, 8);
@@ -292,6 +304,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   // ============================================
   // AFFICHER LE SUCCÈS DU PAIEMENT
   // ============================================
+
   void _showPaiementSuccess({
     required String method,
     required String cle,
@@ -430,6 +443,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   // ============================================
   // ACTIVER AVEC UNE CLÉ - AVEC SUPPORT ROOT
   // ============================================
+
   Future<void> _activerAvecCle(String cle) async {
     setState(() {
       _loading = true;
@@ -439,49 +453,67 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
     try {
       final firebaseService = FirebaseService();
 
+      // ✅ VÉRIFICATION UNIQUE - ROOT KEY DEPUIS .env
+      final isRoot = cle == _rootDevKey && _rootDevKey.isNotEmpty;
+
       // ✅ VÉRIFIER LA CLÉ (ROOT OU STANDARD)
-      if (firebaseService.verifierCle(cle)) {
+      final cleValide = firebaseService.verifierCle(cle) || isRoot;
 
-        // ✅ ACTIVER L'ACCÈS
-        await firebaseService.activerAccesVie(cle);
-
-        // ✅ METTRE À JOUR L'ÉTAT
-        final authNotifier = ref.read(authStateProvider.notifier);
-        final currentUser = ref.read(currentUserProvider);
-
-        if (currentUser != null) {
-          await authNotifier.updateUserProfile(
-              currentUser.copyWith(hasAccesVie: true)
-          );
-        }
-
-        // ✅ VÉRIFIER SI C'EST UNE CLÉ ROOT
-        final isRoot = ROOT_KEYS.contains(cle);
-
-        setState(() {
-          _accesActive = true;
-          _loading = false;
-        });
-
-        if (mounted) {
-          final message = isRoot
-              ? '👑 Accès Root activé avec succès !'
-              : '✅ Accès activé avec succès !';
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              backgroundColor: isRoot ? TAPAColors.purple : Colors.green,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-          context.go('/home');
-        }
-      } else {
+      if (!cleValide) {
         setState(() {
           _error = 'Clé invalide. Format : TB-2026-XXXXXXXX';
           _loading = false;
         });
+        return;
+      }
+
+      if (isRoot) {
+        Logger.info('👑 Accès Root activé avec la clé: $cle');
+      } else {
+        Logger.info('✅ Accès premium activé avec la clé: $cle');
+      }
+
+      // ✅ ACTIVER L'ACCÈS
+      await firebaseService.activerAccesVie(cle);
+
+      // ✅ METTRE À JOUR L'ÉTAT
+      final authNotifier = ref.read(authStateProvider.notifier);
+      final currentUser = ref.read(currentUserProvider);
+
+      if (currentUser != null) {
+        final updatedUser = AppUser(
+          id: currentUser.id,
+          phoneNumber: currentUser.phoneNumber,
+          prenom: currentUser.prenom,
+          monnaie: currentUser.monnaie,
+          codePays: currentUser.codePays,
+          hasAccessVie: true,
+          onboardingVu: currentUser.onboardingVu,
+          notificationsActivees: currentUser.notificationsActivees,
+          createdAt: currentUser.createdAt,
+          dernierActive: DateTime.now(),
+        );
+        await authNotifier.updateUser(updatedUser);
+      }
+
+      setState(() {
+        _accesActive = true;
+        _loading = false;
+      });
+
+      if (mounted) {
+        final message = isRoot
+            ? '👑 Accès Root activé avec succès !'
+            : '✅ Accès activé avec succès !';
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: isRoot ? TAPAColors.purple : Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        context.go('/home');
       }
     } catch (e) {
       setState(() {
@@ -495,6 +527,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   // ============================================
   // ACTIVER AVEC LE CHAMP DE SAISIE
   // ============================================
+
   Future<void> _activer() async {
     final cle = _cleCtrl.text.trim().toUpperCase();
     await _activerAvecCle(cle);
@@ -503,6 +536,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   // ============================================
   // AFFICHER LES OPTIONS DE PAIEMENT
   // ============================================
+
   void _showPaymentOptions() {
     showModalBottomSheet(
       context: context,
@@ -652,6 +686,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   // ============================================
   // WIDGET OPTION DE PAIEMENT
   // ============================================
+
   Widget _paymentOption({
     required IconData icon,
     required Color color,
@@ -712,7 +747,10 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   // ============================================
   // BOUTON POUR CLÉ ROOT (DÉVELOPPEUR)
   // ============================================
+
   Widget _buildRootButton() {
+    final hasRootKey = _rootDevKey.isNotEmpty;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
@@ -722,20 +760,30 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
           color: TAPAColors.purple.withOpacity(0.08),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: TAPAColors.purple.withOpacity(0.3),
+            color: hasRootKey ? TAPAColors.purple.withOpacity(0.3) : Colors.grey.withOpacity(0.3),
             width: 1,
           ),
         ),
         child: TextButton.icon(
-          onPressed: () {
-            _cleCtrl.text = ROOT_KEYS[0];
-            _activerAvecCle(ROOT_KEYS[0]);
-          },
-          icon: const Icon(Icons.admin_panel_settings, color: TAPAColors.purple, size: 20),
-          label: const Text(
-            '🔑 Mode Développeur (Accès Root)',
+          onPressed: hasRootKey
+              ? () {
+            if (_rootDevKey.isNotEmpty) {
+              _cleCtrl.text = _rootDevKey;
+              _activerAvecCle(_rootDevKey);
+            }
+          }
+              : null,
+          icon: Icon(
+            hasRootKey ? Icons.admin_panel_settings : Icons.lock_outline,
+            color: hasRootKey ? TAPAColors.purple : Colors.grey,
+            size: 20,
+          ),
+          label: Text(
+            hasRootKey
+                ? '🔑 Mode Développeur (Accès Root)'
+                : '🔒 Clé Root non configurée (voir .env)',
             style: TextStyle(
-              color: TAPAColors.purple,
+              color: hasRootKey ? TAPAColors.purple : Colors.grey,
               fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
@@ -749,27 +797,9 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   }
 
   // ============================================
-  // AFFICHER UNE ERREUR
-  // ============================================
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Erreur'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ============================================
   // BUILD
   // ============================================
+
   @override
   Widget build(BuildContext context) {
     final isSmall = MediaQuery.of(context).size.width < 360;
@@ -777,6 +807,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
     final paddingSize = isSmall ? 16.0 : (isTablet ? 32.0 : 20.0);
     final spacingSize = isSmall ? 12.0 : (isTablet ? 24.0 : 16.0);
     final titleSize = isSmall ? 18.0 : (isTablet ? 28.0 : 22.0);
+    final hasRootKey = _rootDevKey.isNotEmpty;
 
     return Scaffold(
       backgroundColor: TAPAColors.background,
@@ -788,6 +819,35 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => context.pop(),
         ),
+        // ✅ INDICATEUR DE CONFIGURATION ROOT
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: hasRootKey ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  hasRootKey ? Icons.check_circle : Icons.warning,
+                  size: 12,
+                  color: hasRootKey ? Colors.green : Colors.red,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  hasRootKey ? 'Root OK' : 'Root manquante',
+                  style: TextStyle(
+                    fontSize: 9,
+                    color: hasRootKey ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: _accesActive
           ? _buildActivatedState()
@@ -860,6 +920,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
       double spacingSize,
       double titleSize,
       ) {
+    final hasRootKey = _rootDevKey.isNotEmpty;
+
     return SingleChildScrollView(
       padding: EdgeInsets.all(paddingSize),
       child: Column(
@@ -1066,6 +1128,33 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
 
           // ✅ BOUTON ROOT (MODE DÉVELOPPEUR)
           _buildRootButton(),
+
+          // ✅ AVERTISSEMENT SI ROOT_DEV_KEY MANQUANTE
+          if (!hasRootKey)
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Colors.orange, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '💡 Pour activer le mode Root, définissez ROOT_DEV_KEY dans votre fichier .env',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.orange.shade800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
           const SizedBox(height: 32),
         ],

@@ -1,5 +1,10 @@
+<!-- android/app/src/main/AndroidManifest.xml -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Permissions -->
+
+    <!-- ============================================
+    PERMISSIONS
+    ============================================ -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -8,14 +13,19 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:label="TAPA Budget"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"
-        android:enableOnBackInvokedCallback="true">  <!-- ✅ Ajout pour résoudre l'warning -->
+        android:enableOnBackInvokedCallback="true">
 
+        <!-- ============================================
+        ACTIVITÉ PRINCIPALE
+        ============================================ -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -24,17 +34,76 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
+
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
+
+            <!-- ============================================
+            INTENT FILTER POUR LE LAUNCHER
+            ============================================ -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <!-- ============================================
+            ✅ INTENT FILTER POUR LE SCHEMA CUSTOM
+            ============================================ -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="tapa-budget" />
+            </intent-filter>
+
+            <!-- ============================================
+            ✅ INTENT FILTER POUR DEEP LINKS HTTPS
+            ============================================ -->
+            <!-- Domaine Firebase Hosting -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="tapa-budget-6ed7c.web.app" />
+            </intent-filter>
+
+            <!-- Domaine Firebase App -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="tapa-budget-6ed7c.firebaseapp.com" />
+            </intent-filter>
+
+            <!-- Domaine personnalisé -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="tapa-budget.com"
+                    android:pathPrefix="/verify-email" />
+            </intent-filter>
+
         </activity>
 
+        <!-- ============================================
+        META-DATA
+        ============================================ -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- ✅ Pour Firebase Dynamic Links -->
+        <meta-data
+            android:name="firebase_dynamic_links_domain"
+            android:value="tapa-budget.com" />
+
     </application>
 </manifest>

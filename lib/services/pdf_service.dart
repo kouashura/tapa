@@ -1,8 +1,7 @@
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import '../models/models.dart';
-import '../models/budget_model.dart';
+import '../data/models/models.dart';
 import 'score_service.dart';
 import 'db_service_mysql.dart';
 import '../core/utils/formatters.dart';
@@ -18,7 +17,10 @@ class PdfService {
     final monnaie = user?['monnaie'] ?? 'FCFA';
     final prenom = user?['prenom'] ?? '';
     final tel = user?['telephone'] ?? '';
-    final txs = _db.getTransactions().where((t) =>
+
+    // ✅ CORRECTION : Ajouter await et utiliser _db
+    final allTx = await _db.getTransactions();
+    final txs = allTx.where((t) =>
     t.dateTransaction.year == date.year &&
         t.dateTransaction.month == date.month &&
         t.dateTransaction.day == date.day).toList();
@@ -66,7 +68,10 @@ class PdfService {
     final prenom = user?['prenom'] ?? '';
     final tel = user?['telephone'] ?? '';
     final fin = debut.add(const Duration(days: 6));
-    final txs = _db.getTransactions().where((t) =>
+
+    // ✅ CORRECTION : Ajouter await et utiliser _db
+    final allTx = await _db.getTransactions();
+    final txs = allTx.where((t) =>
     t.dateTransaction.isAfter(debut.subtract(const Duration(days: 1))) &&
         t.dateTransaction.isBefore(fin.add(const Duration(days: 1)))).toList();
     final dep = txs.where((t) => t.isDepense).toList();
@@ -112,13 +117,16 @@ class PdfService {
     final monnaie = user?['monnaie'] ?? 'FCFA';
     final prenom = user?['prenom'] ?? '';
     final tel = user?['telephone'] ?? '';
-    final txs = _db.getTransactions().where((t) =>
+
+    // ✅ CORRECTION : Ajouter await et utiliser _db
+    final allTx = await _db.getTransactions();
+    final txs = allTx.where((t) =>
     t.dateTransaction.month == mois && t.dateTransaction.year == annee).toList();
     final dep = txs.where((t) => t.isDepense).toList();
     final rev = txs.where((t) => t.isRevenu).toList();
     final tDep = dep.fold(0.0, (s, t) => s + t.montant);
     final tRev = rev.fold(0.0, (s, t) => s + t.montant);
-    
+
     final budget = await _db.getBudget(mois, annee);
 
     final premiereDate = txs.isNotEmpty
@@ -137,7 +145,6 @@ class PdfService {
     final catSorted = parCat.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
-    // ✅ CORRECTION : Créer une liste de futures pour chaque ligne de dépense
     final List<pw.TableRow> lignesBudget = [];
     if (budget != null) {
       for (final l in budget.depenses) {
@@ -233,9 +240,9 @@ class PdfService {
     final prenom = user?['prenom'] ?? '';
     final tel = user?['telephone'] ?? '';
     final monnaie = user?['monnaie'] ?? 'FCFA';
-    
+
     final score = await ScoreService.calculer(db);
-    
+
     final now = DateTime.now();
     final mois = ['','Janvier','Fevrier','Mars','Avril','Mai','Juin',
       'Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
@@ -247,13 +254,10 @@ class PdfService {
     else if (score.scoreTotal >= 40) scoreColor = PdfColors.orange800;
     else scoreColor = PdfColors.red800;
 
-    final totalRev = db.getTransactions()
-        .where((t) => t.isRevenu)
-        .fold(0.0, (s, t) => s + t.montant);
-    final totalDep = db.getTransactions()
-        .where((t) => t.isDepense)
-        .fold(0.0, (s, t) => s + t.montant);
-
+    // ✅ CORRECTION : Ajouter await
+    final allTx = await db.getTransactions();
+    final totalRev = allTx.where((t) => t.isRevenu).fold(0.0, (s, t) => s + t.montant);
+    final totalDep = allTx.where((t) => t.isDepense).fold(0.0, (s, t) => s + t.montant);
     final totalSolde = totalRev - totalDep;
 
     final pdf = pw.Document();
@@ -321,7 +325,7 @@ class PdfService {
                 ]),
                 pw.TableRow(children: [
                   _cell('Transactions'),
-                  _cell(db.getTransactions().length.toString()),
+                  _cell(allTx.length.toString()),
                   _cell('Total'),
                 ]),
                 pw.TableRow(children: [

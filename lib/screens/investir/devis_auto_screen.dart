@@ -7,8 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/utils/logger.dart';
 
 class DevisAutoScreen extends ConsumerStatefulWidget {

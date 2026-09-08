@@ -3,10 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
+import '../../core/theme/app_theme.dart';
 import '../../services/db_service_mysql.dart';
-import '../../core/utils/constants.dart';
 import '../../core/utils/logger.dart';
 
 class CategoriesScreen extends ConsumerStatefulWidget {
@@ -199,9 +197,15 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
     );
   }
 
+  // ==========================================================
+  // ✅ MÉTHODE AJOUTER CATÉGORIE - COMPLÈTEMENT CORRIGÉE
+  // ==========================================================
   Future<void> _ajouterCategorie(BuildContext context) async {
-    // ✅ RÉCUPÉRER LE NOM
     final nom = _nomCtrl.text.trim();
+
+    // ✅ CORRECTION: Vérifier mounted avant d'utiliser context
+    if (!mounted) return;
+
     if (nom.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -212,13 +216,12 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
       return;
     }
 
-    // ✅ RÉCUPÉRER L'ÉMOJI
     final emoji = _emojiCtrl.text.trim().isEmpty ? '📌' : _emojiCtrl.text.trim();
-
-    // ✅ DÉTERMINER LE TYPE
     final type = _tabController.index == 0 ? 'depense' : 'revenu';
 
-    // ✅ VÉRIFIER SI LA CATÉGORIE EXISTE DÉJÀ
+    // ✅ CORRECTION: Vérifier mounted avant d'utiliser context
+    if (!mounted) return;
+
     final existe = _categories.any((c) =>
     c['label']?.toLowerCase() == nom.toLowerCase() && c['type'] == type
     );
@@ -234,7 +237,6 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
     }
 
     try {
-      // ✅ CRÉER LA CATÉGORIE
       final nouvelleCategorie = {
         'id': DateTime.now().millisecondsSinceEpoch.toString(),
         'label': nom,
@@ -244,40 +246,37 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
       };
 
       Logger.info('📝 Ajout catégorie: $nouvelleCategorie');
-
-      // ✅ SAUVEGARDER
       await _db.addCategory(nouvelleCategorie);
-
-      // ✅ RECHARGER LES CATÉGORIES
       await _chargerCategories();
 
-      // ✅ FERMER LE DIALOG
-      if (context.mounted) {
-        Navigator.pop(context);
-      }
+      // ✅ CORRECTION: Vérifier mounted après chaque await
+      if (!mounted) return;
+      Navigator.pop(context);
 
-      // ✅ AFFICHER LE MESSAGE DE SUCCÈS
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✅ Catégorie "$nom" ajoutée !'),
-            backgroundColor: TAPAColors.green,
-          ),
-        );
-      }
+      // ✅ CORRECTION: Vérifier mounted avant d'utiliser context
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Catégorie "$nom" ajoutée !'),
+          backgroundColor: TAPAColors.green,
+        ),
+      );
     } catch (e) {
+      // ✅ CORRECTION: Vérifier mounted avant d'utiliser context
+      if (!mounted) return;
       Logger.error('❌ Erreur ajout catégorie: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
-            backgroundColor: TAPAColors.red,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
+          backgroundColor: TAPAColors.red,
+        ),
+      );
     }
   }
 
+  // ==========================================================
+  // SUPPRIMER CATÉGORIE - AVEC VÉRIFICATION mounted
+  // ==========================================================
   Future<void> _supprimerCategorie(String id) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -304,24 +303,26 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
       try {
         await _db.deleteCategory(id);
         await _chargerCategories();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Catégorie supprimée'),
-              backgroundColor: TAPAColors.green,
-            ),
-          );
-        }
+
+        // ✅ CORRECTION: Vérifier mounted avant d'utiliser context
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Catégorie supprimée'),
+            backgroundColor: TAPAColors.green,
+          ),
+        );
       } catch (e) {
+        // ✅ CORRECTION: Vérifier mounted avant d'utiliser context
+        if (!mounted) return;
         Logger.error('❌ Erreur suppression catégorie: $e');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
-              backgroundColor: TAPAColors.red,
-            ),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
+            backgroundColor: TAPAColors.red,
+          ),
+        );
       }
     }
   }

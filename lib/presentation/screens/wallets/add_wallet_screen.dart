@@ -3,8 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/wallet_provider.dart';
+import '../../../core/theme/app_theme.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';
+import '../../providers/wallet/wallet_provider.dart';  // ✅ CHEMIN CORRIGÉ
+import '../../../domain/usecases/wallet/create_wallet_usecase.dart';
+import '../../../core/utils/logger.dart';
 
 class AddWalletScreen extends ConsumerStatefulWidget {
   const AddWalletScreen({super.key});
@@ -60,17 +63,17 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await ref.read(addWalletProvider(
-        AddWalletParams(
-          uid: user.id,
-          nom: _nomController.text.trim(),
-          emoji: _selectedEmoji,
-          type: _selectedType,
-          solde: double.parse(_soldeController.text.trim()),
-          monnaie: user.monnaie ?? 'FCFA',
-          description: _descriptionController.text.trim(),
-        ),
-      ).future);
+      final params = CreateWalletParams(
+        uid: user.id,
+        nom: _nomController.text.trim(),
+        emoji: _selectedEmoji,
+        type: _selectedType,
+        solde: double.parse(_soldeController.text.trim()),
+        monnaie: user.monnaie ?? 'FCFA',
+        description: _descriptionController.text.trim(),
+      );
+
+      await ref.read(createWalletProvider(params).future);
 
       if (mounted) {
         Navigator.pop(context, true);
@@ -85,11 +88,12 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString()}'),
+            content: Text('Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
             backgroundColor: Colors.red,
           ),
         );
       }
+      Logger.error('❌ Erreur création portefeuille: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -162,7 +166,7 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: const Text('Nouveau portefeuille'),
-        backgroundColor: const Color(0xFF1A237E), // Navy
+        backgroundColor: const Color(0xFF1A237E),
         foregroundColor: Colors.white,
       ),
       body: Form(
@@ -304,8 +308,8 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _saveWallet,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFC107), // Gold
-                  foregroundColor: const Color(0xFF1A237E), // Navy
+                  backgroundColor: const Color(0xFFFFC107),
+                  foregroundColor: const Color(0xFF1A237E),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

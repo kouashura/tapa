@@ -2,15 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
-import '../../models/models.dart';
-import '../../models/epargne_programmee_model.dart';  // ✅ Depuis models/
+import '../../core/theme/app_theme.dart';
+import '../../data/models/models.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/logger.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';
 
+// ✅ RENOMMÉ : CreerEpargneScreen au lieu de EpargneProgrammeeScreen
 class CreerEpargneScreen extends ConsumerStatefulWidget {
   const CreerEpargneScreen({super.key});
 
@@ -19,137 +18,98 @@ class CreerEpargneScreen extends ConsumerStatefulWidget {
 }
 
 class _CreerEpargneScreenState extends ConsumerState<CreerEpargneScreen> {
-  final TextEditingController _titreCtrl = TextEditingController();
-  final TextEditingController _objectifCtrl = TextEditingController();
-  final TextEditingController _depotCtrl = TextEditingController();
-  final TextEditingController _dureeCtrl = TextEditingController();
-  String _frequence = 'mois';
-  String? _walletId;
-  bool _verrouille = false;
-  String _codeDeverrouillage = '';
-  bool _loading = false;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
 
-  List<WalletModel> _wallets = [];
+  String _selectedFrequency = 'Mensuel';
+  String _selectedWalletId = '';
+  bool _isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _chargerWallets();
-  }
+  final List<String> _frequencies = ['Hebdomadaire', 'Mensuel', 'Trimestriel'];
 
   @override
   void dispose() {
-    _titreCtrl.dispose();
-    _objectifCtrl.dispose();
-    _depotCtrl.dispose();
-    _dureeCtrl.dispose();
+    _nameController.dispose();
+    _amountController.dispose();
     super.dispose();
   }
 
-  Future<void> _chargerWallets() async {
-    // TODO: Remplacer par un provider
-    // _wallets = await ref.read(walletListProvider.future);
-    if (_wallets.isNotEmpty && _walletId == null) {
-      _walletId = _wallets.first.id?.toString();
-    }
-    setState(() {});
-  }
+  Future<void> _saveEpargne() async {
+    final name = _nameController.text.trim();
+    final amount = double.tryParse(_amountController.text);
 
-  Future<void> _save() async {
-    if (_titreCtrl.text.trim().isEmpty ||
-        _objectifCtrl.text.isEmpty ||
-        _depotCtrl.text.isEmpty ||
-        _dureeCtrl.text.isEmpty ||
-        _walletId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Remplis tous les champs'),
-          backgroundColor: TAPAColors.red,
-        ),
-      );
+    if (name.isEmpty) {
+      _showSnackBar('Veuillez entrer un nom', isError: true);
       return;
     }
 
-    final objectif = double.tryParse(_objectifCtrl.text) ?? 0;
-    final depot = double.tryParse(_depotCtrl.text) ?? 0;
-    final duree = int.tryParse(_dureeCtrl.text) ?? 1;
-
-    if (objectif <= 0 || depot <= 0 || duree <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Entrez des valeurs valides'),
-          backgroundColor: TAPAColors.red,
-        ),
-      );
+    if (amount == null || amount <= 0) {
+      _showSnackBar('Veuillez entrer un montant valide', isError: true);
       return;
     }
 
-    if (depot > objectif) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Le dépôt ne peut pas dépasser l\'objectif'),
-          backgroundColor: TAPAColors.red,
-        ),
-      );
+    if (_selectedWalletId.isEmpty) {
+      _showSnackBar('Veuillez sélectionner un portefeuille', isError: true);
       return;
     }
 
-    setState(() => _loading = true);
+    setState(() => _isLoading = true);
 
     try {
-      final userId = await ref.read(userRepositoryProvider).getCurrentUserId();
+      final user = ref.read(currentUserProvider);
+      final userId = user?.id ?? '';
 
-      final epargne = EpargneProgrammeeModel(
-        id: '',
-        uuid: Fmt.genId(),
-        utilisateurId: int.tryParse(userId) ?? 1,
-        titre: _titreCtrl.text.trim(),
-        montantObjectif: objectif,
-        frequence: _frequence,
-        duree: duree,
-        montantParDepot: depot,
-        portefeuilleId: int.tryParse(_walletId!) ?? 0,
-        dateCreation: DateTime.now(),
-        dateFinPrevue: DateTime.now().add(
-          Duration(days: duree * (_frequence == 'jour' ? 1 : _frequence == 'semaine' ? 7 : 30)),
-        ),
-        montantEpargne: 0,
-        verrouille: _verrouille,
-        codeDeverrouillage: _verrouille ? _codeDeverrouillage : null,
-        termine: false,
+      if (userId.isEmpty) {
+        _showSnackBar('Utilisateur non trouvé', isError: true);
+        return;
+      }
+
+      final userRepo = ref.read(userRepositoryProvider);
+
+      await userRepo.createScheduledSaving(
+        userId: userId,
+        name: name,
+        amount: amount,
+        frequency: _selectedFrequency,
+        startDate: DateTime.now(),
+        walletId: _selectedWalletId,
       );
 
-      // TODO: Utiliser un provider
-      // await ref.read(epargneRepositoryProvider).saveEpargneProgrammee(epargne);
-      Logger.info('📝 Épargne programmée créée: ${epargne.titre}');
-
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Épargne programmée créée !'),
-            backgroundColor: TAPAColors.green,
-          ),
-        );
-        context.pop();
+        _showSnackBar('✅ Épargne programmée créée avec succès !');
+        context.pop(true);
       }
     } catch (e) {
+      Logger.error('❌ Erreur création épargne: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
-            backgroundColor: TAPAColors.red,
-          ),
-        );
+        _showSnackBar('Erreur: ${e.toString().replaceAll('Exception: ', '')}', isError: true);
       }
-      Logger.error('❌ Erreur création épargne programmée: $e');
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? TAPAColors.red : TAPAColors.navy,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final monnaie = ref.watch(userMonnaieProvider);
+    final walletsAsync = ref.watch(walletListProvider(ref.watch(currentUserProvider)?.id ?? ''));
 
     return Scaffold(
       backgroundColor: TAPAColors.background,
@@ -157,183 +117,198 @@ class _CreerEpargneScreenState extends ConsumerState<CreerEpargneScreen> {
         title: const Text('Créer une épargne programmée'),
         backgroundColor: TAPAColors.navy,
         foregroundColor: TAPAColors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => context.pop(),
         ),
+        actions: [
+          TextButton(
+            onPressed: _isLoading ? null : _saveEpargne,
+            child: _isLoading
+                ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: TAPAColors.gold,
+              ),
+            )
+                : const Text(
+              'Sauvegarder',
+              style: TextStyle(
+                color: TAPAColors.gold,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Objectif d\'épargne',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: TAPAColors.navy,
-              ),
-            ),
-            const SizedBox(height: 6),
-            const Text(
-              'Créez votre épargne programmée automatique',
-              style: TextStyle(
-                color: TAPAColors.textSecond,
-              ),
-            ),
-            const SizedBox(height: 24),
             TextField(
-              controller: _titreCtrl,
-              textCapitalization: TextCapitalization.sentences,
+              controller: _nameController,
               decoration: const InputDecoration(
-                labelText: 'Titre *',
-                hintText: 'ex : Vacances 2024',
+                labelText: 'Nom de l\'épargne',
+                hintText: 'ex: Épargne mensuelle',
+                prefixIcon: Icon(Icons.savings_outlined),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
-              controller: _objectifCtrl,
+              controller: _amountController,
               keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
               decoration: InputDecoration(
-                labelText: 'Objectif total *',
+                labelText: 'Montant à épargner',
+                hintText: 'ex: 50000',
+                prefixIcon: const Icon(Icons.attach_money_outlined),
                 suffixText: monnaie,
-                hintText: '1 000 000',
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _depotCtrl,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              decoration: InputDecoration(
-                labelText: 'Montant par dépôt *',
-                suffixText: monnaie,
-                hintText: '50 000',
               ),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _frequence,
+              value: _selectedFrequency,
               decoration: const InputDecoration(
-                labelText: 'Fréquence *',
+                labelText: 'Fréquence',
+                prefixIcon: Icon(Icons.repeat_outlined),
               ),
-              items: const [
-                DropdownMenuItem(value: 'jour', child: Text('Journalière')),
-                DropdownMenuItem(value: 'semaine', child: Text('Hebdomadaire')),
-                DropdownMenuItem(value: 'mois', child: Text('Mensuelle')),
-              ],
-              onChanged: (v) => setState(() => _frequence = v!),
+              items: _frequencies.map((freq) {
+                return DropdownMenuItem(
+                  value: freq,
+                  child: Text(freq),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  setState(() => _selectedFrequency = value);
+                }
+              },
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _dureeCtrl,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              decoration: InputDecoration(
-                labelText: 'Durée (en ${_frequence == 'jour' ? 'jours' : _frequence == 'semaine' ? 'semaines' : 'mois'}) *',
-                hintText: '12',
-              ),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _walletId,
-              decoration: const InputDecoration(
-                labelText: 'Portefeuille *',
-              ),
-              items: _wallets.map((w) =>
-                  DropdownMenuItem<String>(
-                    value: w.id?.toString(),
-                    child: Text('${w.emoji} ${w.nom}'),
-                  ),
-              ).toList(),
-              onChanged: (v) => setState(() => _walletId = v),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Checkbox(
-                  value: _verrouille,
-                  onChanged: (v) => setState(() {
-                    _verrouille = v ?? false;
-                    if (_verrouille) {
-                      _codeDeverrouillage = Fmt.genId().substring(0, 6).toUpperCase();
-                    }
-                  }),
+            walletsAsync.when(
+              loading: () => const Center(
+                child: SizedBox(
+                  height: 40,
+                  child: CircularProgressIndicator(),
                 ),
-                const Expanded(
-                  child: Text(
-                    'Verrouiller l\'épargne (ne peut être déverrouillée que par code)',
-                    style: TextStyle(fontSize: 13),
-                  ),
-                ),
-              ],
-            ),
-            if (_verrouille) ...[
-              const SizedBox(height: 8),
-              Container(
+              ),
+              error: (err, stack) => Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: TAPAColors.goldLight,
-                  borderRadius: BorderRadius.circular(8),
+                  color: TAPAColors.redLight,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    const Text(
-                      'Code de déverrouillage :',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: TAPAColors.textSecond,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _codeDeverrouillage,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: TAPAColors.navy,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Conservez ce code précieusement !',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: TAPAColors.red,
+                    const Icon(Icons.error_outline, color: TAPAColors.red),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Erreur chargement des portefeuilles',
+                        style: TextStyle(color: TAPAColors.red),
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _loading ? null : _save,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: TAPAColors.navy,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: _loading
-                  ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: TAPAColors.gold,
+              data: (wallets) {
+                if (wallets.isEmpty) {
+                  return Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.warning_amber_outlined, color: Colors.orange),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            'Aucun portefeuille. Créez-en un d\'abord.',
+                            style: TextStyle(color: Colors.orange),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => context.push('/wallets'),
+                          child: const Text('Créer'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (_selectedWalletId.isEmpty && wallets.isNotEmpty) {
+                  _selectedWalletId = wallets.first.id;
+                }
+
+                return DropdownButtonFormField<String>(
+                  value: _selectedWalletId,
+                  decoration: const InputDecoration(
+                    labelText: 'Portefeuille source',
+                    prefixIcon: Icon(Icons.account_balance_wallet_outlined),
+                  ),
+                  items: wallets.map((wallet) {
+                    return DropdownMenuItem(
+                      value: wallet.id,
+                      child: Row(
+                        children: [
+                          Text(wallet.emoji),
+                          const SizedBox(width: 8),
+                          Text(wallet.nom),
+                          const Spacer(),
+                          Text(
+                            Fmt.montant(wallet.solde, monnaie: monnaie),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: TAPAColors.textHint,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _selectedWalletId = value);
+                    }
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _saveEpargne,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: TAPAColors.navy,
+                  foregroundColor: TAPAColors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-              )
-                  : const Text(
-                'Créer mon épargne',
-                style: TextStyle(color: TAPAColors.white),
+                child: _isLoading
+                    ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.4,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      TAPAColors.gold,
+                    ),
+                  ),
+                )
+                    : const Text(
+                  'Créer l\'épargne programmée',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ],

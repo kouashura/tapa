@@ -3,10 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
-import '../../domain/repositories/user_repository.dart';
-import '../../data/repositories/user_repository_impl.dart';
+import '../../core/theme/app_theme.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';
 import '../../services/db_service_mysql.dart';
 import '../../services/firebase_service.dart';
 import '../../core/utils/logger.dart';
@@ -50,7 +48,6 @@ class _PinScreenState extends ConsumerState<PinScreen> {
 
   Future<void> _validate() async {
     final authNotifier = ref.read(authStateProvider.notifier);
-    final userRepo = ref.read(userRepositoryProvider);
 
     if (widget.isSetup) {
       // ÉTAPE 1: Choix du PIN
@@ -78,12 +75,10 @@ class _PinScreenState extends ConsumerState<PinScreen> {
       setState(() => _isLoading = true);
 
       try {
-        // ✅ Sauvegarder le PIN
         await authNotifier.savePin(_pin);
         Logger.success('✅ PIN sauvegardé avec succès');
 
-        // ✅ Mettre à jour l'état
-        final user = await userRepo.getCurrentUser();
+        final user = ref.read(currentUserProvider);
         if (user != null) {
           final notifier = ref.read(authStateProvider.notifier);
           notifier.state = notifier.state.copyWith(
@@ -93,48 +88,46 @@ class _PinScreenState extends ConsumerState<PinScreen> {
           Logger.info('👤 État mis à jour pour: ${user.prenom}');
         }
 
-        // ✅ NAVIGATION AVEC GESTION DE L'ESSAI
-        if (mounted) {
-          final db = DBService();
-          final firebaseService = FirebaseService();
-          final isRoot = firebaseService.isRootUser;
+        // ✅ CORRECTION: Vérifier mounted avant navigation
+        if (!mounted) return;
 
-          // ✅ RÉCUPÉRER L'ÉTAT DE L'ESSAI
-          bool essaiExpire = false;
-          bool aAcces = false;
+        final db = DBService();
+        final firebaseService = FirebaseService();
+        final isRoot = firebaseService.isRootUser;
 
-          try {
-            essaiExpire = db.essaiGratuitExpire;
-            aAcces = db.aAccesAVie;
+        bool essaiExpire = false;
+        bool aAcces = false;
 
-            // Si la date n'est pas trouvée, essayer la version asynchrone
-            if (!essaiExpire && db.joursRestantsEssai == 0) {
-              essaiExpire = await db.isEssaiGratuitExpire();
-            }
-          } catch (e) {
-            Logger.error('❌ Erreur vérification essai: $e');
-            essaiExpire = false;
+        try {
+          essaiExpire = db.essaiGratuitExpire;
+          aAcces = db.aAccesAVie;
+
+          if (!essaiExpire && db.joursRestantsEssai == 0) {
+            essaiExpire = await db.isEssaiGratuitExpire();
           }
+        } catch (e) {
+          Logger.error('❌ Erreur vérification essai: $e');
+          essaiExpire = false;
+        }
 
-          Logger.info('🔍 Navigation - Essai expiré: $essaiExpire, Accès: $aAcces, Root: $isRoot');
+        Logger.info('🔍 Navigation - Essai expiré: $essaiExpire, Accès: $aAcces, Root: $isRoot');
 
-          // ✅ SI ROOT → HOME
-          if (isRoot) {
-            Logger.info('👑 Root - Navigation vers /home');
-            context.go('/home');
-          }
-          // ✅ SI ESSAI EXPIRE ET PAS D'ACCES → ACTIVATION
-          else if (essaiExpire && !aAcces) {
-            Logger.info('🔄 Essai expiré - Navigation vers /activation');
-            context.go('/activation');
-          }
-          // ✅ SINON → HOME
-          else {
-            Logger.info('✅ Accès validé - Navigation vers /home');
-            context.go('/home');
-          }
+        // ✅ CORRECTION: Vérifier mounted après chaque await
+        if (!mounted) return;
+
+        if (isRoot) {
+          Logger.info('👑 Root - Navigation vers /home');
+          context.go('/home');
+        } else if (essaiExpire && !aAcces) {
+          Logger.info('🔄 Essai expiré - Navigation vers /activation');
+          context.go('/activation');
+        } else {
+          Logger.info('✅ Accès validé - Navigation vers /home');
+          context.go('/home');
         }
       } catch (e) {
+        // ✅ CORRECTION: Vérifier mounted avant setState
+        if (!mounted) return;
         Logger.error('❌ Erreur lors de la sauvegarde du PIN: $e');
         setState(() {
           _error = true;
@@ -152,11 +145,11 @@ class _PinScreenState extends ConsumerState<PinScreen> {
         final isValid = await authNotifier.verifyPin(_pin);
         Logger.info('🔍 Vérification PIN: ${isValid ? "✅ Valide" : "❌ Invalide"}');
 
+        // ✅ CORRECTION: Vérifier mounted après await
         if (!mounted) return;
 
         if (isValid) {
-          // ✅ PIN valide
-          final user = await userRepo.getCurrentUser();
+          final user = ref.read(currentUserProvider);
           if (user != null) {
             final notifier = ref.read(authStateProvider.notifier);
             notifier.state = notifier.state.copyWith(
@@ -166,7 +159,6 @@ class _PinScreenState extends ConsumerState<PinScreen> {
             Logger.info('👤 Utilisateur connecté: ${user.prenom}');
           }
 
-          // ✅ VÉRIFIER L'ESSAI
           final db = DBService();
           final firebaseService = FirebaseService();
           final isRoot = firebaseService.isRootUser;
@@ -186,6 +178,9 @@ class _PinScreenState extends ConsumerState<PinScreen> {
             essaiExpire = false;
           }
 
+          // ✅ CORRECTION: Vérifier mounted après await
+          if (!mounted) return;
+
           if (isRoot) {
             context.go('/home');
           } else if (essaiExpire && !aAcces) {
@@ -202,6 +197,8 @@ class _PinScreenState extends ConsumerState<PinScreen> {
           });
         }
       } catch (e) {
+        // ✅ CORRECTION: Vérifier mounted avant setState
+        if (!mounted) return;
         Logger.error('❌ Erreur vérification PIN: $e');
         setState(() {
           _error = true;
@@ -277,7 +274,6 @@ class _PinScreenState extends ConsumerState<PinScreen> {
               ),
             ],
             const SizedBox(height: 32),
-            // ✅ INDICATEURS PIN
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(4, (i) =>

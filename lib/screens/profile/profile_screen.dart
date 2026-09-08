@@ -3,11 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
+import '../../core/theme/app_theme.dart';
 import '../../services/link_service.dart';
 import '../../services/firebase_service.dart';
 import '../../core/utils/logger.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -23,23 +23,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Réinitialiser ?',
-            style: TextStyle(color: Colors.red, fontWeight: FontWeight.w700)),
+        title: const Text(
+          'Réinitialiser ?',
+          style: TextStyle(color: Colors.red, fontWeight: FontWeight.w700),
+        ),
         content: const Text(
-            'Toutes tes données seront effacées :\n'
-                '- Portefeuilles et soldes\n'
-                '- Transactions\n'
-                '- Objectifs épargne\n'
-                '- Ton profil\n\n'
-                'Cette action est irréversible.'),
+          'Toutes tes données seront effacées :\n'
+              '- Portefeuilles et soldes\n'
+              '- Transactions\n'
+              '- Objectifs épargne\n'
+              '- Ton profil\n\n'
+              'Cette action est irréversible.',
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Annuler')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
           TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Réinitialiser',
-                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.w700))),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'Réinitialiser',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w700),
+            ),
+          ),
         ],
       ),
     );
@@ -52,19 +59,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Se déconnecter ?',
-            style: TextStyle(fontWeight: FontWeight.w700)),
+        title: const Text(
+          'Se déconnecter ?',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
         content: const Text(
-            'Tes données restent sauvegardées.\n'
-                'Tu pourras te reconnecter avec ton PIN.'),
+          'Tes données restent sauvegardées.\n'
+              'Tu pourras te reconnecter avec ton PIN.',
+        ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Annuler')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
           TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Se déconnecter',
-                  style: TextStyle(color: TAPAColors.navy, fontWeight: FontWeight.w700))),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text(
+              'Se déconnecter',
+              style: TextStyle(color: TAPAColors.navy, fontWeight: FontWeight.w700),
+            ),
+          ),
         ],
       ),
     );
@@ -83,14 +97,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final user = ref.watch(currentUserProvider);
     final prenom = ref.watch(userPrenomProvider);
     final monnaie = ref.watch(userMonnaieProvider);
-    final hasAccesVie = ref.watch(hasAccesVieProvider);
 
-    // ✅ VÉRIFIER SI L'UTILISATEUR A UNE CLÉ ROOT
+    // ✅ CORRECTION: Utiliser directement l'utilisateur pour hasAccessVie
+    final hasAccesVie = user?.hasAccessVie ?? false;
+
+    // Vérifier si l'utilisateur a une clé root
     final firebaseService = FirebaseService();
     final isRoot = firebaseService.isRootUser;
 
     Logger.info('👤 ProfileScreen - user: ${user?.prenom ?? "null"}');
     Logger.info('👑 ProfileScreen - isRoot: $isRoot');
+    Logger.info('💎 ProfileScreen - hasAccessVie: $hasAccesVie');
 
     return Scaffold(
       backgroundColor: TAPAColors.background,
@@ -131,7 +148,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
                     Text(
-                      user?.telephone ?? '',
+                      user?.phoneNumber ?? '',
                       style: const TextStyle(fontSize: 12, color: Colors.white54),
                     ),
                     Text(
@@ -197,13 +214,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 6),
-                child: Text('MON COMPTE',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey,
-                      letterSpacing: 0.8,
-                    )),
+                child: Text(
+                  'MON COMPTE',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey,
+                    letterSpacing: 0.8,
+                  ),
+                ),
               ),
 
               _menuItem(
@@ -233,13 +252,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 6),
-                child: Text('SUPPORT',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey,
-                      letterSpacing: 0.8,
-                    )),
+                child: Text(
+                  'SUPPORT',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey,
+                    letterSpacing: 0.8,
+                  ),
+                ),
               ),
 
               _menuItem(
@@ -254,7 +275,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 icon: Icons.menu_book_outlined,
                 iconColor: Colors.blue,
                 bgColor: const Color(0xFFE3F2FD),
-                title: 'Guide d\'utilisation',
+                title: "Guide d'utilisation",
                 subtitle: 'Apprendre à utiliser TAPA Budget',
                 onTap: () => context.push('/guide'),
               ),
@@ -289,13 +310,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 6),
-                child: Text('SESSION',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey,
-                      letterSpacing: 0.8,
-                    )),
+                child: Text(
+                  'SESSION',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.grey,
+                    letterSpacing: 0.8,
+                  ),
+                ),
               ),
 
               _menuItem(
@@ -309,13 +332,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 6),
-                child: Text('DANGER',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
-                      color: TAPAColors.red,
-                      letterSpacing: 0.8,
-                    )),
+                child: Text(
+                  'DANGER',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: TAPAColors.red,
+                    letterSpacing: 0.8,
+                  ),
+                ),
               ),
 
               _menuItem(
@@ -377,7 +402,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 color: highlighted ? TAPAColors.gold.withOpacity(0.2) : bgColor,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: highlighted ? TAPAColors.gold : iconColor, size: 18),
+              child: Icon(
+                icon,
+                color: highlighted ? TAPAColors.gold : iconColor,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(

@@ -3,8 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import '../../theme/app_theme.dart';
-
+import '../../core/theme/app_theme.dart';
 class GuideScreen extends StatelessWidget {
   const GuideScreen({super.key});
 

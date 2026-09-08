@@ -1,14 +1,18 @@
+// lib/screens/transactions/scanner_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
+import '../../core/theme/app_theme.dart';
 import '../../services/db_service_mysql.dart';
-import '../../models/models.dart';
+import '../../data/models/models.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/utils/logger.dart';
 
 class ScannerScreen extends StatefulWidget {
   const ScannerScreen({super.key});
+
   @override
   State<ScannerScreen> createState() => _ScannerScreenState();
 }
@@ -20,6 +24,19 @@ class _ScannerScreenState extends State<ScannerScreen> {
   bool _isProcessing = false;
   String _result = '';
   List<Map<String, dynamic>> _detectedItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialiser le TextRecognizer
+    _textRecognizer;
+  }
+
+  @override
+  void dispose() {
+    _textRecognizer.close();
+    super.dispose();
+  }
 
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -34,6 +51,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
   }
 
   Future<void> _processImage(XFile image) async {
+    // ✅ CORRECTION: Vérifier mounted avant setState
+    if (!mounted) return;
+
     setState(() {
       _isProcessing = true;
       _result = 'Analyse en cours...';
@@ -44,12 +64,21 @@ class _ScannerScreenState extends State<ScannerScreen> {
       final inputImage = InputImage.fromFilePath(image.path);
       final recognizedText = await _textRecognizer.processImage(inputImage);
       final text = recognizedText.text;
+
+      // ✅ CORRECTION: Vérifier mounted après await
+      if (!mounted) return;
+
       setState(() {
         _result = text;
         _detectedItems = _parseText(text);
         _isProcessing = false;
       });
     } catch (e) {
+      Logger.error('❌ Erreur analyse image: $e');
+
+      // ✅ CORRECTION: Vérifier mounted après await
+      if (!mounted) return;
+
       setState(() {
         _result = 'Erreur: $e';
         _isProcessing = false;
@@ -77,8 +106,15 @@ class _ScannerScreenState extends State<ScannerScreen> {
     return items;
   }
 
+  // ==========================================================
+  // ✅ MÉTHODE CREATE TRANSACTION - COMPLÈTEMENT CORRIGÉE
+  // ==========================================================
   Future<void> _createTransaction(Map<String, dynamic> item) async {
-    final wallets = _db.getWallets();
+    final wallets = await _db.getWallets();
+
+    // ✅ CORRECTION: Vérifier mounted avant d'utiliser context
+    if (!mounted) return;
+
     if (wallets.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -91,13 +127,12 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
     final montant = item['montant'] as double;
     final description = item['description'] as String? ?? '';
+    final userId = _db.getCurrentUserId() ?? '';
 
     final tx = TransactionModel(
-      id: null,
-      uuid: Fmt.genId(),
-      utilisateurId: int.tryParse(_db.getCurrentUserId() ?? "1") ?? 1,
-      portefeuilleId: wallets.first.id!,
-      portefeuilleDestId: null,
+      id: Fmt.genId(),
+      uid: userId,
+      walletId: wallets.first.id,
       montant: montant,
       type: TransactionType.depense,
       categorieId: 'autre',
@@ -109,15 +144,17 @@ class _ScannerScreenState extends State<ScannerScreen> {
     );
 
     await _db.addTransaction(tx);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Transaction enregistrée !'),
-          backgroundColor: TAPAColors.green,
-        ),
-      );
-      context.pop(true);
-    }
+
+    // ✅ CORRECTION: Vérifier mounted après await
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Transaction enregistrée !'),
+        backgroundColor: TAPAColors.green,
+      ),
+    );
+    context.pop(true);
   }
 
   @override

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
+import '../../core/theme/app_theme.dart';
 import '../../services/db_service_mysql.dart';
-import '../../models/models.dart';
+import '../../data/models/models.dart';
 import '../../core/utils/formatters.dart';
 
 class TransferScreen extends StatefulWidget {
@@ -16,16 +16,34 @@ class _TransferScreenState extends State<TransferScreen> {
   final DBService _db = DBService();
   final TextEditingController _montantCtrl = TextEditingController();
   final TextEditingController _noteCtrl = TextEditingController();
-  int? _walletSourceId;
-  int? _walletDestId;
+  String? _walletSourceId;
+  String? _walletDestId;
+
+  // ✅ État pour les portefeuilles
+  List<WalletModel> _wallets = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    final wallets = _db.getWallets();
-    if (wallets.length >= 2) {
-      _walletSourceId = wallets[0].id;
-      _walletDestId = wallets[1].id;
+    _initWallets();
+  }
+
+  // ✅ CORRIGÉ : ajout de async
+  Future<void> _initWallets() async {
+    setState(() => _isLoading = true);
+    try {
+      final wallets = await _db.getWallets();
+      setState(() {
+        _wallets = wallets.where((w) => w != null).cast<WalletModel>().toList();
+        if (_wallets.length >= 2) {
+          _walletSourceId = _wallets[0].id;
+          _walletDestId = _wallets[1].id;
+        }
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -66,8 +84,11 @@ class _TransferScreenState extends State<TransferScreen> {
       return;
     }
 
-    final wallets = _db.getWallets();
-    final source = wallets.firstWhere((w) => w.id == _walletSourceId);
+    // ✅ Utiliser _wallets déjà chargé
+    final source = _wallets.firstWhere(
+          (w) => w.id == _walletSourceId,
+      orElse: () => throw Exception('Portefeuille source non trouvé'),
+    );
     final user = _db.getUser();
     final monnaie = user?['monnaie'] ?? 'FCFA';
 
@@ -81,7 +102,10 @@ class _TransferScreenState extends State<TransferScreen> {
       return;
     }
 
-    final dest = wallets.firstWhere((w) => w.id == _walletDestId);
+    final dest = _wallets.firstWhere(
+          (w) => w.id == _walletDestId,
+      orElse: () => throw Exception('Portefeuille destination non trouvé'),
+    );
 
     final ok = await showDialog<bool>(
       context: context,
@@ -110,31 +134,44 @@ class _TransferScreenState extends State<TransferScreen> {
     );
 
     if (ok == true) {
-      // ✅ CORRECTION : Convertir l'ID utilisateur en int
       final userId = _db.getCurrentUserId();
       final int utilisateurId = userId != null ? int.tryParse(userId) ?? 1 : 1;
 
-      // Débiter la source
-      final updatedSource = source.copyWith(
+      // Mettre à jour la source
+      final updatedSource = WalletModel(
+        id: source.id,
+        uid: source.uid,
+        nom: source.nom,
+        emoji: source.emoji,
+        type: source.type,
         solde: source.solde - montant,
+        monnaie: source.monnaie,
+        description: source.description,
+        createdAt: source.createdAt,
         updatedAt: DateTime.now(),
       );
-      await _db.updateWallet(updatedSource);
+      await _db.saveWallet(updatedSource);
 
-      // Créditer la destination
-      final updatedDest = dest.copyWith(
+      // Mettre à jour la destination
+      final updatedDest = WalletModel(
+        id: dest.id,
+        uid: dest.uid,
+        nom: dest.nom,
+        emoji: dest.emoji,
+        type: dest.type,
         solde: dest.solde + montant,
+        monnaie: dest.monnaie,
+        description: dest.description,
+        createdAt: dest.createdAt,
         updatedAt: DateTime.now(),
       );
-      await _db.updateWallet(updatedDest);
+      await _db.saveWallet(updatedDest);
 
       // Créer la transaction
       final tx = TransactionModel(
-        id: null,
-        uuid: Fmt.genId(),
-        utilisateurId: utilisateurId,
-        portefeuilleId: _walletSourceId!,
-        portefeuilleDestId: _walletDestId,
+        id: Fmt.genId(),
+        uid: userId ?? '',
+        walletId: _walletSourceId!,
         montant: montant,
         type: TransactionType.transfert,
         categorieId: 'transfert',
@@ -160,9 +197,27 @@ class _TransferScreenState extends State<TransferScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final wallets = _db.getWallets();
     final user = _db.getUser();
     final monnaie = user?['monnaie'] ?? 'FCFA';
+
+    // ✅ Utiliser _wallets au lieu de await
+    final wallets = _wallets;
+
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: TAPAColors.background,
+        appBar: AppBar(
+          title: const Text('Transfert'),
+          backgroundColor: TAPAColors.navy,
+          foregroundColor: TAPAColors.white,
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => context.pop(),
+          ),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     if (wallets.length < 2) {
       return Scaffold(
@@ -225,31 +280,31 @@ class _TransferScreenState extends State<TransferScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          DropdownButtonFormField<int>(
+          DropdownButtonFormField<String>(
             value: _walletSourceId,
             decoration: const InputDecoration(
               labelText: 'Portefeuille source *',
             ),
-            items: wallets.map((w) =>
-                DropdownMenuItem<int>(
-                  value: w.id!,
-                  child: Text('${w.emoji} ${w.nom} (${Fmt.montant(w.solde, monnaie: monnaie)})'),
-                ),
-            ).toList(),
+            items: wallets.map((wallet) {
+              return DropdownMenuItem<String>(
+                value: wallet.id,
+                child: Text('${wallet.emoji ?? '💳'} ${wallet.nom ?? 'Portefeuille'} (${Fmt.montant(wallet.solde, monnaie: monnaie)})'),
+              );
+            }).toList(),
             onChanged: (v) => setState(() => _walletSourceId = v),
           ),
           const SizedBox(height: 16),
-          DropdownButtonFormField<int>(
+          DropdownButtonFormField<String>(
             value: _walletDestId,
             decoration: const InputDecoration(
               labelText: 'Portefeuille destination *',
             ),
-            items: wallets.where((w) => w.id != _walletSourceId).map((w) =>
-                DropdownMenuItem<int>(
-                  value: w.id!,
-                  child: Text('${w.emoji} ${w.nom} (${Fmt.montant(w.solde, monnaie: monnaie)})'),
-                ),
-            ).toList(),
+            items: wallets.where((w) => w.id != _walletSourceId).map((wallet) {
+              return DropdownMenuItem<String>(
+                value: wallet.id,
+                child: Text('${wallet.emoji ?? '💳'} ${wallet.nom ?? 'Portefeuille'} (${Fmt.montant(wallet.solde, monnaie: monnaie)})'),
+              );
+            }).toList(),
             onChanged: (v) => setState(() => _walletDestId = v),
           ),
           const SizedBox(height: 16),
@@ -276,7 +331,14 @@ class _TransferScreenState extends State<TransferScreen> {
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: _transfer,
-            child: const Text('Transférer'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: TAPAColors.navy,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: const Text(
+              'Transférer',
+              style: TextStyle(color: TAPAColors.white),
+            ),
           ),
         ],
       ),

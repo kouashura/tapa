@@ -3,10 +3,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' show TZDateTime, local;
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:url_launcher/url_launcher.dart';
-import '../core/utils/constants.dart';
-import '../models/echeance_model.dart';
 import '../core/utils/logger.dart';
+import '../data/models/models.dart';  // ✅ Import correct
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notifs =
@@ -21,9 +19,9 @@ class NotificationService {
           .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
-      print('✅ NotificationService initialisé');
+      Logger.info('✅ NotificationService initialisé');
     } catch (e) {
-      print('❌ Erreur init notifications: $e');
+      Logger.error('❌ Erreur init notifications: $e');
     }
   }
 
@@ -44,7 +42,7 @@ class NotificationService {
         ),
       );
     } catch (e) {
-      print('Erreur notification: $e');
+      Logger.error('❌ Erreur notification: $e');
     }
   }
 
@@ -65,7 +63,7 @@ class NotificationService {
         ),
       );
     } catch (e) {
-      print('Erreur notification: $e');
+      Logger.error('❌ Erreur notification: $e');
     }
   }
 
@@ -85,7 +83,7 @@ class NotificationService {
         ),
       );
     } catch (e) {
-      print('Erreur notification: $e');
+      Logger.error('❌ Erreur notification: $e');
     }
   }
 
@@ -175,7 +173,7 @@ class NotificationService {
         UILocalNotificationDateInterpretation.absoluteTime,
       );
     } catch (e) {
-      // Silencieux
+      Logger.warning('⚠️ Erreur rappels quotidiens: $e');
     }
   }
 
@@ -188,6 +186,7 @@ class NotificationService {
     await _notifs.cancel(11);
   }
 
+  // ✅ CORRIGÉ : Utilise EcheanceModel depuis models.dart
   static Future<void> programmerEcheance(EcheanceModel e) async {
     try {
       final rappel = DateTime.now().add(const Duration(days: 1));
@@ -212,8 +211,9 @@ class NotificationService {
         uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,
       );
+      Logger.info('✅ Échéance programmée: ${e.titre}');
     } catch (e) {
-      print('Erreur echeance: $e');
+      Logger.error('❌ Erreur programmation échéance: $e');
     }
   }
 
@@ -223,16 +223,14 @@ class NotificationService {
   }
 
   // ============================================
-  // RAPPEL ESSAI GRATUIT - CORRIGÉ
+  // RAPPEL ESSAI GRATUIT
   // ============================================
   static Future<void> programmerRappelEssai(DateTime dateInscription) async {
     try {
-      // ✅ RAPPEL 3 JOURS AVANT LA FIN (10 jours d'essai)
       final dateFinEssai = dateInscription.add(const Duration(days: 10));
       final dateRappel = dateFinEssai.subtract(const Duration(days: 3));
       final maintenant = DateTime.now();
 
-      // ✅ NE PAS PROGRAMMER SI LA DATE DE RAPPEL EST DÉPASSÉE
       if (dateRappel.isBefore(maintenant)) {
         Logger.info('ℹ️ Rappel essai déjà passé, non programmé');
         return;
@@ -273,7 +271,6 @@ class NotificationService {
       final dateFinEssai = dateInscription.add(const Duration(days: 10));
       final maintenant = DateTime.now();
 
-      // NE PAS PROGRAMMER SI LA DATE EST DÉPASSÉE
       if (dateFinEssai.isBefore(maintenant)) {
         Logger.info('ℹ️ Fin d\'essai déjà passée');
         return;

@@ -3,7 +3,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../theme/app_theme.dart';  // ✅ AJOUTÉ pour TAPAColors
+import '../../core/theme/app_theme.dart'; // ✅ AJOUTÉ pour TAPAColors
 
 class LinkService {
   static Future<void> ouvrirWhatsApp({String message = ''}) async {

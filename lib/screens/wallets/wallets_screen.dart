@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
+import '../../core/theme/app_theme.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';
 import '../../data/models/models.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/logger.dart';

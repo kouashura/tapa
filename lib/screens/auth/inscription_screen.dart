@@ -3,10 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
-import '../../core/utils/constants.dart';  // ← Changé de '../../core/utils/constants.dart'
-import '../../presentation/providers/auth_provider.dart';
-import '../../core/utils/logger.dart';  // ← Changé de '../../utils/logger.dart'
+import '../../core/theme/app_theme.dart';
+import '../../core/utils/constants.dart';
+import '../../presentation/providers/auth/auth_provider.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';
+import '../../core/utils/logger.dart';
 
 class InscriptionScreen extends ConsumerStatefulWidget {
   const InscriptionScreen({super.key});
@@ -45,32 +46,30 @@ class _Metrics {
 
 class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
   final TextEditingController _prenomCtrl = TextEditingController();
-  final TextEditingController _telCtrl = TextEditingController();
+  final TextEditingController _emailCtrl = TextEditingController(); // ✅ CHANGÉ : email au lieu de téléphone
   int _step = 0;
   String _monnaie = 'FCFA';
   String _codePays = 'CI';
-  String _indicatif = '+225';
-  String _drapeau = '🇨🇮';
   bool _loading = false;
 
   @override
   void dispose() {
     _prenomCtrl.dispose();
-    _telCtrl.dispose();
+    _emailCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _nextStep() async {
     if (_step == 0) {
       final prenom = _prenomCtrl.text.trim();
-      final tel = _telCtrl.text.trim();
+      final email = _emailCtrl.text.trim();
 
       if (prenom.isEmpty) {
         _snack('Entre ton prénom pour continuer');
         return;
       }
-      if (tel.length < 6) {
-        _snack('Entre ton numéro WhatsApp');
+      if (email.isEmpty || !_isValidEmail(email)) {
+        _snack('Entre un email valide');
         return;
       }
 
@@ -80,12 +79,17 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
     await _inscrire();
   }
 
+  // ✅ AJOUT : Validation d'email
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    return emailRegex.hasMatch(email);
+  }
+
   Future<void> _inscrire() async {
     final prenom = _prenomCtrl.text.trim();
-    final tel = _telCtrl.text.trim();
-    final fullNumber = '$_indicatif$tel';
+    final email = _emailCtrl.text.trim();
 
-    if (prenom.isEmpty || tel.length < 6) {
+    if (prenom.isEmpty || email.isEmpty) {
       _snack('Remplis tous les champs');
       return;
     }
@@ -100,9 +104,13 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
         setState(() => _loading = false);
 
         if (mounted) {
+          // ✅ CHANGÉ : Envoyer l'email au lieu du téléphone
           context.push('/verify-phone', extra: {
             'prenom': prenom,
-            'telephone': fullNumber,
+            'telephone': email, // L'email est envoyé comme "telephone" pour compatibilité
+            'indicatif': '',
+            'codePays': _codePays,
+            'monnaie': _monnaie,
           });
         }
         return;
@@ -111,8 +119,8 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
       final authNotifier = ref.read(authStateProvider.notifier);
       await authNotifier.createUserProfile(
         prenom: prenom,
-        telephone: fullNumber,
-        indicatif: _indicatif,
+        telephone: email, // L'email est utilisé comme identifiant
+        indicatif: '',
         codePays: _codePays,
         monnaie: _monnaie,
       );
@@ -346,48 +354,16 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
             ),
           ),
           SizedBox(height: m.gapMedium),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: _showCountryPicker,
-                child: Container(
-                  height: 56,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: TAPAColors.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: TAPAColors.border),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(_drapeau, style: const TextStyle(fontSize: 18)),
-                      const SizedBox(width: 6),
-                      Text(_indicatif,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: TAPAColors.navy,
-                          )),
-                      const Icon(Icons.expand_more,
-                          size: 18, color: TAPAColors.textSecond),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: _telCtrl,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    hintText: 'ex : 0748684403',
-                    labelText: 'Numéro WhatsApp *',
-                  ),
-                ),
-              ),
-            ],
+          // ✅ CHANGÉ : Champ email au lieu de téléphone
+          TextField(
+            controller: _emailCtrl,
+            keyboardType: TextInputType.emailAddress,
+            textCapitalization: TextCapitalization.none,
+            decoration: const InputDecoration(
+              labelText: 'Adresse Email *',
+              hintText: 'ex : kouassi@gmail.com',
+              prefixIcon: Icon(Icons.email_outlined),
+            ),
           ),
           const SizedBox(height: 8),
           Row(
@@ -395,12 +371,14 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
               const Icon(Icons.info_outline,
                   size: 13, color: TAPAColors.textSecond),
               const SizedBox(width: 5),
-              Expanded(
-                child: Text('$_indicatif — numéro utilisé pour te contacter',
-                    style: const TextStyle(
-                      fontSize: 11.5,
-                      color: TAPAColors.textSecond,
-                    )),
+              const Expanded(
+                child: Text(
+                  'Un code de vérification sera envoyé sur votre email',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: TAPAColors.textSecond,
+                  ),
+                ),
               ),
             ],
           ),
@@ -469,126 +447,6 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
           const SizedBox(height: 8),
         ],
       ),
-    );
-  }
-
-  void _showCountryPicker() {
-    final searchCtrl = TextEditingController();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return StatefulBuilder(builder: (ctx, setSheetState) {
-          final query = searchCtrl.text.trim().toLowerCase();
-          final pays = AppConstants.pays.where((p) {
-            if (query.isEmpty) return true;
-            return p['nom']!.toLowerCase().contains(query) ||
-                p['indicatif']!.contains(query);
-          }).toList();
-
-          return DraggableScrollableSheet(
-            initialChildSize: 0.65,
-            minChildSize: 0.4,
-            maxChildSize: 0.9,
-            expand: false,
-            builder: (ctx, scrollCtrl) {
-              return Container(
-                decoration: const BoxDecoration(
-                  color: TAPAColors.surface,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 10),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: TAPAColors.border,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text('Choisis ton pays',
-                            style: TextStyle(
-                                fontSize: 17, fontWeight: FontWeight.w800)),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: TextField(
-                        controller: searchCtrl,
-                        onChanged: (_) => setSheetState(() {}),
-                        decoration: InputDecoration(
-                          hintText: 'Rechercher un pays...',
-                          prefixIcon: const Icon(Icons.search, size: 20),
-                          filled: true,
-                          fillColor: TAPAColors.background,
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 14),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Expanded(
-                      child: pays.isEmpty
-                          ? const Center(
-                          child: Text('Aucun pays trouvé',
-                              style: TextStyle(
-                                  color: TAPAColors.textSecond,
-                                  fontSize: 13)))
-                          : ListView.builder(
-                        controller: scrollCtrl,
-                        itemCount: pays.length,
-                        itemBuilder: (ctx, i) {
-                          final p = pays[i];
-                          final selected = _indicatif == p['indicatif'];
-                          return ListTile(
-                            leading: Text(p['flag']!,
-                                style: const TextStyle(fontSize: 22)),
-                            title: Text(p['nom']!,
-                                style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500)),
-                            subtitle: Text(p['indicatif']!,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: TAPAColors.textSecond,
-                                )),
-                            trailing: selected
-                                ? const Icon(Icons.check_circle,
-                                color: TAPAColors.green, size: 20)
-                                : null,
-                            onTap: () {
-                              setState(() {
-                                _indicatif = p['indicatif']!;
-                                _codePays = p['code']!;
-                                _monnaie = p['monnaie']!;
-                                _drapeau = p['flag']!;
-                              });
-                              Navigator.pop(ctx);
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        });
-      },
     );
   }
 

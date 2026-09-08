@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
-import '../../models/echeance_model.dart';
+import '../../core/theme/app_theme.dart';
+import '../../data/models/models.dart';
 import '../../services/db_service_mysql.dart';
 import '../../services/notification_service.dart';
 import '../../core/utils/formatters.dart';

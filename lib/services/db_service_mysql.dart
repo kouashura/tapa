@@ -1,11 +1,9 @@
 // lib/services/db_service_mysql.dart
 
 import 'firebase_service.dart';
-import '../models/models.dart';
-import '../models/budget_model.dart';
-import '../models/echeance_model.dart';
-import '../models/epargne_programmee_model.dart';
+import '../data/models/models.dart';
 import '../core/utils/logger.dart';
+import 'pin_security.dart';
 
 class DBService {
   static final FirebaseService _firebase = FirebaseService();
@@ -25,15 +23,25 @@ class DBService {
   Map<String, dynamic>? getUser() => _firebase.getUser();
   Future<void> saveUser(UserModel user) async => await _firebase.saveUser(user);
   Future<void> savePin(String pin) async => await _firebase.savePin(pin);
-  bool verifyPin(String pin) => _firebase.verifyPin(pin);
+
+  Future<bool> verifyPin(String pin) async {
+    final result = await _firebase.verifyPin(pin);
+    return result.success;
+  }
+
+  Future<PinCheckResult> verifyPinDetailed(String pin) async {
+    return await _firebase.verifyPin(pin);
+  }
+
   String? getCurrentUserId() => _firebase.getCurrentUserId();
   bool get isLoggedIn => _firebase.isLoggedIn;
+  Future<bool> hasPin() async => await _firebase.hasPin();
 
   // ============================================
   // TRANSACTIONS
   // ============================================
 
-  List<TransactionModel> getTransactions() => _firebase.getTransactions();
+  Future<List<TransactionModel>> getTransactions() async => await _firebase.getTransactions();
   Future<void> addTransaction(TransactionModel transaction) async => await _firebase.addTransaction(transaction);
   Future<void> updateTransaction(TransactionModel oldTx, TransactionModel newTx) async => await _firebase.updateTransaction(oldTx, newTx);
   Future<void> deleteTransaction(TransactionModel transaction) async => await _firebase.deleteTransaction(transaction);
@@ -42,7 +50,7 @@ class DBService {
   // PORTEFEUILLES
   // ============================================
 
-  List<WalletModel> getWallets() => _firebase.getWallets();
+  Future<List<WalletModel>> getWallets() async => await _firebase.getWallets();
   Future<void> saveWallet(WalletModel wallet) async => await _firebase.saveWallet(wallet);
 
   // ============================================
@@ -129,51 +137,27 @@ class DBService {
   Future<void> setNotifications(bool value) async => await _firebase.setNotifications(value);
 
   // ============================================
-  // GESTION DE L'ESSAI GRATUIT ET ACCÈS - CORRIGÉ
+  // GESTION DE L'ESSAI GRATUIT ET ACCÈS
   // ============================================
 
-  /// Vérifie si l'essai gratuit est expiré (version synchrone)
-  bool get essaiGratuitExpire {
-    return _firebase.essaiGratuitExpire;
-  }
+  bool get essaiGratuitExpire => _firebase.essaiGratuitExpire;
+  Future<bool> isEssaiGratuitExpire() async => await _firebase.isEssaiGratuitExpire();
+  int get joursRestantsEssai => _firebase.joursRestantsEssai;
+  bool get aAccesAVie => _firebase.aAccesAVie;
+  bool get isRootUser => _firebase.isRootUser;
 
-  /// Vérifie si l'essai gratuit est expiré (version asynchrone avec Firestore)
-  Future<bool> isEssaiGratuitExpire() async {
-    return await _firebase.isEssaiGratuitExpire();
-  }
-
-  /// Nombre de jours restants pour l'essai gratuit
-  int get joursRestantsEssai {
-    return _firebase.joursRestantsEssai;
-  }
-
-  /// Vérifie si l'utilisateur a l'accès à vie
-  bool get aAccesAVie {
-    return _firebase.aAccesAVie;
-  }
-
-  /// Vérifie si l'utilisateur a un accès root
-  bool get isRootUser {
-    return _firebase.isRootUser;
-  }
-
-  /// Sauvegarde la date d'inscription
   Future<void> sauvegarderDateInscription(DateTime date) async {
     await _firebase.sauvegarderDateInscription(date);
   }
 
-  /// Active l'accès à vie avec une clé
   Future<void> activerAccesVie(String cle) async {
     await _firebase.activerAccesVie(cle);
   }
 
-  /// Vérifie si une clé est valide (root ou standard)
-  bool verifierCle(String cle) {
-    return _firebase.verifierCle(cle);
-  }
+  bool verifierCle(String cle) => _firebase.verifierCle(cle);
 
   // ============================================
-  // STATISTIQUES
+  // STATISTIQUES - ✅ CORRIGÉ
   // ============================================
 
   Future<Map<String, dynamic>> getStatistics() async => await _firebase.getStatistics();

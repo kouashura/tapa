@@ -1,11 +1,13 @@
+// lib/screens/auth/verify_phone_screen.dart
+
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
-import '../../core/utils/logger.dart';  // ← Changé de '../../../utils/logger.dart'
-
+import '../../core/theme/app_theme.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';
+import '../../core/utils/logger.dart';
 
 class VerifyPhoneScreen extends ConsumerStatefulWidget {
   final String prenom;
@@ -28,18 +30,60 @@ class VerifyPhoneScreen extends ConsumerStatefulWidget {
 }
 
 class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
+  // ============================================
+  // CONTROLEURS ET FOCUS
+  // ============================================
+
   final List<TextEditingController> _codeControllers = List.generate(
     6,
         (index) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
+
+  // ============================================
+  // ÉTATS
+  // ============================================
+
   bool _isLoading = false;
   int _countdown = 60;
   bool _canResend = false;
   String _errorMessage = '';
+  bool _codeExpired = false;
+  int _attempts = 0;
+  Timer? _codeTimeoutTimer;
+  Timer? _countdownTimer;
+  bool _emailSent = false;
+  bool _isVerified = false;
+
+  // ============================================
+  // GETTERS
+  // ============================================
+
+  bool get canResend => _canResend || _codeExpired;
+  bool get isCodeComplete => _codeControllers.every((c) => c.text.isNotEmpty);
+  String get code => _codeControllers.map((c) => c.text).join();
+  bool get hasMaxAttempts => _attempts >= 5;
+
+  // ============================================
+  // CYCLE DE VIE
+  // ============================================
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _sendVerificationEmail();
+        _startCountdown();
+      }
+    });
+  }
 
   @override
   void dispose() {
+    _codeTimeoutTimer?.cancel();
+    _countdownTimer?.cancel();
     for (final controller in _codeControllers) {
       controller.dispose();
     }
@@ -49,57 +93,138 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // ✅ Future(() {...}) planifie l'exécution sur une nouvelle itération de la
-    // boucle d'événements, complètement en dehors du cycle de build/frame en
-    // cours. Contrairement à addPostFrameCallback (qui s'exécute encore à
-    // l'intérieur de la même frame et peut donc déclencher l'erreur Riverpod
-    // "Tried to modify a provider while the widget tree was building"), ceci
-    // garantit que le premier build est totalement terminé avant de modifier
-    // le provider et d'utiliser le BuildContext (ScaffoldMessenger, etc.).
-    Future(() {
-      if (mounted) {
-        _sendCode();
-        _startCountdown();
+  // ============================================
+  // CRÉATION DU PROFIL UTILISATEUR
+  // ============================================
+
+  Future<void> _createUserProfile() async {
+    try {
+      final authNotifier = ref.read(authStateProvider.notifier);
+
+      await authNotifier.createUserProfile(
+        prenom: widget.prenom,
+        telephone: widget.telephone,
+        indicatif: widget.indicatif,
+        codePays: widget.codePays,
+        monnaie: widget.monnaie,
+      );
+
+      if (!mounted) return;
+
+      final userData = ref.read(currentUserProvider);
+      Logger.success('✅ Compte créé avec succès pour ${userData?.prenom}');
+
+      if (userData?.onboardingVu ?? false) {
+        context.go('/home');
+      } else {
+        context.go('/onboarding');
       }
-    });
+    } catch (e) {
+      Logger.error('❌ Erreur création profil: $e');
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
+        });
+      }
+    }
   }
 
-  void _sendCode() {
+  // ============================================
+  // ENVOI DU CODE PAR EMAIL (Brevo via auth_provider.dart)
+  // ============================================
+
+  Future<void> _sendVerificationEmail() async {
     setState(() {
       _isLoading = true;
       _errorMessage = '';
+      _codeExpired = false;
+      _attempts = 0;
+      _clearCodeFields();
+      _emailSent = false;
+      _isVerified = false;
     });
 
-    final authNotifier = ref.read(authStateProvider.notifier);
-    authNotifier.sendVerificationCode(widget.telephone);
-    Logger.info('📱 Code envoyé à ${widget.telephone}');
+    _codeTimeoutTimer?.cancel();
+    _countdownTimer?.cancel();
 
-    // ✅ ScaffoldMessenger.of(context) est maintenant sûr car on est dans un callback
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('📱 Code envoyé à ${widget.telephone}'),
-        backgroundColor: TAPAColors.gold,
-        duration: const Duration(seconds: 3),
-      ),
-    );
+    try {
+      // ℹ️ widget.telephone contient en réalité l'adresse email saisie
+      // à l'inscription (nommage hérité de l'ancien flow par SMS).
+      await ref
+          .read(authStateProvider.notifier)
+          .envoyerCodeVerificationEmail(widget.telephone);
 
-    setState(() => _isLoading = false);
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+        _emailSent = true;
+      });
+      _startCodeTimeout();
+
+      _showSnackBar(
+        '📧 Code envoyé à ${widget.telephone}',
+        isSuccess: true,
+      );
+    } catch (e) {
+      Logger.error('❌ Erreur envoi code email: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
+        });
+        _showSnackBar('❌ Erreur envoi email', isError: true);
+      }
+    }
   }
+
+  // ============================================
+  // TIMERS
+  // ============================================
 
   void _startCountdown() {
     setState(() {
       _countdown = 60;
       _canResend = false;
     });
-    Future.delayed(const Duration(seconds: 60), () {
+
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        if (_countdown > 0) {
+          _countdown--;
+        } else {
+          _canResend = true;
+          timer.cancel();
+        }
+      });
+    });
+  }
+
+  void _startCodeTimeout() {
+    _codeExpired = false;
+    _codeTimeoutTimer?.cancel();
+    // ⏰ Doit rester cohérent avec la durée d'expiration côté serveur
+    // (15 minutes dans envoyerCodeVerificationEmail, auth_provider.dart).
+    _codeTimeoutTimer = Timer(const Duration(minutes: 15), () {
       if (mounted) {
-        setState(() => _canResend = true);
+        setState(() {
+          _codeExpired = true;
+          _errorMessage = '⏰ Le code a expiré. Veuillez renvoyer un nouveau code.';
+        });
+        _showSnackBar('⏰ Le code a expiré', isError: true);
       }
     });
   }
+
+  // ============================================
+  // GESTION DU CODE
+  // ============================================
 
   void _onCodeChanged(String value, int index) {
     if (value.length == 1 && index < 5) {
@@ -109,65 +234,135 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
       _focusNodes[index - 1].requestFocus();
     }
 
-    final allFilled = _codeControllers.every((c) => c.text.isNotEmpty);
-    if (allFilled) {
-      final code = _codeControllers.map((c) => c.text).join();
+    if (_errorMessage.isNotEmpty) {
+      setState(() => _errorMessage = '');
+    }
+
+    if (isCodeComplete) {
       _verifierCode(code);
     }
   }
 
+  void _clearCodeFields() {
+    for (final controller in _codeControllers) {
+      controller.clear();
+    }
+    if (_focusNodes.isNotEmpty) {
+      _focusNodes.first.requestFocus();
+    }
+  }
+
+  // ============================================
+  // VÉRIFICATION DU CODE (Brevo via auth_provider.dart)
+  // ============================================
+
   Future<void> _verifierCode(String code) async {
-    if (code.length != 6) return;
+    // ✅ VALIDATION 1: Le code doit faire 6 chiffres
+    if (code.length != 6) {
+      setState(() {
+        _errorMessage = 'Le code doit contenir 6 chiffres.';
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // ✅ VALIDATION 2: Le code n'est pas expiré
+    if (_codeExpired) {
+      setState(() {
+        _errorMessage = '⏰ Le code a expiré. Veuillez renvoyer un nouveau code.';
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // ✅ VALIDATION 3: Pas trop de tentatives
+    if (hasMaxAttempts) {
+      setState(() {
+        _errorMessage = '❌ Trop de tentatives. Veuillez renvoyer un nouveau code.';
+        _isLoading = false;
+      });
+      return;
+    }
+
+    Logger.info('📧 Vérification - Email: ${widget.telephone}');
+    Logger.info('📧 Tentative: ${_attempts + 1}/5');
 
     setState(() {
       _isLoading = true;
       _errorMessage = '';
+      _attempts++;
     });
 
-    final authNotifier = ref.read(authStateProvider.notifier);
-
     try {
-      await authNotifier.verifyCode(code);
+      final isValid = await ref
+          .read(authStateProvider.notifier)
+          .verifierCodeEmail(widget.telephone, code);
 
-      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
 
-      if (mounted && ref.read(isAuthenticatedProvider)) {
-        await authNotifier.createUserProfile(
-          prenom: widget.prenom,
-          telephone: widget.telephone,
-          indicatif: widget.indicatif,
-          codePays: widget.codePays,
-          monnaie: widget.monnaie,
-        );
+      if (isValid) {
+        // ✅ SUCCÈS
+        _codeTimeoutTimer?.cancel();
+        _countdownTimer?.cancel();
 
-        if (mounted) {
-          final user = ref.read(currentUserProvider);
-          Logger.success('✅ Compte créé avec succès pour ${user?.prenom}');
-
-          if (user?.onboardingVu ?? false) {
-            context.go('/home');
-          } else {
-            context.go('/onboarding');
-          }
-        }
-      } else {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Code invalide. Réessayez.';
+          _isVerified = true;
         });
-        for (final controller in _codeControllers) {
-          controller.clear();
+
+        _showSnackBar('✅ Code vérifié avec succès !', isSuccess: true);
+        await _createUserProfile();
+      } else {
+        // ❌ CODE INVALIDE
+        setState(() {
+          _isLoading = false;
+          _errorMessage = '❌ Code invalide. Vérifiez votre email et réessayez. (${_attempts}/5)';
+        });
+
+        _clearCodeFields();
+
+        if (hasMaxAttempts) {
+          _showSnackBar('❌ Trop de tentatives. Renvoyez un nouveau code.', isError: true);
+        } else {
+          _showSnackBar('❌ Code invalide. Réessayez.', isError: true);
         }
-        _focusNodes.first.requestFocus();
       }
     } catch (e) {
+      if (!mounted) return;
+
       setState(() {
         _isLoading = false;
         _errorMessage = 'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
       });
       Logger.error('❌ Erreur vérification: $e');
+
+      _clearCodeFields();
+      _showSnackBar('❌ Erreur: ${e.toString().replaceAll('Exception: ', '')}', isError: true);
     }
   }
+
+  // ============================================
+  // SNACKBAR
+  // ============================================
+
+  void _showSnackBar(String message, {bool isSuccess = false, bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isSuccess ? TAPAColors.green : (isError ? TAPAColors.red : TAPAColors.gold),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  // ============================================
+  // BUILD
+  // ============================================
 
   @override
   Widget build(BuildContext context) {
@@ -175,13 +370,53 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
     final size = MediaQuery.of(context).size;
     final isSmall = size.width < 360;
 
+    final showExpired = _codeExpired && !_isLoading;
+    final bool canResendNow = canResend;
+
+    // ✅ Écran de succès
+    if (_isVerified) {
+      return Scaffold(
+        backgroundColor: TAPAColors.navy,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.check_circle,
+                color: TAPAColors.green,
+                size: 64,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                '✅ Vérification réussie !',
+                style: TextStyle(
+                  color: TAPAColors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Bienvenue ${widget.prenom}',
+                style: TextStyle(
+                  color: TAPAColors.gold,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // ✅ Écran principal
     return Scaffold(
       backgroundColor: TAPAColors.navy,
       appBar: AppBar(
         backgroundColor: TAPAColors.navy,
         foregroundColor: TAPAColors.white,
         elevation: 0,
-        title: const Text('Vérification'),
+        title: const Text('Vérification par Email'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, size: 20),
           onPressed: () => context.go('/inscription'),
@@ -205,7 +440,7 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.sms_outlined,
+                  Icons.email_outlined,
                   color: TAPAColors.gold,
                   size: isSmall ? 32 : 40,
                 ),
@@ -214,7 +449,7 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
 
               // Titre
               Text(
-                'Code de vérification',
+                _emailSent ? 'Code de vérification' : 'Vérification par Email',
                 style: TextStyle(
                   fontSize: isSmall ? 18 : 20,
                   fontWeight: FontWeight.w800,
@@ -223,9 +458,11 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
               ),
               const SizedBox(height: 8),
 
-              // Message
+              // Message avec email
               Text(
-                'Nous avons envoyé un code SMS à',
+                _emailSent
+                    ? 'Nous avons envoyé un code à'
+                    : 'Nous allons envoyer un code à',
                 style: TextStyle(
                   color: Colors.white54,
                   fontSize: isSmall ? 12 : 14,
@@ -247,9 +484,58 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
 
-              // Code fields
+              // Instructions
+              Container(
+                padding: const EdgeInsets.all(14),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: TAPAColors.gold.withOpacity(0.2),
+                  ),
+                ),
+                child: const Column(
+                  children: [
+                    Text(
+                      '📧 Comment vérifier votre compte ?',
+                      style: TextStyle(
+                        color: TAPAColors.gold,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '1️⃣ Ouvrez votre boîte mail\n'
+                          '2️⃣ Récupérez le code à 6 chiffres\n'
+                          '3️⃣ Entrez-le ci-dessous\n'
+                          '4️⃣ Votre compte sera automatiquement vérifié',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        height: 1.8,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Entrer le code manuellement
+              const Text(
+                'Entrez le code à 6 chiffres',
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Champs du code
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(6, (index) {
@@ -268,10 +554,13 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
                       maxLength: 1,
+                      enabled: !_isLoading && !_codeExpired && !hasMaxAttempts && _emailSent,
                       decoration: InputDecoration(
                         counterText: '',
                         filled: true,
-                        fillColor: Colors.white10,
+                        fillColor: (!_emailSent || _codeExpired || hasMaxAttempts)
+                            ? Colors.white.withOpacity(0.05)
+                            : Colors.white10,
                         contentPadding: EdgeInsets.zero,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -340,15 +629,99 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                   ),
                 ),
 
-              const SizedBox(height: 32),
+              // Indicateur d'expiration
+              if (showExpired)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.timer_outlined, color: Colors.orange, size: 16),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          '⏰ Le code a expiré. Cliquez sur "Renvoyer le code".',
+                          style: TextStyle(color: Colors.orange, fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-              // Loading ou bouton renvoyer
+              // Indicateur de tentatives
+              if (_attempts > 0 && !_isLoading)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    'Tentative ${_attempts}/5',
+                    style: TextStyle(
+                      color: _attempts >= 4 ? Colors.orange : Colors.white38,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+
+              // État d'envoi de l'email
+              if (!_emailSent && !_isLoading)
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: TAPAColors.gold.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: TAPAColors.gold.withOpacity(0.2)),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.hourglass_empty, color: TAPAColors.gold, size: 16),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '⏳ Envoi du code en cours...',
+                          style: TextStyle(color: TAPAColors.gold, fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              if (_emailSent && !_isLoading)
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: TAPAColors.green.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: TAPAColors.green.withOpacity(0.2)),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.check_circle, color: TAPAColors.green, size: 16),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '✅ Code envoyé ! Vérifiez votre boîte mail',
+                          style: TextStyle(color: TAPAColors.green, fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              const SizedBox(height: 16),
+
+              // Bouton renvoyer
               if (_isLoading || authState.isLoading)
                 const CircularProgressIndicator(color: TAPAColors.gold)
-              else if (_canResend)
+              else if (canResendNow)
                 TextButton(
-                  onPressed: () {
-                    _sendCode();
+                  onPressed: _isLoading ? null : () {
+                    _sendVerificationEmail();
                     _startCountdown();
                   },
                   style: TextButton.styleFrom(
@@ -359,9 +732,9 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                       side: const BorderSide(color: TAPAColors.gold),
                     ),
                   ),
-                  child: const Text(
-                    'Renvoyer le code',
-                    style: TextStyle(
+                  child: Text(
+                    _codeExpired ? '🔄 Renvoyer le code' : 'Renvoyer le code',
+                    style: const TextStyle(
                       color: TAPAColors.gold,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -383,7 +756,7 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
 
               const SizedBox(height: 24),
 
-              // Info
+              // Information
               Container(
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -391,16 +764,20 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                   color: Colors.white.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
-                    Icon(Icons.info_outline, color: Colors.white54, size: 16),
-                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.email_outlined,
+                      color: Colors.white54,
+                      size: 16,
+                    ),
+                    SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Un SMS de vérification a été envoyé sur votre numéro',
+                        '📧 Un code de vérification a été envoyé sur votre email',
                         style: TextStyle(
                           color: Colors.white38,
-                          fontSize: isSmall ? 10 : 12,
+                          fontSize: 12,
                         ),
                       ),
                     ),
@@ -408,30 +785,22 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                 ),
               ),
 
-              // ✅ Bouton de debug (uniquement en développement)
+              // Astuce debug : le code réel est visible dans les logs
+              // (Logger.success dans envoyerCodeVerificationEmail) et
+              // dans la console Firestore (collection email_verifications),
+              // il n'est plus généré côté écran donc on ne peut pas
+              // l'afficher ici directement.
               if (kDebugMode)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
-                  child: TextButton(
-                    onPressed: () {
-                      // Remplir automatiquement avec le code de test
-                      final testCode = '123456';
-                      for (int i = 0; i < testCode.length; i++) {
-                        _codeControllers[i].text = testCode[i];
-                      }
-                      _verifierCode(testCode);
-                    },
-                    style: TextButton.styleFrom(
-                      backgroundColor: TAPAColors.gold.withOpacity(0.2),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
+                  child: Text(
+                    '🔧 Debug: consultez les logs ou Firestore '
+                        '(email_verifications/${widget.telephone}) pour voir le code.',
+                    style: const TextStyle(
+                      color: Colors.white24,
+                      fontSize: 10,
                     ),
-                    child: const Text(
-                      '🔧 Mode Debug - Code 123456',
-                      style: TextStyle(color: TAPAColors.gold),
-                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
 

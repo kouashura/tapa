@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
+import '../../core/theme/app_theme.dart';  // ✅ CHEMIN CORRIGÉ
+import 'package:tapa_budget/presentation/providers/providers.dart';
+import '../../presentation/providers/app_state.dart';  // ✅ AJOUTÉ
 import '../../services/db_service_mysql.dart';
-import '../../models/budget_model.dart';
 import '../../core/utils/formatters.dart';
-import '../../core/utils/constants.dart';
+import '../../data/models/models.dart';
 import '../../core/utils/logger.dart';
 
 class BudgetScreen extends ConsumerStatefulWidget {
@@ -121,12 +121,16 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     return Scaffold(
       backgroundColor: TAPAColors.background,
       appBar: AppBar(
-        title: const Text('Budget'),
+        title: const Text(
+          'Budget',
+          style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.2),
+        ),
+        elevation: 0,
         backgroundColor: TAPAColors.navy,
         foregroundColor: TAPAColors.white,
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
+          icon: const Icon(Icons.arrow_back_ios_new, size: 18),
           onPressed: () => context.go('/home'),
         ),
       ),
@@ -137,10 +141,15 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
         child: _budget == null ? _buildEmptyState() : _buildBudgetState(),
       ),
       floatingActionButton: _budget != null
-          ? FloatingActionButton(
+          ? FloatingActionButton.extended(
         backgroundColor: TAPAColors.navy,
+        elevation: 3,
         onPressed: _ouvrirEditeur,
-        child: const Icon(Icons.edit, color: Colors.white),
+        icon: const Icon(Icons.edit_outlined, color: Colors.white, size: 18),
+        label: const Text(
+          'Modifier',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+        ),
       )
           : null,
       bottomNavigationBar: _buildBottomNavigationBar(),
@@ -152,41 +161,57 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
       children: [
         _buildMonthSelector(),
         SizedBox(
-          height: 420,
+          height: 440,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.pie_chart_outline,
-                  size: 60,
-                  color: TAPAColors.textHint,
+                Container(
+                  width: 84,
+                  height: 84,
+                  decoration: BoxDecoration(
+                    color: TAPAColors.navy.withOpacity(0.06),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.pie_chart_outline_rounded,
+                    size: 38,
+                    color: TAPAColors.navy,
+                  ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 const Text(
-                  'Budget',
+                  'Aucun budget ce mois-ci',
                   style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
                     color: TAPAColors.navy,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Aucun budget pour $_moisLabel.\nCréez-en un pour suivre\nvos dépenses et revenus',
+                  'Créez le budget de $_moisLabel pour suivre\nvos dépenses et revenus au fil du mois',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: TAPAColors.textSecond),
+                  style: const TextStyle(color: TAPAColors.textSecond, height: 1.4),
                 ),
-                const SizedBox(height: 24),
-                ElevatedButton(
+                const SizedBox(height: 28),
+                ElevatedButton.icon(
                   onPressed: _ouvrirEditeur,
+                  icon: const Icon(Icons.add, size: 18, color: TAPAColors.white),
+                  label: const Text(
+                    'Commencer le budget',
+                    style: TextStyle(
+                      color: TAPAColors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: TAPAColors.navy,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                  ),
-                  child: const Text(
-                    'Commencer le budget',
-                    style: TextStyle(color: TAPAColors.white),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ],
@@ -222,6 +247,7 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   prevu: budget.totalRevenusPrevu,
                   reel: reelRevenus,
                   color: TAPAColors.green,
+                  icon: Icons.arrow_upward_rounded,
                 ),
               ),
               const SizedBox(width: 12),
@@ -231,35 +257,54 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
                   prevu: budget.totalDepensesPrevu,
                   reel: reelDepenses,
                   color: TAPAColors.red,
+                  icon: Icons.arrow_downward_rounded,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
         if (budget.depenses.isNotEmpty) ...[
-          _sectionTitle('Dépenses'),
+          _sectionTitle('Dépenses', budget.depenses.length),
           ...budget.depenses.map((l) => _buildLigne(l)),
         ],
         if (budget.revenus.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          _sectionTitle('Revenus'),
+          const SizedBox(height: 16),
+          _sectionTitle('Revenus', budget.revenus.length),
           ...budget.revenus.map((l) => _buildLigne(l)),
         ],
       ],
     );
   }
 
-  Widget _sectionTitle(String text) {
+  Widget _sectionTitle(String text, int count) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w700,
-          color: TAPAColors.textSecond,
-        ),
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+      child: Row(
+        children: [
+          Text(
+            text.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: TAPAColors.navy,
+              letterSpacing: 0.6,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Container(height: 1, color: TAPAColors.border),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '$count',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: TAPAColors.textHint,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -269,47 +314,94 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
     final prevu = ligne.montantPrevu;
     final progression = prevu > 0 ? (reel / prevu).clamp(0.0, 1.0) : 0.0;
     final depasse = prevu > 0 && reel > prevu;
+    final accentColor = depasse
+        ? TAPAColors.red
+        : (ligne.isRevenu ? TAPAColors.green : TAPAColors.navy);
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+      margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: TAPAColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: TAPAColors.border, width: 0.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text(ligne.categorieEmoji, style: const TextStyle(fontSize: 18)),
-              const SizedBox(width: 8),
+              Container(
+                width: 34,
+                height: 34,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: accentColor.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(ligne.categorieEmoji, style: const TextStyle(fontSize: 16)),
+              ),
+              const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  ligne.categorieLabel,
-                  style: const TextStyle(fontWeight: FontWeight.w600, color: TAPAColors.navy),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ligne.categorieLabel,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                        color: TAPAColors.navy,
+                      ),
+                    ),
+                    if (depasse) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'Budget dépassé',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: TAPAColors.red,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              Text(
-                '${reel.toStringAsFixed(0)} / ${prevu.toStringAsFixed(0)}',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: depasse ? TAPAColors.red : TAPAColors.textSecond,
-                ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    reel.toStringAsFixed(0),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13.5,
+                      color: accentColor,
+                    ),
+                  ),
+                  Text(
+                    '/ ${prevu.toStringAsFixed(0)}',
+                    style: const TextStyle(fontSize: 11, color: TAPAColors.textHint),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           ClipRRect(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: progression,
-              minHeight: 6,
-              backgroundColor: TAPAColors.border,
-              color: depasse
-                  ? TAPAColors.red
-                  : (ligne.isRevenu ? TAPAColors.green : TAPAColors.navy),
+              minHeight: 7,
+              backgroundColor: TAPAColors.background,
+              color: accentColor,
             ),
           ),
         ],
@@ -319,29 +411,63 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
 
   Widget _buildMonthSelector() {
     return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      margin: const EdgeInsets.fromLTRB(20, 20, 20, 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
         color: TAPAColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: TAPAColors.border, width: 0.5),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left, color: TAPAColors.navy),
-            onPressed: () => _changerMois(-1),
+          _monthNavButton(Icons.chevron_left, () => _changerMois(-1)),
+          Column(
+            children: [
+              Text(
+                _moisLabel,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: TAPAColors.navy,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'SUIVI MENSUEL',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: TAPAColors.textHint,
+                  letterSpacing: 1.1,
+                ),
+              ),
+            ],
           ),
-          Text(
-            _moisLabel,
-            style: const TextStyle(fontWeight: FontWeight.w700, color: TAPAColors.navy),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right, color: TAPAColors.navy),
-            onPressed: () => _changerMois(1),
-          ),
+          _monthNavButton(Icons.chevron_right, () => _changerMois(1)),
         ],
+      ),
+    );
+  }
+
+  Widget _monthNavButton(IconData icon, VoidCallback onTap) {
+    return Material(
+      color: TAPAColors.background,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Icon(icon, color: TAPAColors.navy, size: 22),
+        ),
       ),
     );
   }
@@ -483,8 +609,10 @@ class _BudgetScreenState extends ConsumerState<BudgetScreen> {
   }
 }
 
-/// Feuille modale pour créer ou modifier le budget d'un mois donné :
-/// un champ montant par catégorie (dépenses puis revenus).
+// ==========================================================
+// BUDGET EDITOR SHEET
+// ==========================================================
+
 class _BudgetEditorSheet extends StatefulWidget {
   final int mois;
   final int annee;
@@ -593,7 +721,7 @@ class _BudgetEditorSheetState extends State<_BudgetEditorSheet> {
               child: Container(
                 width: 40,
                 height: 4,
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   color: TAPAColors.border,
                   borderRadius: BorderRadius.circular(4),
@@ -603,9 +731,10 @@ class _BudgetEditorSheetState extends State<_BudgetEditorSheet> {
             Text(
               widget.existant == null ? 'Créer le budget' : 'Modifier le budget',
               style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
                 color: TAPAColors.navy,
+                letterSpacing: 0.1,
               ),
             ),
             const SizedBox(height: 4),
@@ -613,22 +742,32 @@ class _BudgetEditorSheetState extends State<_BudgetEditorSheet> {
               BudgetMensuel(id: '', mois: widget.mois, annee: widget.annee, lignes: const []).moisLabel,
               style: const TextStyle(color: TAPAColors.textSecond, fontSize: 13),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Expanded(
               child: ListView(
                 controller: scrollController,
                 children: [
                   if (depenses.isNotEmpty) ...[
-                    const Text('Dépenses',
-                        style: TextStyle(fontWeight: FontWeight.w700, color: TAPAColors.textSecond)),
-                    const SizedBox(height: 8),
+                    Text('DÉPENSES',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11.5,
+                          letterSpacing: 0.6,
+                          color: TAPAColors.textHint,
+                        )),
+                    const SizedBox(height: 10),
                     ...depenses.map(_buildCategoryField),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                   ],
                   if (revenus.isNotEmpty) ...[
-                    const Text('Revenus',
-                        style: TextStyle(fontWeight: FontWeight.w700, color: TAPAColors.textSecond)),
-                    const SizedBox(height: 8),
+                    Text('REVENUS',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11.5,
+                          letterSpacing: 0.6,
+                          color: TAPAColors.textHint,
+                        )),
+                    const SizedBox(height: 10),
                     ...revenus.map(_buildCategoryField),
                   ],
                 ],
@@ -637,14 +776,22 @@ class _BudgetEditorSheetState extends State<_BudgetEditorSheet> {
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 52,
               child: ElevatedButton(
                 onPressed: _enregistrer,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: TAPAColors.navy,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Enregistrer', style: TextStyle(color: Colors.white)),
+                child: const Text(
+                  'Enregistrer',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
               ),
             ),
           ],
@@ -658,15 +805,32 @@ class _BudgetEditorSheetState extends State<_BudgetEditorSheet> {
     final label = cat['label'] as String? ?? 'Autre';
     final emoji = cat['emoji'] as String? ?? '📌';
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: TAPAColors.surface,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Row(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 18)),
+          Container(
+            width: 30,
+            height: 30,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: TAPAColors.navy.withOpacity(0.06),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(emoji, style: const TextStyle(fontSize: 15)),
+          ),
           const SizedBox(width: 10),
           Expanded(
             flex: 3,
-            child: Text(label, style: const TextStyle(color: TAPAColors.navy)),
+            child: Text(
+              label,
+              style: const TextStyle(color: TAPAColors.navy, fontWeight: FontWeight.w600, fontSize: 13.5),
+            ),
           ),
           Expanded(
             flex: 2,
@@ -674,11 +838,18 @@ class _BudgetEditorSheetState extends State<_BudgetEditorSheet> {
               controller: _controllers[id],
               keyboardType: TextInputType.number,
               textAlign: TextAlign.right,
+              style: const TextStyle(fontWeight: FontWeight.w700, color: TAPAColors.navy),
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: '0',
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                filled: true,
+                fillColor: TAPAColors.background,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
           ),
@@ -688,40 +859,93 @@ class _BudgetEditorSheetState extends State<_BudgetEditorSheet> {
   }
 }
 
+// ==========================================================
+// SUMMARY CARD
+// ==========================================================
+
 class _SummaryCard extends StatelessWidget {
   final String label;
   final double prevu;
   final double reel;
   final Color color;
+  final IconData icon;
 
   const _SummaryCard({
     required this.label,
     required this.prevu,
     required this.reel,
     required this.color,
+    required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
+    final progression = prevu > 0 ? (reel / prevu).clamp(0.0, 1.0) : 0.0;
+
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: TAPAColors.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: TAPAColors.border, width: 0.5),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 12, color: TAPAColors.textSecond)),
-          const SizedBox(height: 6),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 14, color: color),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    color: TAPAColors.textSecond,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           Text(
             reel.toStringAsFixed(0),
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color),
+            style: TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.w800,
+              color: TAPAColors.navy,
+              height: 1,
+            ),
           ),
+          const SizedBox(height: 3),
           Text(
             'sur ${prevu.toStringAsFixed(0)} prévu',
-            style: const TextStyle(fontSize: 11, color: TAPAColors.textSecond),
+            style: const TextStyle(fontSize: 11.5, color: TAPAColors.textSecond),
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: progression,
+              minHeight: 5,
+              backgroundColor: color.withOpacity(0.12),
+              color: color,
+            ),
           ),
         ],
       ),

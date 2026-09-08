@@ -39,7 +39,8 @@ class ScoreTAPA {
 
 class ScoreService {
   static Future<ScoreTAPA> calculer(DBService db) async {
-    final txs = db.getTransactions();
+    // ✅ CORRECTION: Ajouter await
+    final txs = await await db.getTransactions();
     final revenus = txs.where((t) => t.isRevenu).toList();
     final depenses = txs.where((t) => t.isDepense).toList();
     final epargnes = db.getSavingsGoals();

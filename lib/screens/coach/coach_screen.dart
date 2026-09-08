@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
+import '../../core/theme/app_theme.dart';
 import '../../services/db_service_mysql.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/logger.dart';
@@ -24,14 +24,15 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
   final List<Map<String, String>> _messages = [];
   bool _loading = false;
 
-  // ✅ AJOUTER VOTRE CLÉ API ANTHROPIC ICI
-  static const String _apiKey = 'YOUR_ANTHROPIC_API_KEY';
+  // ✅ UTILISER LA CLÉ DEPUIS .env
+  static String get _apiKey => dotenv.env['ANTHROPIC_API_KEY'] ?? '';
   static const String _model = 'claude-3-5-sonnet-20241022';
 
   @override
   void initState() {
     super.initState();
     _ajouterMessageBienvenue();
+    _verifierCleApi();
   }
 
   @override
@@ -39,6 +40,25 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
     _msgCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
+  }
+
+  // ✅ VÉRIFIER QUE LA CLÉ API EXISTE
+  void _verifierCleApi() {
+    if (_apiKey.isEmpty) {
+      Logger.warning('⚠️ ANTHROPIC_API_KEY non définie dans .env');
+      // ✅ CORRIGÉ : Pas de EnvService, on utilise directement _apiKey
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('⚠️ Mode simulation activé (Clé API manquante)'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } else {
+      Logger.info('✅ ANTHROPIC_API_KEY chargée avec succès');
+    }
   }
 
   Future<void> _ajouterMessageBienvenue() async {
@@ -73,8 +93,21 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
     final depMois = await _db.getTotalDepensesReelles(now.month, now.year);
     final revMois = await _db.getTotalRevenusReels(now.month, now.year);
     final soldeTotal = revMois - depMois;
-    final wallets = _db.getWallets();
+    final wallets = await _db.getWallets();
     final goals = _db.getSavingsGoals();
+
+    String walletsStr = '';
+    if (wallets.isNotEmpty) {
+      final walletStrings = <String>[];
+      for (final w in wallets) {
+        if (w != null) {
+          walletStrings.add('${w.nom ?? 'Inconnu'}: ${(w.solde ?? 0).toStringAsFixed(0)} $monnaie');
+        }
+      }
+      walletsStr = walletStrings.join(', ');
+    } else {
+      walletsStr = 'Aucun portefeuille';
+    }
 
     return '''Tu es TAPA Coach, un assistant financier personnel bienveillant et expert, 
 intégré dans l'application TAPA Budget pour l'Afrique de l'Ouest.
@@ -94,7 +127,7 @@ CONTEXTE UTILISATEUR :
 - Solde total : ${soldeTotal.toStringAsFixed(0)} $monnaie
 - Dépenses ce mois : ${depMois.toStringAsFixed(0)} $monnaie
 - Revenus ce mois : ${revMois.toStringAsFixed(0)} $monnaie
-- Portefeuilles : ${wallets.map((w) => '${w.nom}: ${w.solde.toStringAsFixed(0)} $monnaie').join(', ')}
+- Portefeuilles : $walletsStr
 - Objectifs épargne : ${goals.length} en cours
 
 RÈGLES :
@@ -108,6 +141,7 @@ RÈGLES :
 - Si l'utilisateur semble stressé, rassure-le d'abord avant les conseils''';
   }
 
+  // ✅ MÉTHODE _envoyer (CORRIGÉE)
   Future<void> _envoyer() async {
     final msg = _msgCtrl.text.trim();
     if (msg.isEmpty || _loading) return;
@@ -127,18 +161,20 @@ RÈGLES :
         ..._messages.map((m) => {'role': m['role']!, 'content': m['content']!}),
       ];
 
-      // ✅ VÉRIFIER SI LA CLÉ API EST CONFIGURÉE
-      if (_apiKey == 'YOUR_ANTHROPIC_API_KEY') {
+      // ✅ VÉRIFIER SI LA CLÉ API EXISTE
+      if (_apiKey.isEmpty) {
+        Logger.warning('⚠️ ANTHROPIC_API_KEY manquante - Utilisation du mode simulation');
         _reponseSimulee(msg);
         return;
       }
 
+      // ✅ APPEL API AVEC LA CLÉ DEPUIS .env
       final response = await http.post(
         Uri.parse('https://api.anthropic.com/v1/messages'),
         headers: {
           'Content-Type': 'application/json',
           'anthropic-version': '2023-06-01',
-          'x-api-key': _apiKey,  // ✅ CLÉ API
+          'x-api-key': _apiKey, // ✅ UTILISATION DE LA CLÉ .env
         },
         body: jsonEncode({
           'model': _model,
@@ -158,7 +194,14 @@ RÈGLES :
         _scrollToBottom();
       } else {
         final errorData = jsonDecode(response.body);
-        Logger.error('❌ API Erreur: ${response.statusCode} - ${errorData['error']['message']}');
+        final errorMessage = errorData['error']['message'] ?? 'Erreur inconnue';
+        Logger.error('❌ API Erreur: ${response.statusCode} - $errorMessage');
+
+        // ✅ GESTION D'ERREUR : Si erreur API, on utilise la simulation
+        if (response.statusCode == 401) {
+          Logger.error('❌ Clé API invalide ou expirée');
+          _showApiKeyError();
+        }
         _reponseSimulee(msg);
       }
     } catch (e) {
@@ -167,7 +210,19 @@ RÈGLES :
     }
   }
 
-  // ✅ RÉPONSE SIMULÉE (Mode Démo)
+  // ✅ AFFICHER UNE ERREUR SI LA CLÉ API EST INVALIDE
+  void _showApiKeyError() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('❌ Clé API Anthropic invalide. Vérifiez votre fichier .env'),
+        backgroundColor: TAPAColors.red,
+        duration: Duration(seconds: 4),
+      ),
+    );
+  }
+
+  // ✅ RÉPONSE SIMULÉE (AMÉLIORÉE)
   void _reponseSimulee(String msg) {
     final user = _db.getUser();
     final prenom = user?['prenom'] ?? 'Utilisateur';
@@ -189,7 +244,7 @@ RÈGLES :
           '✅ Utilisez la règle 50/30/20\n'
           '✅ Suivez vos dépenses en temps réel\n\n'
           'Avez-vous créé votre budget dans TAPA Budget ? 💪';
-    } else if (msg.contains('invest')) {
+    } else if (msg.contains('invest') || msg.contains('investissement')) {
       reponse = 'Bonjour $prenom ! 📈\n\n'
           'Investir est une excellente façon de faire fructifier votre argent.\n\n'
           '🌍 En Afrique de l\'Ouest, vous avez plusieurs options :\n'
@@ -197,7 +252,7 @@ RÈGLES :
           '- BRVM : actions cotées\n'
           '- Assurance vie : épargne + protection\n\n'
           'Quelle option vous intéresse ? 🚀';
-    } else if (msg.contains('assurance') || msg.contains('protég')) {
+    } else if (msg.contains('assurance') || msg.contains('protég') || msg.contains('protege')) {
       reponse = 'Bonjour $prenom ! 🛡️\n\n'
           'L\'assurance vie est un outil puissant pour protéger vos proches.\n\n'
           'Avec SONAM VIE, partenaire de TAPA Budget :\n'
@@ -205,6 +260,13 @@ RÈGLES :
           '✅ Assurance épargne : rendement garanti\n'
           '✅ Assurance éducation\n\n'
           'Quel type vous intéresse ? 💡';
+    } else if (msg.contains('dette') || msg.contains('credit') || msg.contains('crédit')) {
+      reponse = 'Bonjour $prenom ! 💳\n\n'
+          'Gérer ses dettes est essentiel pour une santé financière solide.\n\n'
+          '✅ Priorisez les dettes avec les taux d\'intérêt les plus élevés\n'
+          '✅ Utilisez la méthode "boule de neige" (remboursez la plus petite dette d\'abord)\n'
+          '✅ N\'accumulez pas de nouvelles dettes\n\n'
+          'Quelles dettes souhaitez-vous rembourser en priorité ? 📊';
     } else {
       reponse = 'Bonjour $prenom ! 👋\n\n'
           'Je suis TAPA Coach, votre assistant financier personnel.\n\n'
@@ -238,6 +300,8 @@ RÈGLES :
 
   @override
   Widget build(BuildContext context) {
+    final hasApiKey = _apiKey.isNotEmpty;
+
     return Scaffold(
         backgroundColor: TAPAColors.background,
         appBar: AppBar(
@@ -261,7 +325,36 @@ RÈGLES :
             foregroundColor: TAPAColors.white,
             leading: IconButton(
                 icon: const Icon(Icons.arrow_back_ios),
-                onPressed: () => Navigator.pop(context))),
+                onPressed: () => Navigator.pop(context)),
+            // ✅ INDICATEUR DE STATUT API
+            actions: [
+              Container(
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: hasApiKey ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      hasApiKey ? Icons.check_circle : Icons.warning,
+                      size: 12,
+                      color: hasApiKey ? Colors.green : Colors.red,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      hasApiKey ? 'API OK' : 'Mode simulation',
+                      style: TextStyle(
+                        fontSize: 9,
+                        color: hasApiKey ? Colors.green : Colors.red,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ]),
         body: Column(children: [
           if (_messages.length <= 1)
             Container(
@@ -305,7 +398,7 @@ RÈGLES :
                     maxLines: 3,
                     minLines: 1,
                     decoration: InputDecoration(
-                        hintText: 'Posez votre question...',
+                        hintText: hasApiKey ? 'Posez votre question...' : 'Mode simulation...',
                         hintStyle: const TextStyle(
                             color: TAPAColors.textHint),
                         border: OutlineInputBorder(

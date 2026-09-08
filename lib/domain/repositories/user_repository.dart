@@ -1,7 +1,9 @@
 // lib/domain/repositories/user_repository.dart
 
-import '../../data/models/user.dart';  // ← Import correct
+import '../../data/models/models.dart';
 
+/// Interface du repository utilisateur (legacy)
+/// À déprécier au profit de IUserRepository
 abstract class UserRepository {
   // ============================================
   // AUTHENTIFICATION

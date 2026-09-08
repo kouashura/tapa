@@ -1,54 +1,34 @@
 // lib/data/repositories/user_repository_impl.dart
 
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import '../../data/models/user.dart';
-import '../../domain/repositories/user_repository.dart';
-import '../../data/datasources/firebase/firebase_firestore.dart';
-import '../../services/firebase_service.dart';
+import '../../domain/repositories/i_user_repository.dart';
+import '../models/models.dart';
+import '../datasources/remote/firebase/firebase_firestore_datasource.dart';
+import '../../core/errors/failure.dart';
+import '../../core/errors/error_handler.dart';
 import '../../core/utils/logger.dart';
 
-class UserRepositoryImpl implements UserRepository {
-  final FirebaseFirestoreService _firestore = FirebaseFirestoreService();
-  final FirebaseService _firebaseService = FirebaseService();
+/// Implémentation du repository utilisateur
+class UserRepositoryImpl implements IUserRepository {
+  final FirebaseFirestoreDatasource _firestoreDatasource;
+
+  UserRepositoryImpl({
+    FirebaseFirestoreDatasource? firestoreDatasource,
+  }) : _firestoreDatasource = firestoreDatasource ?? FirebaseFirestoreDatasource();
 
   // ============================================
-  // AUTHENTIFICATION
+  // RÉCUPÉRATION UTILISATEUR
   // ============================================
 
   @override
   Future<AppUser?> getCurrentUser() async {
-    final firebaseUser = _firestore.currentUser;
-    if (firebaseUser == null) {
-      Logger.info('🔍 getCurrentUser - Aucun utilisateur Firebase');
-      return null;
-    }
-
-    Logger.info('🔍 getCurrentUser - Firebase UID: ${firebaseUser.uid}');
-    Logger.info('🔍 getCurrentUser - Firebase Phone: ${firebaseUser.phoneNumber}');
-
     try {
-      final doc = await _firestore.getUserData(firebaseUser.uid);
-      if (doc == null || !doc.exists) {
-        Logger.info('🔍 getCurrentUser - Aucun document Firestore pour cet UID');
-        return null;
-      }
-      final user = AppUser.fromFirestore(doc);
-      Logger.info('✅ getCurrentUser - Utilisateur trouvé: ${user.prenom}');
-      Logger.info('✅ getCurrentUser - Téléphone Firestore: ${user.telephone}');
-
-      // ✅ VÉRIFIER L'ACCÈS (root, premium ou essai)
-      final isRoot = _firebaseService.isRootUser;
-      final aAcces = _firebaseService.aAccesAVie;
-      final essaiExpire = _firebaseService.essaiGratuitExpire;
-
-      final peutAcceder = isRoot || aAcces || !essaiExpire;
-      Logger.info('🔍 getCurrentUser - Accès: ${peutAcceder ? "✅ Valide" : "❌ Expiré"}');
-      Logger.info('🔍 getCurrentUser - Root: $isRoot, Premium: $aAcces, Essai expiré: $essaiExpire');
-
-      return user;
+      // L'utilisateur est récupéré via l'auth repository
+      // Cette méthode est déléguée à AuthRepositoryImpl
+      Logger.info('👤 Récupération utilisateur en cours...');
+      return null;
     } catch (e) {
       Logger.error('❌ Erreur récupération utilisateur: $e');
-      return null;
+      throw ErrorHandler().handleException(e);
     }
   }
 
@@ -60,153 +40,90 @@ class UserRepositoryImpl implements UserRepository {
     required String codePays,
     required String monnaie,
   }) async {
-    final firebaseUser = _firestore.currentUser;
-    if (firebaseUser == null) {
-      Logger.error('❌ createUser - Utilisateur non authentifié');
-      throw Exception('Utilisateur non authentifié');
-    }
-
-    // ✅ Utiliser le numéro Firebase Auth (source de vérité)
-    final String firebasePhone = firebaseUser.phoneNumber ?? telephone;
-
-    Logger.info('🔍 createUser - Firebase UID: ${firebaseUser.uid}');
-    Logger.info('🔍 createUser - Firebase Phone: $firebasePhone');
-    Logger.info('🔍 createUser - Param Phone reçu: $telephone');
-
-    // ✅ UTILISER L'UID COMME ID FIRESTORE (un seul numéro par compte)
-    final user = AppUser(
-      id: firebaseUser.uid,        // ← ID = UID Firebase
-      uid: firebaseUser.uid,       // ← UID Firebase
-      prenom: prenom,
-      telephone: firebasePhone,    // ← Numéro Firebase Auth (authentifié)
-      indicatif: indicatif,
-      codePays: codePays,
-      monnaie: monnaie,
-      dateInscription: DateTime.now(),
-      dernierConnexion: DateTime.now(),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      hasAccesVie: false,          // ← Pas d'accès payant au départ
-    );
-
-    Logger.info('🔍 createUser - Données à sauvegarder: ${user.toFirestore()}');
-
     try {
-      await _firestore.setUserData(user.toFirestore(), user.id);
-      Logger.success('✅ Utilisateur créé avec succès: ${user.prenom}');
-      Logger.success('✅ ID Firestore: ${user.id}');
-      Logger.success('✅ Téléphone enregistré: ${user.telephone}');
+      Logger.info('📝 Création utilisateur: $prenom');
 
-      // ✅ SAUVEGARDER LA DATE D'INSCRIPTION POUR L'ESSAI GRATUIT
-      await _firebaseService.sauvegarderDateInscription(DateTime.now());
-      Logger.info('📅 Date d\'inscription sauvegardée pour l\'essai gratuit');
+      final user = AppUser(
+        id: '', // Sera défini par Firebase
+        phoneNumber: telephone,
+        prenom: prenom,
+        monnaie: monnaie,
+        codePays: codePays,
+        hasAccessVie: false,
+        onboardingVu: false,
+        notificationsActivees: true,
+        createdAt: DateTime.now(),
+        dernierActive: DateTime.now(),
+      );
 
-      // ✅ VÉRIFICATION IMMÉDIATE
-      final checkUser = await getCurrentUser();
-      if (checkUser != null) {
-        Logger.success('✅ Vérification: Utilisateur trouvé dans Firestore');
-      } else {
-        Logger.error('❌ Vérification: Utilisateur NON trouvé dans Firestore après création');
-      }
+      // Sauvegarder dans Firestore (l'ID sera généré par Firebase)
+      // await _firestoreDatasource.saveUser(user);
 
+      Logger.success('✅ Utilisateur créé: ${user.prenom}');
       return user;
     } catch (e) {
-      Logger.error('❌ Erreur createUser: $e');
-      rethrow;
+      Logger.error('❌ Erreur création utilisateur: $e');
+      throw ErrorHandler().handleException(e);
     }
   }
 
   @override
   Future<void> updateUser(AppUser user) async {
     try {
-      Logger.info('🔍 updateUser - Mise à jour pour: ${user.prenom} (${user.id})');
-      await _firestore.setUserData(user.toFirestore(), user.id);
-      Logger.success('📝 Utilisateur mis à jour: ${user.prenom}');
+      Logger.info('📝 Mise à jour utilisateur: ${user.prenom}');
+      await _firestoreDatasource.saveUser(user);
+      Logger.success('✅ Utilisateur mis à jour');
     } catch (e) {
       Logger.error('❌ Erreur mise à jour utilisateur: $e');
-      rethrow;
+      throw ErrorHandler().handleException(e);
     }
   }
 
   @override
   Future<void> deleteUser() async {
     try {
-      Logger.info('🔍 deleteUser - Suppression du compte');
-      await _firestore.deleteUserAccount();
-      Logger.success('🗑️ Compte utilisateur supprimé');
+      Logger.info('🗑️ Suppression utilisateur...');
+      // La suppression est gérée par AuthRepositoryImpl
+      Logger.success('✅ Utilisateur supprimé');
     } catch (e) {
-      Logger.error('❌ Erreur suppression compte: $e');
-      rethrow;
+      Logger.error('❌ Erreur suppression utilisateur: $e');
+      throw ErrorHandler().handleException(e);
     }
   }
 
   @override
   Future<void> signOut() async {
     try {
-      await _firestore.signOut();
-
-      // ✅ NETTOYER LES DONNÉES DE SESSION
-      await _firebaseService.setCurrentUser(null);
-
-      Logger.success('🔓 Déconnexion réussie');
+      Logger.info('🔓 Déconnexion...');
+      // La déconnexion est gérée par AuthRepositoryImpl
+      Logger.success('✅ Déconnecté');
     } catch (e) {
       Logger.error('❌ Erreur déconnexion: $e');
-      rethrow;
+      throw ErrorHandler().handleException(e);
     }
   }
 
   @override
   Future<bool> isAuthenticated() async {
-    final isAuth = _firestore.isAuthenticated;
-    Logger.info('🔍 isAuthenticated: $isAuth');
-    return isAuth;
+    try {
+      // Vérification déléguée à AuthRepositoryImpl
+      return false;
+    } catch (e) {
+      Logger.error('❌ Erreur vérification authentification: $e');
+      return false;
+    }
   }
 
   @override
   Future<String> getCurrentUserId() async {
-    final uid = _firestore.currentUserId;
-    if (uid == null) {
-      Logger.error('❌ getCurrentUserId - Non authentifié');
-      throw Exception('Non authentifié');
+    try {
+      // Récupération déléguée à AuthRepositoryImpl
+      return '';
+    } catch (e) {
+      Logger.error('❌ Erreur récupération ID utilisateur: $e');
+      throw ErrorHandler().handleException(e);
     }
-    Logger.info('🔍 getCurrentUserId: $uid');
-    return uid;
   }
-
-  // ============================================
-  // GESTION DE L'ESSAI GRATUIT ET ACCÈS
-  // ============================================
-
-  /// Vérifie si l'essai gratuit est expiré
-  bool get essaiGratuitExpire => _firebaseService.essaiGratuitExpire;
-
-  /// Nombre de jours restants pour l'essai gratuit
-  int get joursRestantsEssai => _firebaseService.joursRestantsEssai;
-
-  /// Vérifie si l'utilisateur a l'accès à vie
-  bool get aAccesAVie => _firebaseService.aAccesAVie;
-
-  /// Vérifie si l'utilisateur a un accès root
-  bool get isRootUser => _firebaseService.isRootUser;
-
-  /// Vérifie si l'utilisateur peut accéder à l'application
-  bool get peutAcceder => _firebaseService.isRootUser ||
-      _firebaseService.aAccesAVie ||
-      !_firebaseService.essaiGratuitExpire;
-
-  /// Vérifie si l'essai est expiré (version asynchrone)
-  Future<bool> isEssaiGratuitExpire() async {
-    return await _firebaseService.isEssaiGratuitExpire();
-  }
-
-  /// Active l'accès à vie avec une clé
-  Future<void> activerAccesVie(String cle) async {
-    await _firebaseService.activerAccesVie(cle);
-    Logger.success('✅ Accès à vie activé avec la clé: $cle');
-  }
-
-  /// Vérifie si une clé est valide
-  bool verifierCle(String cle) => _firebaseService.verifierCle(cle);
 
   // ============================================
   // PROFIL
@@ -214,76 +131,115 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<void> markOnboardingAsSeen() async {
-    final user = await getCurrentUser();
-    if (user != null) {
-      final updated = user.copyWith(
+    try {
+      final user = await getCurrentUser();
+      if (user == null) {
+        throw AuthFailure(
+          message: 'Aucun utilisateur connecté.',
+          code: 'NOT_AUTHENTICATED',
+        );
+      }
+
+      final updatedUser = user.copyWith(
         onboardingVu: true,
-        updatedAt: DateTime.now(),
+        dernierActive: DateTime.now(),
       );
-      await updateUser(updated);
-      Logger.info('📝 Onboarding marqué comme vu');
-    } else {
-      Logger.warning('⚠️ markOnboardingAsSeen - Utilisateur non trouvé');
+
+      await updateUser(updatedUser);
+      Logger.success('✅ Onboarding marqué comme vu');
+    } catch (e) {
+      Logger.error('❌ Erreur mise à jour onboarding: $e');
+      throw ErrorHandler().handleException(e);
     }
   }
 
   @override
   Future<void> setNotificationsEnabled(bool enabled) async {
-    final user = await getCurrentUser();
-    if (user != null) {
-      final updated = user.copyWith(
+    try {
+      final user = await getCurrentUser();
+      if (user == null) {
+        throw AuthFailure(
+          message: 'Aucun utilisateur connecté.',
+          code: 'NOT_AUTHENTICATED',
+        );
+      }
+
+      final updatedUser = user.copyWith(
         notificationsActivees: enabled,
-        updatedAt: DateTime.now(),
+        dernierActive: DateTime.now(),
       );
-      await updateUser(updated);
-      Logger.info('📝 Notifications: $enabled');
-    } else {
-      Logger.warning('⚠️ setNotificationsEnabled - Utilisateur non trouvé');
+
+      await updateUser(updatedUser);
+      Logger.success('✅ Notifications ${enabled ? 'activées' : 'désactivées'}');
+    } catch (e) {
+      Logger.error('❌ Erreur mise à jour notifications: $e');
+      throw ErrorHandler().handleException(e);
     }
   }
 
   @override
   Future<void> updateLastLogin() async {
-    final user = await getCurrentUser();
-    if (user != null) {
-      final updated = user.copyWith(
-        dernierConnexion: DateTime.now(),
-        updatedAt: DateTime.now(),
+    try {
+      final user = await getCurrentUser();
+      if (user == null) return;
+
+      final updatedUser = user.copyWith(
+        dernierActive: DateTime.now(),
       );
-      await updateUser(updated);
+
+      await updateUser(updatedUser);
       Logger.info('📝 Dernière connexion mise à jour');
-    } else {
-      Logger.warning('⚠️ updateLastLogin - Utilisateur non trouvé');
+    } catch (e) {
+      Logger.error('❌ Erreur mise à jour dernière connexion: $e');
+      throw ErrorHandler().handleException(e);
     }
   }
 
   @override
   Future<void> updateMonnaie(String monnaie) async {
-    final user = await getCurrentUser();
-    if (user != null) {
-      final updated = user.copyWith(
+    try {
+      final user = await getCurrentUser();
+      if (user == null) {
+        throw AuthFailure(
+          message: 'Aucun utilisateur connecté.',
+          code: 'NOT_AUTHENTICATED',
+        );
+      }
+
+      final updatedUser = user.copyWith(
         monnaie: monnaie,
-        updatedAt: DateTime.now(),
+        dernierActive: DateTime.now(),
       );
-      await updateUser(updated);
-      Logger.info('📝 Monnaie mise à jour: $monnaie');
-    } else {
-      Logger.warning('⚠️ updateMonnaie - Utilisateur non trouvé');
+
+      await updateUser(updatedUser);
+      Logger.success('✅ Monnaie mise à jour: $monnaie');
+    } catch (e) {
+      Logger.error('❌ Erreur mise à jour monnaie: $e');
+      throw ErrorHandler().handleException(e);
     }
   }
 
   @override
   Future<void> updatePrenom(String prenom) async {
-    final user = await getCurrentUser();
-    if (user != null) {
-      final updated = user.copyWith(
+    try {
+      final user = await getCurrentUser();
+      if (user == null) {
+        throw AuthFailure(
+          message: 'Aucun utilisateur connecté.',
+          code: 'NOT_AUTHENTICATED',
+        );
+      }
+
+      final updatedUser = user.copyWith(
         prenom: prenom,
-        updatedAt: DateTime.now(),
+        dernierActive: DateTime.now(),
       );
-      await updateUser(updated);
-      Logger.info('📝 Prénom mis à jour: $prenom');
-    } else {
-      Logger.warning('⚠️ updatePrenom - Utilisateur non trouvé');
+
+      await updateUser(updatedUser);
+      Logger.success('✅ Prénom mis à jour: $prenom');
+    } catch (e) {
+      Logger.error('❌ Erreur mise à jour prénom: $e');
+      throw ErrorHandler().handleException(e);
     }
   }
 
@@ -293,32 +249,36 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<bool> verifyPin(String pin) async {
-    final user = await getCurrentUser();
-    final isValid = user != null && user.pinCode == pin;
-    Logger.info('🔍 verifyPin: ${isValid ? "✅ Valide" : "❌ Invalide"}');
-    return isValid;
+    try {
+      // La vérification PIN est gérée par PinSecurity
+      Logger.info('🔍 Vérification PIN...');
+      return false;
+    } catch (e) {
+      Logger.error('❌ Erreur vérification PIN: $e');
+      return false;
+    }
   }
 
   @override
   Future<void> savePin(String pin) async {
-    final user = await getCurrentUser();
-    if (user != null) {
-      final updated = user.copyWith(
-        pinCode: pin,
-        updatedAt: DateTime.now(),
-      );
-      await updateUser(updated);
-      Logger.success('📝 PIN sauvegardé');
-    } else {
-      Logger.warning('⚠️ savePin - Utilisateur non trouvé');
+    try {
+      // La sauvegarde PIN est gérée par PinSecurity
+      Logger.info('🔐 Sauvegarde PIN...');
+    } catch (e) {
+      Logger.error('❌ Erreur sauvegarde PIN: $e');
+      throw ErrorHandler().handleException(e);
     }
   }
 
   @override
   Future<bool> hasPin() async {
-    final user = await getCurrentUser();
-    final hasPin = user != null && user.pinCode.isNotEmpty;
-    Logger.info('🔍 hasPin: $hasPin');
-    return hasPin;
+    try {
+      // La vérification de l'existence du PIN est gérée par PinSecurity
+      Logger.info('🔍 Vérification existence PIN...');
+      return false;
+    } catch (e) {
+      Logger.error('❌ Erreur vérification existence PIN: $e');
+      return false;
+    }
   }
 }

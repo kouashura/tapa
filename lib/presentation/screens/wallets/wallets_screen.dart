@@ -2,24 +2,36 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../theme/app_theme.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/wallet_provider.dart';
-import '../../../data/models/wallet_model.dart';  // ✅ Import correct
+import 'package:go_router/go_router.dart';
+import '../../../core/theme/app_theme.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';
+import '../../providers/wallet/wallet_provider.dart';
+import '../../../data/models/models.dart';
 import '../../../core/utils/formatters.dart';
 import 'add_wallet_screen.dart';
 
-class WalletsScreen extends ConsumerWidget {
+class WalletsScreen extends ConsumerStatefulWidget {
   const WalletsScreen({super.key});
 
-  void _ajouter(BuildContext context) {
+  @override
+  ConsumerState<WalletsScreen> createState() => _WalletsScreenState();
+}
+
+class _WalletsScreenState extends ConsumerState<WalletsScreen> {
+  void _ajouter() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const AddWalletScreen()),
-    );
+    ).then((_) {
+      // Rafraîchir la liste après l'ajout
+      final user = ref.read(currentUserProvider);
+      if (user != null) {
+        ref.refresh(walletListProvider(user.id));
+      }
+    });
   }
 
-  void _modifier(BuildContext context, WalletModel w) {
+  void _modifier(WalletModel w) {
     // TODO: Implémenter l'écran de modification
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Modifier: ${w.nom}')),
@@ -27,7 +39,7 @@ class WalletsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final monnaie = ref.watch(userMonnaieProvider);
 
@@ -48,7 +60,7 @@ class WalletsScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add_circle_outline, color: Color(0xFFFFC107)),
-            onPressed: () => _ajouter(context),
+            onPressed: _ajouter,
           ),
         ],
       ),
@@ -180,7 +192,7 @@ class WalletsScreen extends ConsumerWidget {
                       IconButton(
                         icon: const Icon(Icons.edit_outlined,
                             color: Color(0xFF1A237E), size: 20),
-                        onPressed: () => _modifier(context, w),
+                        onPressed: () => _modifier(w),
                       ),
                     ],
                   ),
@@ -188,7 +200,7 @@ class WalletsScreen extends ConsumerWidget {
 
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
-                  onPressed: () => _ajouter(context),
+                  onPressed: _ajouter,
                   icon: const Icon(Icons.add),
                   label: const Text('Ajouter un portefeuille'),
                   style: OutlinedButton.styleFrom(

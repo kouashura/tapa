@@ -33,3 +33,7 @@ google-services.json
 *.log
 *.pid
 *.tmp
+
+# Android signing files
+upload-keystore.jks
+upload_certificate.pem

@@ -3,12 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
-import '../../data/models/epargne_programmee_model.dart';
+import '../../core/theme/app_theme.dart';
+import '../../data/models/models.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/logger.dart';
 import '../../services/link_service.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';  // ✅ IMPORT AJOUTÉ
 
 class EpargneProgrammeeScreen extends ConsumerStatefulWidget {
   const EpargneProgrammeeScreen({super.key});
@@ -29,7 +29,6 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
 
   Future<void> _charger() async {
     // TODO: Remplacer par un provider
-    // _epargnes = await ref.read(epargneProgrammeeListProvider.future);
     setState(() {});
   }
 
@@ -53,6 +52,7 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
       return;
     }
 
+    // ✅ CORRECTION: Utiliser userMonnaieProvider
     final monnaie = ref.watch(userMonnaieProvider);
 
     final ok = await showDialog<bool>(
@@ -86,7 +86,6 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
     if (ok == true) {
       try {
         // TODO: Utiliser un provider
-        // await ref.read(epargneRepositoryProvider).effectuerDepot(ep);
         _charger();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -157,7 +156,6 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
                   Navigator.pop(ctx);
                   final epMaj = ep.copyWith(verrouille: false);
                   // TODO: Utiliser un provider
-                  // await ref.read(epargneRepositoryProvider).saveEpargneProgrammee(epMaj);
                   _charger();
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -213,13 +211,13 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
     );
     if (ok == true) {
       // TODO: Utiliser un provider
-      // await ref.read(epargneRepositoryProvider).deleteEpargneProgrammee(ep.id);
       _charger();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // ✅ CORRECTION: Utiliser userMonnaieProvider
     final monnaie = ref.watch(userMonnaieProvider);
 
     return Scaffold(

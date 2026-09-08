@@ -3,10 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
-import '../../data/models/models.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';
+import '../../core/theme/app_theme.dart';
+
+import '../../data/models/models.dart';  // ✅ CORRIGÉ
 import '../../core/utils/formatters.dart';
 import '../../core/utils/constants.dart';
 import '../../core/utils/logger.dart';
@@ -190,12 +190,11 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   child: ElevatedButton(
                     onPressed: () async {
                       final montant = double.tryParse(ctrl.text) ?? tx.montant;
+                      // ✅ CORRECTION : Utiliser le bon constructeur
                       final nouvelle = TransactionModel(
                         id: tx.id,
-                        uuid: tx.uuid,
-                        utilisateurId: tx.utilisateurId,
-                        portefeuilleId: tx.portefeuilleId,
-                        portefeuilleDestId: tx.portefeuilleDestId,
+                        uid: tx.uid,
+                        walletId: tx.walletId,
                         montant: montant,
                         type: tx.type,
                         categorieId: selCat,
@@ -470,19 +469,20 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               itemCount: txs.length,
               itemBuilder: (ctx, i) {
                 final tx = txs[i];
+                // ✅ CORRECTION : Utiliser walletId pour trouver le wallet
                 final wallet = _wallets.firstWhere(
-                      (w) => w.id == tx.portefeuilleId,
+                      (w) => w.id == tx.walletId,
                   orElse: () => _wallets.isNotEmpty ? _wallets.first : WalletModel(
-                    id: null,
-                    uuid: '',
-                    utilisateurId: 0,
+                    id: '',
+                    uid: '',
                     nom: 'Inconnu',
-                    type: 'compte',
                     emoji: '💰',
+                    type: 'compte',
                     solde: 0,
-                    seuilAlerte: 5000,
-                    updatedAt: DateTime.now(),
+                    monnaie: monnaie,
+                    description: '',
                     createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
                   ),
                 );
                 return Container(

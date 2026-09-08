@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
+import '../../core/theme/app_theme.dart';  // ✅ CHEMIN CORRIGÉ
 import '../../services/db_service_mysql.dart';
-import '../../core/utils/formatters.dart';  // ← Changé de '../../core/utils/formatters.dart'
-import '../../models/models.dart';
+import '../../core/utils/formatters.dart';
+import '../../data/models/models.dart';
 import 'dart:math' as math;
 
 class AnalyseScreen extends StatefulWidget {
@@ -19,10 +19,15 @@ class _AnalyseScreenState extends State<AnalyseScreen>
   late TabController _tabController;
   final DBService _db = DBService();
 
+  // ✅ Cache pour les transactions
+  List<TransactionModel> _allTransactions = [];
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _loadData();
   }
 
   @override
@@ -31,18 +36,30 @@ class _AnalyseScreenState extends State<AnalyseScreen>
     super.dispose();
   }
 
-  // Obtenir transactions du mois
+  // ✅ Charger toutes les transactions une fois
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+    try {
+      _allTransactions = await _db.getTransactions();
+    } catch (e) {
+      print('Erreur chargement transactions: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // ✅ CORRIGÉ : Obtenir transactions du mois
   List<TransactionModel> _txDuMois(int mois, int annee) {
-    return _db.getTransactions().where((t) =>
-    t.dateTransaction.month == mois &&
+    return _allTransactions.where((t) =>
+        t.dateTransaction.month == mois &&
         t.dateTransaction.year == annee &&
         t.isDepense).toList();
   }
 
-  // Obtenir transactions de l annee
+  // ✅ CORRIGÉ : Obtenir transactions de l'année
   List<TransactionModel> _txAnnee(int annee) {
-    return _db.getTransactions().where((t) =>
-    t.dateTransaction.year == annee && t.isDepense).toList();
+    return _allTransactions.where((t) =>
+        t.dateTransaction.year == annee && t.isDepense).toList();
   }
 
   // Grouper par categorie
@@ -61,7 +78,8 @@ class _AnalyseScreenState extends State<AnalyseScreen>
   Map<int, double> _parMois(int annee) {
     final map = <int, double>{};
     for (int m = 1; m <= 12; m++) map[m] = 0;
-    for (final tx in _txAnnee(annee)) {
+    final transactions = _txAnnee(annee);
+    for (final tx in transactions) {
       map[tx.dateTransaction.month] = (map[tx.dateTransaction.month] ?? 0) + tx.montant;
     }
     return map;
@@ -95,6 +113,13 @@ class _AnalyseScreenState extends State<AnalyseScreen>
     final now = DateTime.now();
     final user = _db.getUser();
     final monnaie = user?['monnaie'] ?? 'FCFA';
+
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: TAPAColors.background,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
         backgroundColor: TAPAColors.background,
@@ -142,8 +167,12 @@ class _AnalyseScreenState extends State<AnalyseScreen>
     final total = totalCourant > 0 ? totalCourant : 1;
 
     final colors = [
-      TAPAColors.red, TAPAColors.gold, TAPAColors.purple,
-      TAPAColors.green, TAPAColors.navy, const Color(0xFFE67E22),
+      TAPAColors.red,
+      TAPAColors.gold,
+      TAPAColors.purple,
+      TAPAColors.green,
+      TAPAColors.navy,
+      const Color(0xFFE67E22),
     ];
 
     return ListView(
@@ -298,8 +327,12 @@ class _AnalyseScreenState extends State<AnalyseScreen>
         : parMois.values.reduce(math.max);
 
     final colors = [
-      TAPAColors.red, TAPAColors.gold, TAPAColors.purple,
-      TAPAColors.green, TAPAColors.navy, const Color(0xFFE67E22),
+      TAPAColors.red,
+      TAPAColors.gold,
+      TAPAColors.purple,
+      TAPAColors.green,
+      TAPAColors.navy,
+      const Color(0xFFE67E22),
     ];
 
     return ListView(

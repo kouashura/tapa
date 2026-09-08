@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import '../../theme/app_theme.dart';
+import '../../core/theme/app_theme.dart';
 import '../../services/db_service_mysql.dart';
-import '../../models/models.dart';
-import '../../core/utils/formatters.dart';  // ← Changé de '../../utils/formatters.dart'
-import '../../core/utils/constants.dart';   // ← Changé de '../../utils/constants.dart'
-
+import '../../data/models/models.dart';
+import '../../core/utils/formatters.dart';
+import '../../core/utils/constants.dart';
 
 class VoiceTransactionScreen extends StatefulWidget {
   const VoiceTransactionScreen({super.key});
@@ -26,15 +25,32 @@ class _VoiceTransactionScreenState
   TransactionType _type = TransactionType.depense;
   String _categorieId = 'autre';
   String _categorieLabel = 'Autre';
-  String _categorieEmoji = 'autre';
-  int? _walletId;
+  String _categorieEmoji = '📌';
+  String? _walletId;
+
+  // ✅ État pour les portefeuilles
+  List<WalletModel> _wallets = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _initSpeech();
-    final wallets = _db.getWallets();
-    if (wallets.isNotEmpty) _walletId = wallets.first.id;
+    _initWallet();
+  }
+
+  // ✅ CORRIGÉ : async + await
+  Future<void> _initWallet() async {
+    try {
+      final wallets = await _db.getWallets();
+      setState(() {
+        _wallets = wallets.where((w) => w != null).cast<WalletModel>().toList();
+        if (_wallets.isNotEmpty) _walletId = _wallets.first.id;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _initSpeech() async {
@@ -62,7 +78,7 @@ class _VoiceTransactionScreenState
       _isListening = true;
       _texteReconnu = '';
       _montant = null;
-      _statut = 'J ecoute... Parle maintenant !';
+      _statut = 'J écoute... Parle maintenant !';
     });
     await _speech.listen(
       onResult: (result) {
@@ -175,14 +191,11 @@ class _VoiceTransactionScreenState
     if (_montant == null || _walletId == null) return;
     try {
       final userId = _db.getCurrentUserId();
-      final int utilisateurId = userId != null ? int.tryParse(userId) ?? 1 : 1;
 
       final tx = TransactionModel(
-        id: null,
-        uuid: Fmt.genId(),
-        utilisateurId: utilisateurId,
-        portefeuilleId: _walletId!,
-        portefeuilleDestId: null,
+        id: Fmt.genId(),
+        uid: userId ?? '',
+        walletId: _walletId!,
         montant: _montant!,
         type: _type,
         categorieId: _categorieId,
@@ -213,15 +226,32 @@ class _VoiceTransactionScreenState
 
   @override
   Widget build(BuildContext context) {
-    final wallets = _db.getWallets();
     final user = _db.getUser();
     final monnaie = user?['monnaie'] ?? 'FCFA';
     final isRevenu = _type == TransactionType.revenu;
+
+    // ✅ Utiliser _wallets déjà chargé
+    final wallets = _wallets;
 
     final userCats = _db.getCategories();
     final cats = isRevenu
         ? userCats.where((c) => c['type'] == 'revenu').toList()
         : userCats.where((c) => c['type'] == 'depense' || c['type'] == 'dépense').toList();
+
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: TAPAColors.navy,
+        appBar: AppBar(
+          backgroundColor: TAPAColors.navy,
+          foregroundColor: TAPAColors.white,
+          title: const Text('Dictee vocale'),
+          leading: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(false)),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
         backgroundColor: TAPAColors.navy,
@@ -351,7 +381,7 @@ class _VoiceTransactionScreenState
                                 }),
                           const SizedBox(height: 8),
 
-                          DropdownButtonFormField<int>(
+                          DropdownButtonFormField<String>(
                               isExpanded: true,
                               value: _walletId,
                               decoration: const InputDecoration(
@@ -361,9 +391,9 @@ class _VoiceTransactionScreenState
                                       horizontal: 12, vertical: 8)),
                               items: wallets.map((w) {
                                 final solde = Fmt.montant(w.solde, monnaie: monnaie);
-                                return DropdownMenuItem<int>(
-                                    value: w.id!,
-                                    child: Text('${w.emoji} ${w.nom} ($solde)',
+                                return DropdownMenuItem<String>(
+                                    value: w.id,
+                                    child: Text('${w.emoji ?? '💳'} ${w.nom ?? 'Portefeuille'} ($solde)',
                                         overflow: TextOverflow.ellipsis));
                               }).toList(),
                               onChanged: (v) => setState(() => _walletId = v)),

@@ -1,0 +1,207 @@
+<!-- public/index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TAPA Budget - Vérification</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #1A237E, #0D1444);
+            color: white;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .logo span { color: #FFD700; }
+        .subtitle {
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .loader {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #FFD700;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .message {
+            font-size: 16px;
+            margin: 20px 0;
+            color: rgba(255,255,255,0.8);
+        }
+        .btn {
+            background: #FFD700;
+            color: #1A237E;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .btn:hover { transform: scale(1.02); }
+        .btn:active { transform: scale(0.98); }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+        }
+        .status {
+            color: #FFD700;
+            font-weight: 600;
+            margin: 10px 0;
+            min-height: 24px;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="logo">TAPA <span>Budget</span></div>
+    <div class="subtitle">Votre coach financier intelligent</div>
+    <div class="loader" id="loader"></div>
+    <div class="message" id="message">✅ Vérification en cours...</div>
+    <div class="status" id="status"></div>
+
+    <button class="btn" id="openAppBtn" style="display:none;">📱 Ouvrir l'application</button>
+    <button class="btn btn-secondary" id="retryBtn" style="display:none;">🔄 Réessayer</button>
+
+    <div class="footer">© 2024 TAPA Budget</div>
+</div>
+
+<script>
+    // ✅ Fonction pour ouvrir l'application
+    function openApp() {
+        // Méthode 1: Schéma personnalisé
+        window.location.href = 'tapa-budget://verify';
+
+        // Méthode 2: Firebase Hosting (fallback)
+        setTimeout(() => {
+            window.location.href = 'https://tapa-budget-6ed7c.web.app';
+        }, 2000);
+    }
+
+    // ✅ Tentatives multiples
+    let attempts = 0;
+    const maxAttempts = 3;
+    const statusEl = document.getElementById('status');
+    const loaderEl = document.getElementById('loader');
+    const messageEl = document.getElementById('message');
+    const openBtn = document.getElementById('openAppBtn');
+    const retryBtn = document.getElementById('retryBtn');
+
+    function tryOpenApp() {
+        attempts++;
+        statusEl.textContent = `🔄 Tentative ${attempts}/${maxAttempts}...`;
+
+        // Essayer d'ouvrir l'app
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = 'tapa-budget://verify';
+        document.body.appendChild(iframe);
+
+        setTimeout(() => {
+            document.body.removeChild(iframe);
+        }, 1000);
+    }
+
+    // ✅ Démarrer le processus
+    setTimeout(() => {
+        tryOpenApp();
+    }, 500);
+
+    // ✅ Si après 5 secondes l'app ne s'est pas ouverte
+    setTimeout(() => {
+        statusEl.textContent = '💡 L\'application ne s\'est pas ouverte ?';
+        openBtn.style.display = 'block';
+        retryBtn.style.display = 'block';
+        loaderEl.style.display = 'none';
+        messageEl.textContent = 'Cliquez sur le bouton pour ouvrir l\'application';
+    }, 5000);
+
+    // ✅ Bouton pour ouvrir l'application
+    openBtn.addEventListener('click', function() {
+        statusEl.textContent = '📱 Ouverture de l\'application...';
+        this.textContent = '⏳ Ouverture...';
+        this.disabled = true;
+
+        openApp();
+
+        setTimeout(() => {
+            this.textContent = '📱 Ouvrir l\'application';
+            this.disabled = false;
+            statusEl.textContent = '✅ Si l\'application ne s\'ouvre pas, vérifiez qu\'elle est installée';
+        }, 3000);
+    });
+
+    // ✅ Bouton réessayer
+    retryBtn.addEventListener('click', function() {
+        this.style.display = 'none';
+        openBtn.style.display = 'none';
+        statusEl.textContent = '🔄 Nouvelle tentative...';
+        loaderEl.style.display = 'block';
+        messageEl.textContent = '🔄 Tentative de réouverture...';
+
+        setTimeout(() => {
+            tryOpenApp();
+        }, 500);
+
+        setTimeout(() => {
+            statusEl.textContent = '💡 L\'application ne s\'est pas ouverte ?';
+            openBtn.style.display = 'block';
+            retryBtn.style.display = 'block';
+            loaderEl.style.display = 'none';
+            messageEl.textContent = 'Cliquez sur le bouton pour ouvrir l\'application';
+        }, 4000);
+    });
+
+    // ✅ Logs pour le débogage
+    console.log('📱 TAPA Budget - Page de vérification');
+    console.log('🔗 Redirection vers: tapa-budget://verify');
+    console.log('🌐 Site: https://tapa-budget-6ed7c.web.app');
+
+    // ✅ Vérifier si l'application est installée
+    function checkAppInstalled() {
+        // Tentative de redirection
+        window.location.href = 'tapa-budget://ping';
+
+        // Si l'app répond, elle est installée
+        setTimeout(() => {
+            // Pas de réponse de l'app -> pas installée
+            statusEl.textContent = '💡 Téléchargez l\'application TAPA Budget';
+        }, 2000);
+    }
+</script>
+</body>
+</html>

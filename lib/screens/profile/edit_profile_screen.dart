@@ -3,11 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
+import '../../core/theme/app_theme.dart';
 import '../../data/models/models.dart';
 import '../../core/utils/constants.dart';
 import '../../core/utils/logger.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -20,8 +20,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   late TextEditingController _prenomCtrl;
   late String _monnaie;
   late String _codePays;
-  late String _indicatif;
-  late String _telephone;
   bool _isLoading = false;
 
   @override
@@ -31,8 +29,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     _prenomCtrl = TextEditingController(text: user?.prenom ?? '');
     _monnaie = user?.monnaie ?? 'FCFA';
     _codePays = user?.codePays ?? 'CI';
-    _indicatif = user?.indicatif ?? '+225';
-    _telephone = user?.telephone ?? '';
   }
 
   @override
@@ -44,60 +40,54 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Future<void> _save() async {
     final user = ref.read(currentUserProvider);
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Utilisateur non trouvé'),
-          backgroundColor: TAPAColors.red,
-        ),
-      );
+      _showSnackBar('Utilisateur non trouvé', isError: true);
       return;
     }
 
     final newPrenom = _prenomCtrl.text.trim();
     if (newPrenom.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Le prénom ne peut pas être vide'),
-          backgroundColor: TAPAColors.red,
-        ),
-      );
+      _showSnackBar('Le prénom ne peut pas être vide', isError: true);
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      final updatedUser = user.copyWith(
+      // ✅ CORRECTION: Appeler avec des paramètres nommés
+      final authNotifier = ref.read(authStateProvider.notifier);
+      await authNotifier.updateUserProfile(
         prenom: newPrenom,
         monnaie: _monnaie,
         codePays: _codePays,
-        indicatif: _indicatif,
       );
 
-      await ref.read(authStateProvider.notifier).updateUserProfile(updatedUser);
-
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Profil mis à jour !'),
-            backgroundColor: TAPAColors.green,
-          ),
-        );
+        _showSnackBar('✅ Profil mis à jour avec succès');
         context.pop();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
-            backgroundColor: TAPAColors.red,
-          ),
-        );
+        _showSnackBar('Erreur: ${e.toString().replaceAll('Exception: ', '')}', isError: true);
       }
       Logger.error('❌ Erreur mise à jour profil: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? TAPAColors.red : TAPAColors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
@@ -242,7 +232,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               final p = AppConstants.pays.firstWhere((p) => p['code'] == v);
               setState(() {
                 _codePays = v;
-                _indicatif = p['indicatif']!;
                 _monnaie = p['monnaie']!;
               });
             },
@@ -273,7 +262,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         ),
                       ),
                       Text(
-                        _telephone,
+                        user?.phoneNumber ?? '',
                         style: const TextStyle(
                           fontSize: 14,
                           color: TAPAColors.navy,

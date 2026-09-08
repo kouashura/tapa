@@ -24,7 +24,7 @@ class OTPService {
 
     // Formatter le numero
     String tel = telephone.replaceAll(' ', '')
-      .replaceAll('-', '').replaceAll('+', '');
+        .replaceAll('-', '').replaceAll('+', '');
     if (tel.startsWith('0') && tel.length == 10) {
       tel = '225${tel.substring(1)}';
     } else if (!tel.startsWith('225')) {
@@ -36,18 +36,18 @@ class OTPService {
 
     try {
       final response = await http.post(
-        Uri.parse(_apiUrl),
-        headers: {
-          'apiKey': _apiKey,
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Accept': 'application/json',
-        },
-        body: {
-          'username': _username,
-          'to': tel,
-          'message': 'Votre code TAPA Budget : $code. '
-            'Valable 10 minutes.',
-        });
+          Uri.parse(_apiUrl),
+          headers: {
+            'apiKey': _apiKey,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+          },
+          body: {
+            'username': _username,
+            'to': tel,
+            'message': 'Votre code TAPA Budget : $code. '
+                'Valable 10 minutes.',
+          });
 
       print('AT STATUS: ${response.statusCode}');
       print('AT BODY: ${response.body}');

@@ -1,3 +1,4 @@
+// lib/screens/migration/migration_page.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -5,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'dart:convert';
 import '../../firebase_options.dart';
+import '../../core/utils/logger.dart';
 
 class MigrationPage extends StatefulWidget {
   const MigrationPage({super.key});
@@ -40,23 +42,26 @@ class _MigrationPageState extends State<MigrationPage> {
         try {
           final telephone = user['telephone']?.toString() ?? '';
           if (telephone.isEmpty) {
-            print('⚠️ Utilisateur sans téléphone: ${user['prenom']}');
+            Logger.warning('⚠️ Utilisateur sans téléphone: ${user['prenom']}');
             continue;
           }
 
           final cleanTelephone = telephone.replaceAll(' ', '').trim();
 
-          await FirebaseFirestore.instance.collection('users').doc(cleanTelephone).set({
-            'uuid': user['uuid'] ?? '',
+          // ✅ Utiliser l'UID ou générer un ID si absent
+          final String docId = user['uid']?.toString() ?? cleanTelephone;
+
+          await FirebaseFirestore.instance.collection('users').doc(docId).set({
+            'uid': user['uid'] ?? '',
             'prenom': user['prenom'] ?? '',
-            'telephone': cleanTelephone,
+            'phoneNumber': cleanTelephone,  // ✅ CORRIGÉ: phoneNumber au lieu de telephone
             'indicatif': user['indicatif'] ?? '+225',
             'codePays': user['code_pays'] ?? 'CI',
             'monnaie': user['monnaie'] ?? 'FCFA',
             'pinCode': user['pin_code'] ?? '1234',
-            'hasAccesVie': user['has_acces_vie'] == 1,
+            'hasAccessVie': user['has_acces_vie'] == 1,
             'cleActivee': user['cle_activee'],
-            'dateInscription': user['date_inscription'],
+            'dateInscription': user['date_inscription'] ?? DateTime.now().toIso8601String(),  // ✅ FALLBACK
             'derniereActivite': user['derniere_activite'] ?? DateTime.now().toIso8601String(),
             'onboardingVu': user['onboarding_vu'] == 1,
             'notificationsActivees': user['notifications_activees'] == 1,
@@ -70,10 +75,10 @@ class _MigrationPageState extends State<MigrationPage> {
             _status = 'Importé ${user['prenom']} ($count/$_total)';
           });
 
-          print('✅ ${user['prenom']} - $cleanTelephone');
+          Logger.success('✅ ${user['prenom']} - $cleanTelephone');
 
         } catch (e) {
-          print('❌ Erreur pour ${user['prenom']}: $e');
+          Logger.error('❌ Erreur pour ${user['prenom']}: $e');
         }
       }
 
@@ -87,7 +92,7 @@ class _MigrationPageState extends State<MigrationPage> {
         _status = '❌ Erreur: $e. Vérifiez que le fichier assets/data/utilisateurs.json existe.';
         _isMigrating = false;
       });
-      print('❌ Erreur: $e');
+      Logger.error('❌ Erreur: $e');
     }
   }
 
@@ -120,7 +125,10 @@ class _MigrationPageState extends State<MigrationPage> {
                 valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1A237E)),
               ),
               const SizedBox(height: 10),
-              Text('$_progress / $_total'),
+              Text(
+                '$_progress / $_total',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
             ],
             const SizedBox(height: 30),
             ElevatedButton(

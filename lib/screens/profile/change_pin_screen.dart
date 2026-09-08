@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
-import '../../services/db_service_mysql.dart';  // ← Changé de '../../services/db_service.dart'
+import '../../core/theme/app_theme.dart';
+import '../../services/db_service_mysql.dart';
 
 class ChangePinScreen extends StatefulWidget {
   const ChangePinScreen({super.key});
@@ -12,15 +12,17 @@ class ChangePinScreen extends StatefulWidget {
 }
 
 class _ChangePinScreenState extends State<ChangePinScreen> {
-  final DBService _db = DBService();  // ← Maintenant DBService est défini
+  final DBService _db = DBService();
   String _ancien = '';
   String _nouveau = '';
   String _confirm = '';
   int _step = 0;
   bool _error = false;
   String _errorMsg = '';
+  bool _isLoading = false;
 
   void _press(String d) {
+    if (_isLoading) return;
     setState(() => _error = false);
     if (_step == 0 && _ancien.length < 4) {
       setState(() => _ancien += d);
@@ -47,31 +49,55 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
   }
 
   void _delete() {
+    if (_isLoading) return;
     if (_step == 0 && _ancien.isNotEmpty) {
       setState(() => _ancien =
-          _ancien.substring(0, _ancien.length-1));
+          _ancien.substring(0, _ancien.length - 1));
     } else if (_step == 1 && _nouveau.isNotEmpty) {
       setState(() => _nouveau =
-          _nouveau.substring(0, _nouveau.length-1));
+          _nouveau.substring(0, _nouveau.length - 1));
     } else if (_step == 2 && _confirm.isNotEmpty) {
       setState(() => _confirm =
-          _confirm.substring(0, _confirm.length-1));
+          _confirm.substring(0, _confirm.length - 1));
     }
   }
 
-  void _validateAncien() {
-    if (_db.verifyPin(_ancien)) {
-      setState(() => _step = 1);
-    } else {
+  // ✅ CORRIGÉ : utilise async/await
+  Future<void> _validateAncien() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+
+    try {
+      final isValid = await _db.verifyPin(_ancien);
+
+      if (isValid) {
+        setState(() {
+          _step = 1;
+          _isLoading = false;
+          _error = false;
+        });
+      } else {
+        setState(() {
+          _ancien = '';
+          _error = true;
+          _errorMsg = 'Code incorrect. Réessaie.';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
       setState(() {
         _ancien = '';
         _error = true;
-        _errorMsg = 'Code incorrect. Réessaie.';
+        _errorMsg = 'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
+        _isLoading = false;
       });
     }
   }
 
   Future<void> _validerNouveau() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+
     if (_nouveau != _confirm) {
       setState(() {
         _nouveau = '';
@@ -79,16 +105,29 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
         _step = 1;
         _error = true;
         _errorMsg = 'Les codes ne correspondent pas.';
+        _isLoading = false;
       });
       return;
     }
-    await _db.savePin(_nouveau);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+
+    try {
+      await _db.savePin(_nouveau);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-              content: Text('PIN modifié avec succès !'),
-              backgroundColor: TAPAColors.green));
-      context.pop();
+            content: Text('PIN modifié avec succès !'),
+            backgroundColor: TAPAColors.green,
+          ),
+        );
+        context.pop();
+      }
+    } catch (e) {
+      setState(() {
+        _error = true;
+        _errorMsg = 'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
+        _isLoading = false;
+      });
     }
   }
 
@@ -138,6 +177,13 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
                 style: const TextStyle(
                     color: TAPAColors.red,
                     fontSize: 12)),
+          ],
+          if (_isLoading) ...[
+            const SizedBox(height: 8),
+            const CircularProgressIndicator(
+              color: TAPAColors.gold,
+              strokeWidth: 2,
+            ),
           ],
           const SizedBox(height: 32),
           Row(

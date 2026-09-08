@@ -2,7 +2,9 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../providers/auth_provider.dart';
+import '../providers/auth/auth_provider.dart';
+import '../providers/app_state.dart';
+import '../providers/providers.dart';
 import '../../services/firebase_service.dart';
 import '../../services/db_service_mysql.dart';
 import '../../core/utils/logger.dart';
@@ -56,6 +58,19 @@ class AppRouter {
 
   AppRouter(WidgetRef ref) : router = _buildRouter(ref);
 
+  /// Fonction pour vérifier l'existence du PIN
+  static Future<bool> _checkIfPinExists(WidgetRef ref) async {
+    try {
+      final db = DBService();
+      final hasPin = await db.hasPin();
+      Logger.info(hasPin ? '✅ PIN trouvé' : '❌ Aucun PIN trouvé');
+      return hasPin;
+    } catch (e) {
+      Logger.error('❌ Erreur vérification PIN: $e');
+      return false;
+    }
+  }
+
   static GoRouter _buildRouter(WidgetRef ref) {
     return GoRouter(
       initialLocation: '/splash',
@@ -82,26 +97,27 @@ class AppRouter {
 
         // ---- Utilisateur connecté ----
         final needsOnboarding = !(user?.onboardingVu ?? false);
-        final needsPin = (user?.pinCode ?? '').isEmpty;
+        final hasPin = await _checkIfPinExists(ref);
+        final needsPin = !hasPin;
 
-        // ✅ ÉTAPE 1 : ONBOARDING (priorité absolue)
+        // ÉTAPE 1 : ONBOARDING
         if (needsOnboarding) {
           Logger.info('🔄 Redirection: Onboarding nécessaire');
           return isOnboardingScreen ? null : '/onboarding';
         }
 
-        // ✅ ÉTAPE 2 : PIN (après onboarding)
+        // ÉTAPE 2 : PIN
         if (needsPin) {
-          Logger.info('🔄 Redirection: PIN nécessaire');
+          Logger.info('🔄 Redirection: PIN nécessaire (hasPin=$hasPin)');
           return isPinScreen ? null : '/pin-setup';
         }
 
-        // ✅ ÉTAPE 3 : VÉRIFICATION ESSAI + ROOT
+        // ÉTAPE 3 : VÉRIFICATION ESSAI + ROOT
         final db = DBService();
         final firebaseService = FirebaseService();
         final isRoot = firebaseService.isRootUser;
 
-        // ✅ SI ROOT → ACCÈS ILLIMITÉ
+        // SI ROOT → ACCÈS ILLIMITÉ
         if (isRoot) {
           Logger.info('👑 Redirection: Utilisateur Root - Accès illimité');
           if (isActivationScreen) {
@@ -110,39 +126,37 @@ class AppRouter {
           return null;
         }
 
-        // ✅ VÉRIFICATION ESSAI AVEC FALLBACK
+        // VÉRIFICATION ESSAI
         bool essaiExpire = false;
         bool aAcces = false;
 
         try {
-          // Utiliser la version synchrone (plus rapide)
           essaiExpire = db.essaiGratuitExpire;
           aAcces = db.aAccesAVie;
 
-          // Si la date n'est pas trouvée, essayer la version asynchrone
           if (!essaiExpire && db.joursRestantsEssai == 0) {
             essaiExpire = await db.isEssaiGratuitExpire();
           }
         } catch (e) {
           Logger.error('❌ Erreur vérification essai: $e');
-          essaiExpire = false; // ✅ FALLBACK: considérer que l'essai n'est pas expiré
+          essaiExpire = false;
         }
 
         Logger.info('🔍 Redirection - Essai expiré: $essaiExpire, Accès: $aAcces, Root: $isRoot');
 
-        // ✅ SI ESSAI EXPIRE ET PAS D'ACCES (ET PAS ROOT)
+        // SI ESSAI EXPIRE ET PAS D'ACCES
         if (essaiExpire && !aAcces && !isActivationScreen) {
           Logger.info('🔄 Redirection: Essai expiré → /activation');
           return '/activation';
         }
 
-        // ✅ SI SUR ACTIVATION MAIS ACCÈS VALIDE (PREMIUM OU ESSAI)
+        // SI SUR ACTIVATION MAIS ACCÈS VALIDE
         if (isActivationScreen && (aAcces || !essaiExpire)) {
           Logger.info('🔄 Redirection: Activation déjà validée → /home');
           return '/home';
         }
 
-        // ✅ ÉTAPE 4 : ACCUEIL
+        // ÉTAPE 4 : ACCUEIL
         if (isAuthScreen || isOnboardingScreen || isPinScreen || isActivationScreen) {
           Logger.info('🔄 Redirection: Accès validé → /home');
           return '/home';

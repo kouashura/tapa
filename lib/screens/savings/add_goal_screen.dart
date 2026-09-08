@@ -2,13 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import '../../theme/app_theme.dart';
-import '../../presentation/providers/auth_provider.dart';
-import '../../models/models.dart';  // ✅ Depuis models/
+import '../../core/theme/app_theme.dart';
+import '../../data/models/models.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/logger.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';
 
 class AddGoalScreen extends ConsumerStatefulWidget {
   const AddGoalScreen({super.key});
@@ -18,110 +17,118 @@ class AddGoalScreen extends ConsumerStatefulWidget {
 }
 
 class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
-  final TextEditingController _nomCtrl = TextEditingController();
-  final TextEditingController _montantCtrl = TextEditingController();
-  DateTime? _dateLimite;
-  String? _walletId;
-  bool _loading = false;
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _targetController = TextEditingController();
+  final TextEditingController _currentController = TextEditingController();
 
-  List<WalletModel> _wallets = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _chargerWallets();
-  }
+  DateTime _targetDate = DateTime.now().add(const Duration(days: 30));
+  bool _isLoading = false;
+  String _selectedCurrency = 'FCFA';
 
   @override
   void dispose() {
-    _nomCtrl.dispose();
-    _montantCtrl.dispose();
+    _nameController.dispose();
+    _targetController.dispose();
+    _currentController.dispose();
     super.dispose();
   }
 
-  Future<void> _chargerWallets() async {
-    // TODO: Remplacer par un provider
-    // _wallets = await ref.read(walletListProvider.future);
-    if (_wallets.isNotEmpty && _walletId == null) {
-      _walletId = _wallets.first.id?.toString();
-    }
-    setState(() {});
-  }
+  Future<void> _saveGoal() async {
+    final name = _nameController.text.trim();
+    final targetAmount = double.tryParse(_targetController.text);
+    final currentAmount = double.tryParse(_currentController.text) ?? 0;
 
-  Future<void> _save() async {
-    if (_nomCtrl.text.trim().isEmpty ||
-        _montantCtrl.text.isEmpty ||
-        _walletId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Remplis tous les champs.'),
-          backgroundColor: TAPAColors.red,
-        ),
-      );
+    if (name.isEmpty) {
+      _showSnackBar('Veuillez entrer un nom pour votre objectif', isError: true);
       return;
     }
 
-    final montant = double.tryParse(_montantCtrl.text) ?? 0;
-    if (montant <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Entrez un montant valide.'),
-          backgroundColor: TAPAColors.red,
-        ),
-      );
+    if (targetAmount == null || targetAmount <= 0) {
+      _showSnackBar('Veuillez entrer un montant cible valide', isError: true);
       return;
     }
 
-    setState(() => _loading = true);
+    setState(() => _isLoading = true);
 
     try {
-      final userId = await ref.read(userRepositoryProvider).getCurrentUserId();
+      final user = ref.read(currentUserProvider);
+      final userId = user?.id ?? '';
 
-      final goal = SavingsGoalModel(
-        id: null,
-        uuid: Fmt.genId(),
-        utilisateurId: int.tryParse(userId) ?? 1,
-        nom: _nomCtrl.text.trim(),
-        montantCible: montant,
-        montantActuel: 0,
-        dateLimite: _dateLimite,
-        portefeuilleId: int.tryParse(_walletId!) ?? 0,
-        estAtteint: false,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
+      if (userId.isEmpty) {
+        _showSnackBar('Utilisateur non trouvé', isError: true);
+        return;
+      }
+
+      // ✅ CORRECTION: Utiliser userRepositoryProvider depuis providers.dart
+      final userRepo = ref.read(userRepositoryProvider);
+
+      await userRepo.createSavingsGoal(
+        userId: userId,
+        name: name,
+        targetAmount: targetAmount,
+        currentAmount: currentAmount,
+        currency: _selectedCurrency,
+        targetDate: _targetDate,
       );
 
-      // TODO: Utiliser un provider
-      // await ref.read(savingsGoalRepositoryProvider).addSavingsGoal(goal);
-      Logger.info('📝 Objectif créé: ${goal.nom}');
-
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Objectif créé avec succès !'),
-            backgroundColor: TAPAColors.green,
-          ),
-        );
-        context.pop();
+        _showSnackBar('✅ Objectif d\'épargne créé avec succès !');
+        context.pop(true);
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
-            backgroundColor: TAPAColors.red,
-          ),
-        );
-      }
       Logger.error('❌ Erreur création objectif: $e');
+      if (mounted) {
+        _showSnackBar('Erreur: ${e.toString().replaceAll('Exception: ', '')}', isError: true);
+      }
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _targetDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 10)),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: TAPAColors.navy,
+              onPrimary: TAPAColors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() => _targetDate = picked);
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? TAPAColors.red : TAPAColors.navy,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final monnaie = ref.watch(userMonnaieProvider);
+    _selectedCurrency = monnaie;
 
     return Scaffold(
       backgroundColor: TAPAColors.background,
@@ -129,117 +136,15 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
         title: const Text('Nouvel objectif'),
         backgroundColor: TAPAColors.navy,
         foregroundColor: TAPAColors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => context.pop(),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          const Text(
-            'Quel est ton objectif ?',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: TAPAColors.navy,
-            ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            'Ex : Rentrée scolaire, Loyer...',
-            style: TextStyle(
-              color: TAPAColors.textSecond,
-            ),
-          ),
-          const SizedBox(height: 24),
-          TextField(
-            controller: _nomCtrl,
-            textCapitalization: TextCapitalization.sentences,
-            decoration: const InputDecoration(
-              labelText: 'Nom de l\'objectif *',
-              hintText: 'ex : Rentrée scolaire',
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _montantCtrl,
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-            decoration: InputDecoration(
-              labelText: 'Montant à atteindre *',
-              suffixText: monnaie,
-              hintText: '100 000',
-            ),
-          ),
-          const SizedBox(height: 16),
-          GestureDetector(
-            onTap: () async {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now().add(const Duration(days: 30)),
-                firstDate: DateTime.now(),
-                lastDate: DateTime.now().add(const Duration(days: 3650)),
-              );
-              if (date != null) {
-                setState(() => _dateLimite = date);
-              }
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: TAPAColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: TAPAColors.border,
-                  width: 0.5,
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.calendar_today_outlined,
-                    color: TAPAColors.navy,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    _dateLimite != null
-                        ? 'Date limite : ${Fmt.dateComplete(_dateLimite!)}'
-                        : 'Date limite (optionnel)',
-                    style: TextStyle(
-                      color: _dateLimite != null ? TAPAColors.navy : TAPAColors.textHint,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            value: _walletId,
-            decoration: const InputDecoration(
-              labelText: 'Portefeuille dédié *',
-            ),
-            items: _wallets.map((w) =>
-                DropdownMenuItem<String>(
-                  value: w.id?.toString(),
-                  child: Text('${w.emoji} ${w.nom}'),
-                ),
-            ).toList(),
-            onChanged: (v) => setState(() => _walletId = v),
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: _loading ? null : _save,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: TAPAColors.navy,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
-            child: _loading
+        actions: [
+          TextButton(
+            onPressed: _isLoading ? null : _saveGoal,
+            child: _isLoading
                 ? const SizedBox(
               width: 20,
               height: 20,
@@ -249,11 +154,112 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
               ),
             )
                 : const Text(
-              'Créer mon objectif',
-              style: TextStyle(color: TAPAColors.white),
+              'Sauvegarder',
+              style: TextStyle(
+                color: TAPAColors.gold,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Nom de l\'objectif',
+                hintText: 'ex: Voyage, Maison, Voiture...',
+                prefixIcon: Icon(Icons.flag_outlined),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _targetController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Montant cible',
+                hintText: 'ex: 500000',
+                prefixIcon: const Icon(Icons.trending_up_outlined),
+                suffixText: _selectedCurrency,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _currentController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Montant actuel (optionnel)',
+                hintText: 'ex: 50000',
+                prefixIcon: const Icon(Icons.account_balance_wallet_outlined),
+                suffixText: _selectedCurrency,
+              ),
+            ),
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: () => _selectDate(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                decoration: BoxDecoration(
+                  color: TAPAColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: TAPAColors.border),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.calendar_today_outlined, color: TAPAColors.textHint),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Date cible: ${Fmt.dateRelative(_targetDate)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: TAPAColors.navy,
+                        ),
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios, size: 16, color: TAPAColors.textHint),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _saveGoal,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: TAPAColors.navy,
+                  foregroundColor: TAPAColors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.4,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      TAPAColors.gold,
+                    ),
+                  ),
+                )
+                    : const Text(
+                  'Créer l\'objectif',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

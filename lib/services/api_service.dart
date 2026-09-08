@@ -1,12 +1,9 @@
-// lib/services/firebase_service.dart
+// lib/services/api_service.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/models.dart';
-import '../models/budget_model.dart';
-import '../models/echeance_model.dart';
-import '../models/epargne_programmee_model.dart';
+import '../data/models/models.dart';  // ✅ CORRIGÉ
 import '../core/utils/logger.dart';
 
 class FirebaseService {
@@ -30,7 +27,6 @@ class FirebaseService {
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
 
-    // ✅ UTILISER L'UID FIREBASE AU LIEU DU TÉLÉPHONE
     final user = _auth.currentUser;
     if (user != null) {
       _currentUserId = user.uid;
@@ -54,7 +50,6 @@ class FirebaseService {
   String? getCurrentUserId() => _currentUserId;
   bool get isLoggedIn => _currentUserId != null;
 
-  /// Met à jour l'utilisateur courant après connexion
   Future<void> setCurrentUser(User? user) async {
     if (user != null) {
       _currentUserId = user.uid;
@@ -92,28 +87,25 @@ class FirebaseService {
 
   Future<void> saveUser(UserModel user) async {
     try {
-      // ✅ Utiliser l'UID Firebase comme ID du document
-      final uid = _auth.currentUser?.uid ?? user.uuid;
+      final uid = _auth.currentUser?.uid ?? user.id;
 
       await _firestore.collection('users').doc(uid).set({
-        'uuid': user.uuid,
+        'phoneNumber': user.phoneNumber,
         'prenom': user.prenom,
-        'telephone': user.telephone,
-        'indicatif': user.indicatif,
-        'codePays': user.codePays,
         'monnaie': user.monnaie,
-        'pinCode': user.pinCode,
-        'hasAccesVie': user.hasAccesVie,
+        'codePays': user.codePays,
+        'hasAccessVie': user.hasAccessVie,
+        'onboardingVu': user.onboardingVu,
+        'notificationsActivees': user.notificationsActivees,
         'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
+        'dernierActive': FieldValue.serverTimestamp(),
       });
 
       _currentUserId = uid;
       await _prefs?.setString('user_id', uid);
-      await _prefs?.setString('user_telephone', user.telephone);
+      await _prefs?.setString('user_telephone', user.phoneNumber);
       await _prefs?.setString('user_prenom', user.prenom);
       await _prefs?.setString('user_monnaie', user.monnaie);
-      await _prefs?.setString('user_pin', user.pinCode);
 
       await _initDefaultWallets(uid);
       await _initDefaultCategories(uid);
@@ -148,13 +140,13 @@ class FirebaseService {
 
   Future<void> _initDefaultWallets(String userId) async {
     final defaultWallets = [
-      {'uuid': 'wallet-${DateTime.now().millisecondsSinceEpoch}-001', 'nom': 'Compte Principal', 'type': 'compte', 'emoji': '🏦', 'solde': 0.0, 'seuilAlerte': 10000.0, 'createdAt': FieldValue.serverTimestamp(), 'updatedAt': FieldValue.serverTimestamp()},
-      {'uuid': 'wallet-${DateTime.now().millisecondsSinceEpoch}-002', 'nom': 'Wave', 'type': 'mobile', 'emoji': '📱', 'solde': 0.0, 'seuilAlerte': 5000.0, 'createdAt': FieldValue.serverTimestamp(), 'updatedAt': FieldValue.serverTimestamp()},
-      {'uuid': 'wallet-${DateTime.now().millisecondsSinceEpoch}-003', 'nom': 'Espèces', 'type': 'especes', 'emoji': '💵', 'solde': 0.0, 'seuilAlerte': 3000.0, 'createdAt': FieldValue.serverTimestamp(), 'updatedAt': FieldValue.serverTimestamp()},
+      {'uid': userId, 'nom': 'Compte Principal', 'type': 'compte', 'emoji': '🏦', 'solde': 0.0, 'monnaie': 'FCFA', 'description': 'Compte principal', 'createdAt': FieldValue.serverTimestamp(), 'updatedAt': FieldValue.serverTimestamp()},
+      {'uid': userId, 'nom': 'Wave', 'type': 'mobile', 'emoji': '📱', 'solde': 0.0, 'monnaie': 'FCFA', 'description': 'Portefeuille Wave', 'createdAt': FieldValue.serverTimestamp(), 'updatedAt': FieldValue.serverTimestamp()},
+      {'uid': userId, 'nom': 'Espèces', 'type': 'especes', 'emoji': '💵', 'solde': 0.0, 'monnaie': 'FCFA', 'description': 'Espèces', 'createdAt': FieldValue.serverTimestamp(), 'updatedAt': FieldValue.serverTimestamp()},
     ];
     final batch = _firestore.batch();
     for (final wallet in defaultWallets) {
-      final docRef = _firestore.collection('users').doc(userId).collection('wallets').doc();
+      final docRef = _firestore.collection('wallets').doc();
       batch.set(docRef, wallet);
     }
     await batch.commit();
@@ -166,17 +158,17 @@ class FirebaseService {
   Future<void> saveWallet(WalletModel wallet) async {
     final userId = _currentUserId;
     if (userId == null) return;
-    if (wallet.id != null) {
-      await _firestore.collection('users').doc(userId).collection('wallets').doc(wallet.id.toString()).update({
-        'nom': wallet.nom, 'solde': wallet.solde, 'seuilAlerte': wallet.seuilAlerte, 'updatedAt': FieldValue.serverTimestamp(),
-      });
-    } else {
-      await _firestore.collection('users').doc(userId).collection('wallets').add({
-        'uuid': wallet.uuid, 'nom': wallet.nom, 'type': wallet.type, 'emoji': wallet.emoji,
-        'solde': wallet.solde, 'seuilAlerte': wallet.seuilAlerte,
-        'createdAt': FieldValue.serverTimestamp(), 'updatedAt': FieldValue.serverTimestamp(),
-      });
-    }
+    await _firestore.collection('wallets').doc(wallet.id).set({
+      'uid': userId,
+      'nom': wallet.nom,
+      'emoji': wallet.emoji,
+      'type': wallet.type,
+      'solde': wallet.solde,
+      'monnaie': wallet.monnaie,
+      'description': wallet.description,
+      'createdAt': wallet.createdAt ?? FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
   // ============================================
@@ -188,10 +180,9 @@ class FirebaseService {
   Future<void> addTransaction(TransactionModel transaction) async {
     final userId = _currentUserId;
     if (userId == null) return;
-    await _firestore.collection('users').doc(userId).collection('transactions').add({
-      'uuid': transaction.uuid,
-      'portefeuilleId': transaction.portefeuilleId,
-      'portefeuilleDestId': transaction.portefeuilleDestId,
+    await _firestore.collection('transactions').add({
+      'uid': userId,
+      'walletId': transaction.walletId,
       'montant': transaction.montant,
       'type': transaction.type.toString().split('.').last,
       'categorieId': transaction.categorieId,
@@ -223,13 +214,14 @@ class FirebaseService {
     ];
     final batch = _firestore.batch();
     for (final cat in categories) {
-      final docRef = _firestore.collection('users').doc(userId).collection('categories').doc(cat['id']);
+      final docRef = _firestore.collection('categories').doc(cat['id']);
       batch.set(docRef, {
+        'uid': userId,
+        'categorieId': cat['id'],
         'label': cat['label'],
         'emoji': cat['emoji'],
         'type': cat['type'],
         'isDefault': true,
-        'uid': userId,
         'createdAt': FieldValue.serverTimestamp(),
       });
     }
@@ -237,7 +229,6 @@ class FirebaseService {
     Logger.info('📂 Catégories par défaut créées');
   }
 
-  /// Charge les catégories depuis Firestore dans le cache local.
   Future<void> _loadCategories() async {
     final userId = _currentUserId;
     if (userId == null) {
@@ -246,9 +237,8 @@ class FirebaseService {
     }
     try {
       final snap = await _firestore
-          .collection('users')
-          .doc(userId)
           .collection('categories')
+          .where('uid', isEqualTo: userId)
           .get();
       _categories = snap.docs.map((d) => {
         'id': d.id,
@@ -261,10 +251,8 @@ class FirebaseService {
     }
   }
 
-  /// Force un rechargement des catégories depuis Firestore.
   Future<void> refreshCategories() => _loadCategories();
 
-  /// Retourne les catégories mises en cache.
   List<Map<String, dynamic>> getCategories() => _categories;
 
   Future<void> addCategory(Map<String, dynamic> category) async {
@@ -283,16 +271,15 @@ class FirebaseService {
 
     try {
       await _firestore
-          .collection('users')
-          .doc(userId)
           .collection('categories')
           .doc(id)
           .set({
+        'uid': userId,
+        'categorieId': id,
         'label': label,
         'emoji': emoji,
         'type': type,
         'isDefault': category['isDefault'] ?? false,
-        'uid': userId,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -312,8 +299,6 @@ class FirebaseService {
 
     try {
       await _firestore
-          .collection('users')
-          .doc(userId)
           .collection('categories')
           .doc(categoryId)
           .delete();
@@ -335,17 +320,18 @@ class FirebaseService {
   Future<void> saveEcheance(EcheanceModel echeance) async {
     final userId = _currentUserId;
     if (userId == null) return;
-    await _firestore.collection('users').doc(userId).collection('echeances').add({
+    await _firestore.collection('echeances').add({
+      'uid': userId,
       'titre': echeance.titre,
+      'description': echeance.description,
       'montant': echeance.montant,
+      'dateEcheance': echeance.dateEcheance,
       'type': echeance.type,
-      'jourDuMois': echeance.jourDuMois,
-      'jourDeLaSemaine': echeance.jourDeLaSemaine,
-      'datePrecise': echeance.datePrecise,
-      'rappelAvant': echeance.rappelAvant,
-      'emoji': echeance.emoji,
-      'active': echeance.active,
+      'statut': echeance.statut,
+      'descriptionRecurrence': echeance.descriptionRecurrence,
+      'descriptionRappel': echeance.descriptionRappel,
       'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 
@@ -421,9 +407,8 @@ class FirebaseService {
     final debut = DateTime(annee, mois, 1);
     final fin = DateTime(annee, mois + 1, 1);
     final snap = await _firestore
-        .collection('users')
-        .doc(userId)
         .collection('transactions')
+        .where('uid', isEqualTo: userId)
         .where('type', isEqualTo: type)
         .where('dateTransaction', isGreaterThanOrEqualTo: debut)
         .where('dateTransaction', isLessThan: fin)
@@ -447,9 +432,8 @@ class FirebaseService {
     final debut = DateTime(annee, mois, 1);
     final fin = DateTime(annee, mois + 1, 1);
     final snap = await _firestore
-        .collection('users')
-        .doc(userId)
         .collection('transactions')
+        .where('uid', isEqualTo: userId)
         .where('categorieId', isEqualTo: categorieId)
         .where('dateTransaction', isGreaterThanOrEqualTo: debut)
         .where('dateTransaction', isLessThan: fin)

@@ -1,3 +1,6 @@
+// lib/data/models/wallet_model.dart
+
+/// Modèle portefeuille pour Firestore
 class WalletModel {
   final String id;
   final String uid;
@@ -9,6 +12,8 @@ class WalletModel {
   final String description;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+
+  bool get estPresqueVide => solde <= 0;
 
   WalletModel({
     required this.id,
