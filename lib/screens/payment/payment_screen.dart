@@ -340,7 +340,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Accès à vie - TAPA Budget',
+                  'Accès à vie - TAPA Invest',
                   style: TextStyle(
                     color: TAPAColors.white,
                     fontSize: 14,
@@ -511,7 +511,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
       ),
       child: Column(
         children: [
-          _summaryRow('Article', 'Accès à vie TAPA Budget'),
+          _summaryRow('Article', 'Accès à vie TAPA Invest'),
           _summaryRow('Opérateur', selectedProvider.name),
           _summaryRow('Numéro', _phoneNumber.isEmpty ? 'Non renseigné' : _phoneNumber),
           const Divider(height: 16),

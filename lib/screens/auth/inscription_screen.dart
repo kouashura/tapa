@@ -211,7 +211,7 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
                                 ),
                               ),
                               TextSpan(
-                                text: ' Budget',
+                                text: ' Invest',
                                 style: TextStyle(
                                   fontSize: m.headerTitleSize,
                                   color: TAPAColors.white,

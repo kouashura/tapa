@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/link_service.dart';
-import '../../services/firebase_service.dart';
 import '../../core/utils/logger.dart';
 import 'package:tapa_budget/presentation/providers/providers.dart';
 
@@ -76,7 +75,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text(
               'Se déconnecter',
-              style: TextStyle(color: TAPAColors.navy, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                  color: TAPAColors.navy, fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -98,16 +98,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final prenom = ref.watch(userPrenomProvider);
     final monnaie = ref.watch(userMonnaieProvider);
 
-    // ✅ CORRECTION: Utiliser directement l'utilisateur pour hasAccessVie
-    final hasAccesVie = user?.hasAccessVie ?? false;
-
-    // Vérifier si l'utilisateur a une clé root
-    final firebaseService = FirebaseService();
-    final isRoot = firebaseService.isRootUser;
-
     Logger.info('👤 ProfileScreen - user: ${user?.prenom ?? "null"}');
-    Logger.info('👑 ProfileScreen - isRoot: $isRoot');
-    Logger.info('💎 ProfileScreen - hasAccessVie: $hasAccesVie');
 
     return Scaffold(
       backgroundColor: TAPAColors.background,
@@ -128,7 +119,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     const SizedBox(height: 50),
                     CircleAvatar(
                       radius: 36,
-                      backgroundColor: isRoot ? TAPAColors.purple : TAPAColors.gold,
+                      backgroundColor: TAPAColors.gold,
                       child: Text(
                         prenom.isNotEmpty ? prenom[0].toUpperCase() : 'T',
                         style: const TextStyle(
@@ -149,29 +140,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     Text(
                       user?.phoneNumber ?? '',
-                      style: const TextStyle(fontSize: 12, color: Colors.white54),
+                      style:
+                          const TextStyle(fontSize: 12, color: Colors.white54),
                     ),
                     Text(
                       '💰 $monnaie',
-                      style: const TextStyle(fontSize: 12, color: TAPAColors.gold),
+                      style: const TextStyle(
+                          fontSize: 12, color: TAPAColors.gold),
                     ),
-                    if (isRoot)
-                      Container(
-                        margin: const EdgeInsets.only(top: 4),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: TAPAColors.purple,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Text(
-                          '👑 ROOT',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: TAPAColors.white,
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
@@ -181,19 +157,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             delegate: SliverChildListDelegate([
               const SizedBox(height: 16),
 
-              // ✅ Section Premium / Root
-              _menuItem(
-                icon: isRoot ? Icons.admin_panel_settings : Icons.star_rounded,
-                iconColor: isRoot ? TAPAColors.purple : TAPAColors.gold,
-                bgColor: isRoot ? const Color(0xFFF3E8FB) : Colors.amber.shade50,
-                title: isRoot ? '👑 Accès Root (Admin)' : 'Accès à vie',
-                subtitle: isRoot
-                    ? 'Accès illimité - Mode développeur'
-                    : hasAccesVie ? '✅ Activé' : '5 000 FCFA - Paiement unique',
-                onTap: () => isRoot ? null : context.push('/activation'),
-                highlighted: !isRoot && !hasAccesVie,
-              ),
-
+              // ---- Section Découvrir ----
               _menuItem(
                 icon: Icons.trending_up_rounded,
                 iconColor: const Color(0xFF7B1FA2),
@@ -202,16 +166,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 subtitle: 'Place ton épargne dans des fonds partenaires',
                 onTap: () => _navigateTo('/investir', 1),
               ),
-
               _menuItem(
                 icon: Icons.alarm_outlined,
                 iconColor: const Color(0xFFE67E22),
                 bgColor: const Color(0xFFFEF9E7),
                 title: 'Mes échéances',
-                subtitle: 'Rappels automatiques pour vos échéances',
+                subtitle: 'Rappels automatiques pour tes échéances',
                 onTap: () => context.push('/echeances'),
               ),
 
+              // ---- Section Mon compte ----
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 6),
                 child: Text(
@@ -225,6 +189,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
 
+              // ✅ NOUVEAU : Mon Wallet
+              _menuItem(
+                icon: Icons.account_balance_wallet,
+                iconColor: TAPAColors.gold,
+                bgColor: Colors.amber.shade50,
+                title: 'Mon Wallet',
+                subtitle: 'Ajouter des fonds pour investir',
+                onTap: () => context.push('/wallet'),
+              ),
               _menuItem(
                 icon: Icons.account_balance_wallet_outlined,
                 title: 'Mes portefeuilles',
@@ -250,6 +223,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onTap: () => context.push('/edit-profile'),
               ),
 
+              // ---- Section Support ----
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 6),
                 child: Text(
@@ -276,7 +250,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 iconColor: Colors.blue,
                 bgColor: const Color(0xFFE3F2FD),
                 title: "Guide d'utilisation",
-                subtitle: 'Apprendre à utiliser TAPA Budget',
+                subtitle: 'Apprendre à utiliser TAPA Invest',
                 onTap: () => context.push('/guide'),
               ),
               _menuItem(
@@ -297,17 +271,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               _menuItem(
                 icon: Icons.message_outlined,
+                iconColor: const Color(0xFF25D366),
+                bgColor: const Color(0xFFE8F8EE),
                 title: 'Contacter le support',
                 subtitle: 'WhatsApp - +225 01 60 25 41 02',
                 onTap: () => LinkService.ouvrirWhatsApp(),
               ),
-              _menuItem(
-                icon: Icons.shopping_bag_outlined,
-                title: 'Boutique TAPA',
-                subtitle: 'Accès à vie - 5 000 FCFA',
-                onTap: () => LinkService.ouvrirBoutiqueAvecFallback(context),
-              ),
 
+              // ---- Section Session ----
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 6),
                 child: Text(
@@ -330,6 +301,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onTap: _deconnecter,
               ),
 
+              // ---- Section Danger ----
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 16, 16, 6),
                 child: Text(
@@ -356,9 +328,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  'TAPA Budget v1.0.0\nLe budget simple pour tous.',
+                  'TAPA Invest v1.0.0\nInvestir. Simplement. Grandir.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 11, color: Colors.grey, height: 1.6),
+                  style: TextStyle(
+                      fontSize: 11, color: Colors.grey, height: 1.6),
                 ),
               ),
               const SizedBox(height: 80),
@@ -378,7 +351,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     Color bgColor = const Color(0xFFF0F2F8),
     required VoidCallback onTap,
     Widget? trailing,
-    bool highlighted = false,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -386,12 +358,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: highlighted ? TAPAColors.navy : TAPAColors.surface,
+          color: TAPAColors.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: highlighted ? TAPAColors.gold : Colors.grey.shade200,
-            width: highlighted ? 1.5 : 0.5,
-          ),
+          border: Border.all(color: Colors.grey.shade200, width: 0.5),
         ),
         child: Row(
           children: [
@@ -399,14 +368,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: highlighted ? TAPAColors.gold.withOpacity(0.2) : bgColor,
+                color: bgColor,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                icon,
-                color: highlighted ? TAPAColors.gold : iconColor,
-                size: 18,
-              ),
+              child: Icon(icon, color: iconColor, size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -415,10 +380,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: highlighted ? TAPAColors.gold : TAPAColors.navy,
+                      color: TAPAColors.navy,
                     ),
                   ),
                   if (subtitle != null)
@@ -426,7 +391,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       subtitle,
                       style: TextStyle(
                         fontSize: 11,
-                        color: highlighted ? Colors.white54 : Colors.grey.shade600,
+                        color: Colors.grey.shade600,
                       ),
                     ),
                 ],
@@ -436,7 +401,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 13,
-                  color: highlighted ? Colors.white38 : Colors.grey.shade400,
+                  color: Colors.grey.shade400,
                 ),
           ],
         ),
@@ -537,20 +502,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               decoration: BoxDecoration(
                 gradient: isActive
                     ? const LinearGradient(
-                  colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
+                        colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
                     : null,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: isActive
                     ? [
-                  BoxShadow(
-                    color: const Color(0xFF1A237E).withOpacity(0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
+                        BoxShadow(
+                          color:
+                              const Color(0xFF1A237E).withOpacity(0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
                     : null,
               ),
               child: Icon(
@@ -564,8 +530,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               label,
               style: TextStyle(
                 fontSize: isActive ? 10 : 9,
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive ? const Color(0xFF1A237E) : Colors.grey.shade500,
+                fontWeight:
+                    isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive
+                    ? const Color(0xFF1A237E)
+                    : Colors.grey.shade500,
                 letterSpacing: 0.1,
               ),
               maxLines: 1,

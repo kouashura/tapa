@@ -4,21 +4,21 @@ class AppStrings {
   // ============================================
   // TITRES DE L'APPLICATION
   // ============================================
-  static const String appName = 'TAPA Budget';
+  static const String appName = 'TAPA Invest';
   static const String appSubtitle = 'Le budget simple pour tous.';
   static const String appSlogan = 'Votre coach financier intelligent';
 
   // ============================================
   // ÉCRAN DE CHARGEMENT (Splash)
   // ============================================
-  static const String splashTitle = 'TAPA Budget';
+  static const String splashTitle = 'TAPA Invest';
   static const String splashSubtitle = 'Le budget simple pour tous.';
   static const String splashLoading = 'Chargement...';
 
   // ============================================
   // ONBOARDING
   // ============================================
-  static const String onboardingTitle1 = 'Bienvenue sur TAPA Budget';
+  static const String onboardingTitle1 = 'Bienvenue sur TAPA Invest';
   static const String onboardingSubtitle1 = 'LE COACH FINANCIER DE CHAQUE AFRICAIN';
   static const String onboardingDesc1 = 'Prenez le contrôle de votre argent et construisez votre avenir financier pas à pas.';
 
@@ -282,16 +282,16 @@ class AppStrings {
   static const String assuranceAuto = 'Assurance Auto';
   static const String assurancePartenaire = 'SONAM VIE';
   static const String assurancePartenaireAuto = 'SONAM AUTO';
-  static const String assurancePartenaireSub = 'Partenaire assurance de TAPA Budget';
+  static const String assurancePartenaireSub = 'Partenaire assurance de TAPA Invest';
   static const String assuranceDevis = 'Obtenir un devis';
 
   // ============================================
   // GUIDE
   // ============================================
   static const String guideTitle = "Guide d'utilisation";
-  static const String guideSubtitle = 'Apprenez à utiliser TAPA Budget efficacement';
+  static const String guideSubtitle = 'Apprenez à utiliser TAPA Invest efficacement';
   static const String guideDownload = 'Télécharger le guide PDF';
-  static const String guideSection1 = 'Bienvenue dans TAPA Budget';
+  static const String guideSection1 = 'Bienvenue dans TAPA Invest';
   static const String guideSection2 = 'PREMIÈRE ÉTAPE : Configurez vos portefeuilles';
   static const String guideSection3 = 'DEUXIÈME ÉTAPE : Créez vos catégories';
   static const String guideSection4 = 'Ajouter une transaction';

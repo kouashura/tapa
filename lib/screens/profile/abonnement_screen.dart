@@ -171,7 +171,7 @@ class AbonnementScreen extends StatelessWidget {
             onPressed: () =>
                 LinkService.ouvrirWhatsApp(
                     message:
-                    'Bonjour TAPA Budget ! '
+                    'Bonjour TAPA Invest ! '
                         'Je souhaite obtenir mon '
                         'accès à vie (5 000 FCFA).'),
             icon: const Icon(

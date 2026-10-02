@@ -10,6 +10,7 @@ import '../../../domain/repositories/i_auth_repository.dart';
 import '../../../data/repositories/auth_repository_impl.dart';
 import '../../../data/models/models.dart';
 import '../../../core/utils/logger.dart';
+import '../../../services/pin_security.dart';
 import 'auth_state.dart';
 import '../app_state.dart';
 
@@ -17,12 +18,10 @@ import '../app_state.dart';
 // PROVIDER
 // ============================================
 
-/// Provider du repository d'authentification
 final authRepositoryProvider = Provider<IAuthRepository>((ref) {
   return AuthRepositoryImpl();
 });
 
-/// Provider de l'état d'authentification
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(
     ref.watch(authRepositoryProvider),
@@ -30,17 +29,6 @@ final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   );
 });
 
-// ============================================
-// PROVIDERS UTILITAIRES SPÉCIFIQUES À CE FICHIER
-// ============================================
-// NOTE: currentUserProvider, isAuthenticatedProvider, userMonnaieProvider,
-// userPrenomProvider, hasPinProvider, onboardingCompletedProvider,
-// hasAccessVieProvider, canAccessAppProvider, isLoadingProvider et
-// errorProvider sont déjà définis dans providers.dart (basés sur
-// appStateProvider). Ne PAS les redéfinir ici pour éviter les
-// "ambiguous_import" partout dans l'app.
-
-/// Provider pour l'ID de vérification
 final verificationIdProvider = Provider<String?>((ref) {
   return ref.watch(authStateProvider).verificationId;
 });
@@ -49,20 +37,12 @@ final verificationIdProvider = Provider<String?>((ref) {
 // NOTIFIER
 // ============================================
 
-/// Notifier pour l'authentification
 class AuthNotifier extends StateNotifier<AuthState> {
   final IAuthRepository _authRepository;
   final AppStateNotifier _appStateNotifier;
 
   AuthNotifier(this._authRepository, this._appStateNotifier)
       : super(AuthState.initial) {
-    // ⚠️ Important : on ne peut pas appeler _checkAuthStatus() de façon
-    // synchrone ici, car sa partie exécutée avant le premier `await`
-    // modifierait AppStateNotifier pendant que Riverpod est encore en
-    // train de construire AuthNotifier — ce qui est interdit et provoque
-    // l'erreur "Providers are not allowed to modify other providers
-    // during their initialization." Future.microtask reporte l'appel
-    // juste après la fin de la phase de construction en cours.
     Future.microtask(_checkAuthStatus);
   }
 
@@ -101,7 +81,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   // ============================================
-  // ENVOI DU CODE DE VÉRIFICATION
+  // ENVOI DU CODE DE VÉRIFICATION SMS
   // ============================================
 
   Future<void> sendVerificationCode(String phoneNumber) async {
@@ -123,10 +103,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   // ============================================
-  // VÉRIFICATION DU CODE
+  // VÉRIFICATION DU CODE SMS
   // ============================================
 
-  /// Vérifie le code SMS (avec 2 paramètres)
   Future<AppUser?> verifyCode(String verificationId, String smsCode) async {
     try {
       state = AuthState.verifying();
@@ -152,7 +131,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  /// Vérifie le code SMS (avec 1 paramètre - pour compatibilité)
   Future<bool> verifyCodeSingle(String smsCode) async {
     try {
       state = AuthState.verifying();
@@ -183,20 +161,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   // VÉRIFICATION EMAIL (Brevo + Cloudflare Worker)
   // ============================================
 
-  /// URL de ton Worker Cloudflare (proxy Brevo)
   static const String _brevoWorkerUrl =
       'https://brevo-proxy.tapa-budget.workers.dev';
 
-  /// Génère un code à 6 chiffres, le stocke dans Firestore avec expiration,
-  /// puis l'envoie par email via le Worker Cloudflare (Brevo).
   Future<void> envoyerCodeVerificationEmail(String email) async {
     try {
       state = state.copyWith(isLoading: true);
       _appStateNotifier.setLoading(true);
 
-      // ℹ️ Pas de vérification de currentUser ici : cette méthode est
-      // utilisée pendant l'inscription, AVANT la création du compte
-      // (le document Firestore est indexé par email, pas par uid).
       final code = (100000 + Random().nextInt(900000)).toString();
 
       await FirebaseFirestore.instance
@@ -231,8 +203,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  /// Compare le code entré par l'utilisateur avec celui stocké dans Firestore.
-  /// Retourne true si valide et non expiré.
   Future<bool> verifierCodeEmail(String email, String codeEntre) async {
     try {
       state = state.copyWith(isLoading: true);
@@ -261,10 +231,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return false;
       }
 
-      // Si un compte existe déjà (ex: modification d'email depuis le
-      // profil), on le met à jour tout de suite. Pendant l'inscription,
-      // le compte n'existe pas encore : c'est l'écran appelant qui le
-      // créera juste après, avec cet email et emailVerifie: true.
       final currentUser = state.user;
       if (currentUser != null) {
         final updatedUser = currentUser.copyWith(
@@ -332,7 +298,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  /// Alias pour createUser (pour compatibilité avec inscription_screen)
   Future<void> createUserProfile({
     required String prenom,
     required String telephone,
@@ -348,9 +313,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
       monnaie: monnaie,
     );
     if (user == null) {
-      // createUser() a déjà loggé et mis state.error à jour ; on relance
-      // ici pour que l'écran appelant (verify_phone_screen.dart) sache
-      // que la création a échoué au lieu de rediriger comme si tout allait bien.
       throw Exception(state.error ?? 'Erreur lors de la création du compte.');
     }
   }
@@ -364,14 +326,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(isLoading: true);
       _appStateNotifier.setLoading(true);
 
-      // TODO: Sauvegarder le PIN dans un stockage sécurisé (SharedPreferences/Keychain)
-      // AppUser n'a pas de champ hasPin, on le stocke séparément
+      final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        throw Exception('Aucun utilisateur connecté');
+      }
 
-      Logger.success('✅ PIN sauvegardé');
+      await PinSecurity.savePin(userId, pin);
+
+      _appStateNotifier.setPinExists(true);
+
+      Logger.success('✅ PIN sauvegardé pour $userId');
     } catch (e) {
       state = AuthState.error(e.toString());
       _appStateNotifier.setError(e.toString());
       Logger.error('❌ Erreur sauvegarde PIN: $e');
+      rethrow;
     } finally {
       _appStateNotifier.setLoading(false);
     }
@@ -382,16 +351,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(isLoading: true);
       _appStateNotifier.setLoading(true);
 
-      // TODO: Vérifier le PIN depuis le stockage sécurisé
-      final isValid = pin == '1234' || pin == '0000';
-
-      if (isValid) {
-        Logger.success('✅ PIN vérifié');
-      } else {
-        Logger.warning('⚠️ PIN incorrect');
+      final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) {
+        Logger.warning('⚠️ Aucun utilisateur connecté pour vérifier le PIN');
+        return false;
       }
 
-      return isValid;
+      final result = await PinSecurity.verifyPin(userId, pin);
+
+      if (result.success) {
+        Logger.success('✅ PIN vérifié');
+      } else {
+        Logger.warning('⚠️ PIN incorrect: ${result.message}');
+      }
+
+      return result.success;
     } catch (e) {
       Logger.error('❌ Erreur vérification PIN: $e');
       return false;
@@ -439,7 +413,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   void updateWalletParams(Map<String, dynamic> params) {
     try {
       Logger.info('📊 Mise à jour wallet params: $params');
-      // TODO: Implémenter la mise à jour réelle
     } catch (e) {
       Logger.error('❌ Erreur updateWalletParams: $e');
     }
@@ -465,7 +438,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           prenom: prenom ?? currentUser.prenom,
           monnaie: monnaie ?? currentUser.monnaie,
           codePays: codePays ?? currentUser.codePays,
-          notificationsActivees: notificationsActivees ?? currentUser.notificationsActivees,
+          notificationsActivees: notificationsActivees ??
+              currentUser.notificationsActivees,
           dernierActive: DateTime.now(),
         );
 

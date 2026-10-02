@@ -144,7 +144,7 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
                 Expanded(
                   child: Text(
                     'Les investissements sont soumis aux risques du marché. '
-                        'TAPA Budget facilite la mise en relation avec ses partenaires agréés.',
+                        'TAPA Invest facilite la mise en relation avec ses partenaires agréés.',
                     style: TextStyle(
                       fontSize: subtitleSize,
                       color: TAPAColors.textSecond,

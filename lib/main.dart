@@ -90,7 +90,7 @@ class TapaBudgetApp extends ConsumerWidget {
     final router = AppRouter(ref);
 
     return MaterialApp.router(
-      title: 'TAPA Budget Pro',
+      title: 'TAPA Invest Pro',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       localizationsDelegates: const [

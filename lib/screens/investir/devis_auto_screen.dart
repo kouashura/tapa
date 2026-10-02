@@ -159,7 +159,7 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
     }
 
     parts.add('---');
-    parts.add('Envoyé depuis TAPA Budget');
+    parts.add('Envoyé depuis TAPA Invest');
     parts.add('Contact: +225 07 18 14 87 79');
 
     return parts.join('\n');

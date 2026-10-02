@@ -183,7 +183,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                     ),
                   ),
                   TextSpan(
-                    text: ' Budget',
+                    text: ' Invest',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w400,

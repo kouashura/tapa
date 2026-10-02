@@ -45,7 +45,7 @@ class OTPService {
           body: {
             'username': _username,
             'to': tel,
-            'message': 'Votre code TAPA Budget : $code. '
+            'message': 'Votre code TAPA Invest : $code. '
                 'Valable 10 minutes.',
           });
 

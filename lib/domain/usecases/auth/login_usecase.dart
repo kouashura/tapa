@@ -68,7 +68,7 @@ class LoginResult {
   factory LoginResult.needOnboarding() {
     return LoginResult(
       requiresOnboarding: true,
-      message: 'Bienvenue ! Découvrez TAPA Budget.',
+      message: 'Bienvenue ! Découvrez TAPA Invest.',
     );
   }
 

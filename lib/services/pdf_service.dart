@@ -382,7 +382,7 @@ class PdfService {
                     pw.SizedBox(height: 4),
                     pw.Text(
                         'Ce score est base sur les donnees auto-declarees par '
-                            'l utilisateur dans TAPA Budget. Il est fourni a titre '
+                            'l utilisateur dans TAPA Invest. Il est fourni a titre '
                             'indicatif et educatif. Pour une evaluation officielle, '
                             'des donnees vérifiees par des tiers sont nécessaires.',
                         style: pw.TextStyle(fontSize: 9,
@@ -494,7 +494,7 @@ class PdfService {
                 pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('TAPA Budget',
+                      pw.Text('TAPA Invest',
                           style: pw.TextStyle(fontSize: 22,
                               fontWeight: pw.FontWeight.bold,
                               color: PdfColors.blueGrey900)),
@@ -692,7 +692,7 @@ class PdfService {
       pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            pw.Text('TAPA Budget — Le budget simple pour tous.',
+            pw.Text('TAPA Invest — Le budget simple pour tous.',
                 style: pw.TextStyle(fontSize: 8,
                     color: PdfColors.grey500)),
             pw.Text('Document confidentiel',

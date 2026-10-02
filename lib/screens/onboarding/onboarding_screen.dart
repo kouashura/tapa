@@ -73,7 +73,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
   static const List<Map<String, dynamic>> _slides = [
     {
       'emoji': '👋',
-      'titre': 'Bienvenue sur TAPA Budget',
+      'titre': 'Bienvenue sur TAPA Invest',
       'sousTitre': 'LE COACH FINANCIER DE CHAQUE AFRICAIN',
       'description':
       'Prenez le contrôle de votre argent et construisez '

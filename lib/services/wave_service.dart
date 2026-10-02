@@ -25,11 +25,11 @@ class WaveService {
         'succèss_url': 'https://tapaconseil.com/paiement-reussi',
         'client_reference': userId,
         'payment_method': 'wave_money',
-        'name': 'Licence TAPA Budget - Accès a vie',
+        'name': 'Licence TAPA Invest - Accès a vie',
         'merchant_data': {
           'client_nom': nomClient,
           'client_téléphone': telephone,
-          'produit': 'TAPA Budget Licence',
+          'produit': 'TAPA Invest Licence',
         }
       };
 

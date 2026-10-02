@@ -8,7 +8,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>TAPA Budget</string>
+    <string>TAPA Invest</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -16,7 +16,7 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>TAPA Budget</string>
+    <string>TAPA Invest</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -98,16 +98,16 @@
     ✅ PERMISSIONS
     ============================================ -->
     <key>NSCameraUsageDescription</key>
-    <string>TAPA Budget utilise la caméra pour scanner vos reçus et documents</string>
+    <string>TAPA Invest utilise la caméra pour scanner vos reçus et documents</string>
 
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>TAPA Budget utilise la galerie pour importer vos reçus et documents</string>
+    <string>TAPA Invest utilise la galerie pour importer vos reçus et documents</string>
 
     <key>NSMicrophoneUsageDescription</key>
-    <string>TAPA Budget utilise le microphone pour la saisie vocale de vos transactions</string>
+    <string>TAPA Invest utilise le microphone pour la saisie vocale de vos transactions</string>
 
     <key>NSUserNotificationUsageDescription</key>
-    <string>TAPA Budget vous envoie des rappels pour vos échéances et notifications</string>
+    <string>TAPA Invest vous envoie des rappels pour vos échéances et notifications</string>
 
 </dict>
 </plist>

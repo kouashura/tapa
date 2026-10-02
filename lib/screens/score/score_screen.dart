@@ -139,7 +139,7 @@ class _ScoreScreenState extends State<ScoreScreen> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'Score basé sur vos habitudes financières dans TAPA Budget.',
+                'Score basé sur vos habitudes financières dans TAPA Invest.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 11,

@@ -21,6 +21,7 @@ import '../../screens/auth/setup_wallets_screen.dart';
 import '../../screens/onboarding/onboarding_screen.dart';
 import '../../screens/home/home_screen.dart';
 import '../../screens/wallets/wallets_screen.dart';
+import '../../screens/wallet/wallet_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/profile/edit_profile_screen.dart';
 import '../../screens/profile/categories_screen.dart';
@@ -112,56 +113,7 @@ class AppRouter {
           return isPinScreen ? null : '/pin-setup';
         }
 
-        // ÉTAPE 3 : VÉRIFICATION ESSAI + ROOT
-        final db = DBService();
-        final firebaseService = FirebaseService();
-        final isRoot = firebaseService.isRootUser;
-
-        // SI ROOT → ACCÈS ILLIMITÉ
-        if (isRoot) {
-          Logger.info('👑 Redirection: Utilisateur Root - Accès illimité');
-          if (isActivationScreen) {
-            return '/home';
-          }
-          return null;
-        }
-
-        // VÉRIFICATION ESSAI
-        bool essaiExpire = false;
-        bool aAcces = false;
-
-        try {
-          essaiExpire = db.essaiGratuitExpire;
-          aAcces = db.aAccesAVie;
-
-          if (!essaiExpire && db.joursRestantsEssai == 0) {
-            essaiExpire = await db.isEssaiGratuitExpire();
-          }
-        } catch (e) {
-          Logger.error('❌ Erreur vérification essai: $e');
-          essaiExpire = false;
-        }
-
-        Logger.info('🔍 Redirection - Essai expiré: $essaiExpire, Accès: $aAcces, Root: $isRoot');
-
-        // SI ESSAI EXPIRE ET PAS D'ACCES
-        if (essaiExpire && !aAcces && !isActivationScreen) {
-          Logger.info('🔄 Redirection: Essai expiré → /activation');
-          return '/activation';
-        }
-
-        // SI SUR ACTIVATION MAIS ACCÈS VALIDE
-        if (isActivationScreen && (aAcces || !essaiExpire)) {
-          Logger.info('🔄 Redirection: Activation déjà validée → /home');
-          return '/home';
-        }
-
-        // ÉTAPE 4 : ACCUEIL
-        if (isAuthScreen || isOnboardingScreen || isPinScreen || isActivationScreen) {
-          Logger.info('🔄 Redirection: Accès validé → /home');
-          return '/home';
-        }
-
+        // ✅ ACCÈS GRATUIT POUR TOUS : plus de vérification d'essai/abonnement
         return null;
       },
       routes: [
@@ -240,6 +192,10 @@ class AppRouter {
         GoRoute(
           path: '/wallets',
           builder: (context, state) => const WalletsScreen(),
+        ),
+        GoRoute(
+          path: '/wallet',
+          builder: (context, state) => const WalletScreen(),
         ),
         GoRoute(
           path: '/add-transaction',

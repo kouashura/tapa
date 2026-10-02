@@ -177,7 +177,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: SelectableText(
-                      'Bonjour TAPA Budget ! Je souhaite obtenir l\'accès à vie.',
+                      'Bonjour TAPA Invest ! Je souhaite obtenir l\'accès à vie.',
                       style: const TextStyle(
                         fontSize: 12,
                         color: TAPAColors.navy,
@@ -214,7 +214,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _ouvrirWhatsApp(
-                      message: 'Bonjour TAPA Budget ! Je souhaite obtenir l\'accès à vie.',
+                      message: 'Bonjour TAPA Invest ! Je souhaite obtenir l\'accès à vie.',
                     ),
                     icon: const Icon(Icons.open_in_browser, size: 16),
                     label: const Text('Ouvrir WhatsApp'),
@@ -244,8 +244,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   // ============================================
 
   void _demanderCleWhatsApp() {
-    final message = 'Bonjour TAPA Budget ! 👋\n\n'
-        'Je souhaite obtenir l\'accès à vie de TAPA Budget à ${_montant.toString()} FCFA.\n'
+    final message = 'Bonjour TAPA Invest ! 👋\n\n'
+        'Je souhaite obtenir l\'accès à vie de TAPA Invest à ${_montant.toString()} FCFA.\n'
         'Pouvez-vous m\'envoyer ma clé d\'accès ?\n\n'
         '📱 Mon numéro: ${_numeroCtrl.text.isNotEmpty ? _numeroCtrl.text : "__________________"}\n'
         '📅 Date: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
@@ -886,7 +886,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Vous avez accès à toutes les fonctionnalités de TAPA Budget.',
+              'Vous avez accès à toutes les fonctionnalités de TAPA Invest.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,

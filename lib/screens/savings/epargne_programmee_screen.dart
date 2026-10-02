@@ -120,7 +120,7 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Ce compte est verrouillé. Envoyez un WhatsApp à TAPA Budget '
+              'Ce compte est verrouillé. Envoyez un WhatsApp à TAPA Invest '
                   'pour recevoir votre code de déverrouillage.',
               style: TextStyle(fontSize: 13),
             ),
@@ -129,7 +129,7 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
               onPressed: () {
                 Navigator.pop(ctx);
                 LinkService.ouvrirWhatsApp(
-                  message: 'Bonjour TAPA Budget ! Je souhaite déverrouiller '
+                  message: 'Bonjour TAPA Invest ! Je souhaite déverrouiller '
                       'mon épargne programmée "${ep.titre}". '
                       'Pouvez-vous m\'envoyer le code ?',
                 );

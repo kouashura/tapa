@@ -110,7 +110,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
     }
 
     return '''Tu es TAPA Coach, un assistant financier personnel bienveillant et expert, 
-intégré dans l'application TAPA Budget pour l'Afrique de l'Ouest.
+intégré dans l'application TAPA Invest pour l'Afrique de l'Ouest.
 
 TON RÔLE :
 - Coach financier personnel chaleureux et accessible
@@ -235,7 +235,7 @@ RÈGLES :
           'L\'épargne est la clé de la liberté financière. Voici 3 conseils :\n\n'
           '1️⃣ Règle 50/30/20 : 50% besoins, 30% loisirs, 20% épargne\n'
           '2️⃣ Commencez par 10% de vos revenus chaque mois\n'
-          '3️⃣ Utilisez les objectifs d\'épargne dans TAPA Budget\n\n'
+          '3️⃣ Utilisez les objectifs d\'épargne dans TAPA Invest\n\n'
           'Quels sont vos objectifs d\'épargne actuels ? 🎯';
     } else if (msg.contains('budget') || msg.contains('dépense') || msg.contains('depense')) {
       reponse = 'Bonjour $prenom ! 📊\n\n'
@@ -243,7 +243,7 @@ RÈGLES :
           '✅ Listez TOUTES vos dépenses\n'
           '✅ Utilisez la règle 50/30/20\n'
           '✅ Suivez vos dépenses en temps réel\n\n'
-          'Avez-vous créé votre budget dans TAPA Budget ? 💪';
+          'Avez-vous créé votre budget dans TAPA Invest ? 💪';
     } else if (msg.contains('invest') || msg.contains('investissement')) {
       reponse = 'Bonjour $prenom ! 📈\n\n'
           'Investir est une excellente façon de faire fructifier votre argent.\n\n'
@@ -255,7 +255,7 @@ RÈGLES :
     } else if (msg.contains('assurance') || msg.contains('protég') || msg.contains('protege')) {
       reponse = 'Bonjour $prenom ! 🛡️\n\n'
           'L\'assurance vie est un outil puissant pour protéger vos proches.\n\n'
-          'Avec SONAM VIE, partenaire de TAPA Budget :\n'
+          'Avec SONAM VIE, partenaire de TAPA Invest :\n'
           '✅ Assurance décès : jusqu\'à 10 000 000 FCFA\n'
           '✅ Assurance épargne : rendement garanti\n'
           '✅ Assurance éducation\n\n'

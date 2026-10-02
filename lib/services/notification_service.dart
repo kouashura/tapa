@@ -30,7 +30,7 @@ class NotificationService {
       await _notifs.show(
         1,
         'Mot du jour TAPA',
-        'Ouvre TAPA Budget pour apprendre !',
+        'Ouvre TAPA Invest pour apprendre !',
         const NotificationDetails(
           android: AndroidNotificationDetails(
             'education_channel',
@@ -133,7 +133,7 @@ class NotificationService {
 
       await _notifs.zonedSchedule(
         10,
-        'TAPA Budget',
+        'TAPA Invest',
         _messagesMatin[rand],
         _toTZDateTime(heureMatin),
         const NotificationDetails(
@@ -154,7 +154,7 @@ class NotificationService {
 
       await _notifs.zonedSchedule(
         11,
-        'TAPA Budget',
+        'TAPA Invest',
         _messagesSoir[rand],
         _toTZDateTime(heureSoir),
         const NotificationDetails(
@@ -238,7 +238,7 @@ class NotificationService {
 
       await _notifs.zonedSchedule(
         20,
-        '⏰ TAPA Budget — Votre essai se termine bientôt',
+        '⏰ TAPA Invest — Votre essai se termine bientôt',
         'Il vous reste 3 jours pour profiter de toutes les fonctionnalités.\n'
             'Passez à l\'accès à vie pour seulement 5 000 FCFA !',
         _toTZDateTime(dateRappel),
@@ -278,8 +278,8 @@ class NotificationService {
 
       await _notifs.zonedSchedule(
         21,
-        '🔒 TAPA Budget — Votre essai gratuit est terminé',
-        'Pour continuer à utiliser TAPA Budget,\n'
+        '🔒 TAPA Invest — Votre essai gratuit est terminé',
+        'Pour continuer à utiliser TAPA Invest,\n'
             'activez l\'accès à vie pour seulement 5 000 FCFA !',
         _toTZDateTime(dateFinEssai),
         const NotificationDetails(
@@ -312,7 +312,7 @@ class NotificationService {
         22,
         '🎉 Félicitations !',
         'Votre accès à vie est activé !\n'
-            'Profitez de toutes les fonctionnalités de TAPA Budget.',
+            'Profitez de toutes les fonctionnalités de TAPA Invest.',
         const NotificationDetails(
           android: AndroidNotificationDetails(
             'activation_channel',

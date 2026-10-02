@@ -162,7 +162,7 @@ class _WavePaymentScreenState extends ConsumerState<WavePaymentScreen> {
         'currency': 'XOF',
         'merchantId': MERCHANT_ID,
         'merchantSecret': MERCHANT_SECRET,
-        'description': 'Accès à vie - TAPA Budget',
+        'description': 'Accès à vie - TAPA Invest',
         'successUrl': 'https://tapa-budget.com/success',
         'cancelUrl': 'https://tapa-budget.com/cancel',
       };
@@ -670,7 +670,7 @@ class _WavePaymentScreenState extends ConsumerState<WavePaymentScreen> {
       ),
       child: Column(
         children: [
-          _summaryRow('Article', 'Accès à vie TAPA Budget'),
+          _summaryRow('Article', 'Accès à vie TAPA Invest'),
           _summaryRow('Méthode', 'Wave'),
           _summaryRow('Téléphone', _phoneController.text.isEmpty ? 'Non renseigné' : _phoneController.text),
           const Divider(height: 16),

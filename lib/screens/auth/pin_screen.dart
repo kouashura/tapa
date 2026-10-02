@@ -235,7 +235,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                     ),
                   ),
                   TextSpan(
-                    text: ' Budget',
+                    text: ' Invest',
                     style: TextStyle(
                       fontSize: 26,
                       color: TAPAColors.white,

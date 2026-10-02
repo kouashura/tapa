@@ -10,9 +10,9 @@ class GuideScreen extends StatelessWidget {
   static const List<Map<String, dynamic>> _sections = [
     {
       'numero': '01',
-      'titre': 'Bienvenue dans TAPA Budget',
+      'titre': 'Bienvenue dans TAPA Invest',
       'contenu': [
-        'TAPA Budget est votre application de gestion financiere personnelle conçue pour l Afrique de l Ouest.',
+        'TAPA Invest est votre application de gestion financiere personnelle conçue pour l Afrique de l Ouest.',
         'Elle vous permet de suivre vos revenus et depenses, gerer vos portefeuilles mobile money, planifier votre budget et atteindre vos objectifs financiers.',
         '✅ Simple a utiliser',
         '✅ Adapte au contexte africain (Wave, Orange Money, MTN MoMo...)',
@@ -72,7 +72,7 @@ class GuideScreen extends StatelessWidget {
       'numero': '05',
       'titre': 'Scanner un recu',
       'contenu': [
-        'TAPA Budget peut lire automatiquement vos recus !',
+        'TAPA Invest peut lire automatiquement vos recus !',
         'Comment faire :',
         '1. Sur l Accueil, appuyez sur le bouton VERT (icone scanner)',
         '2. Choisissez PRENDRE UNE PHOTO ou GALERIE',
@@ -194,7 +194,7 @@ class GuideScreen extends StatelessWidget {
           child: pw.Center(child: pw.Column(
             mainAxisAlignment: pw.MainAxisAlignment.center,
             children: [
-              pw.Text('TAPA Budget',
+              pw.Text('TAPA Invest',
                 style: pw.TextStyle(fontSize: 48,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.amber)),
@@ -233,14 +233,14 @@ class GuideScreen extends StatelessWidget {
                     color: PdfColors.blueGrey900)))),
             pw.SizedBox(height: 20),
             pw.Divider(),
-            pw.Text('TAPA Budget — Guide Pratique | +225 01 60 25 41 02',
+            pw.Text('TAPA Invest — Guide Pratique | +225 01 60 25 41 02',
               style: pw.TextStyle(fontSize: 9, color: PdfColors.grey500)),
           ]));
       }
 
       await Printing.sharePdf(
         bytes: await pdf.save(),
-        filename: 'Guide_TAPA_Budget.pdf');
+        filename: 'Guide_TAPA_Invest.pdf');
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -285,13 +285,13 @@ class GuideScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 20,
                     fontWeight: FontWeight.w800,
                     color: TAPAColors.white)),
-                const Text('TAPA Budget',
+                const Text('TAPA Invest',
                   style: TextStyle(fontSize: 16,
                     color: TAPAColors.gold,
                     fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
                 const Text(
-                  'Apprenez a utiliser TAPA Budget efficacement',
+                  'Apprenez a utiliser TAPA Invest efficacement',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 13,
                     color: Colors.white60)),

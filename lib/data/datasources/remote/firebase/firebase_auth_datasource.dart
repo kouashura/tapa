@@ -10,7 +10,7 @@ import '../../../models/models.dart';
 /// Datasource pour l'authentification Firebase
 class FirebaseAuthDatasource {
   static final FirebaseAuthDatasource _instance =
-  FirebaseAuthDatasource._internal();
+      FirebaseAuthDatasource._internal();
 
   factory FirebaseAuthDatasource() => _instance;
 
@@ -129,7 +129,6 @@ class FirebaseAuthDatasource {
         return null;
       }
 
-      // Vérifier si l'utilisateur existe dans Firestore
       final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
 
       if (doc.exists) {
@@ -137,7 +136,6 @@ class FirebaseAuthDatasource {
         return AppUser.fromMap(data, firebaseUser.uid);
       }
 
-      // Créer un nouvel utilisateur si pas trouvé
       return AppUser(
         id: firebaseUser.uid,
         phoneNumber: firebaseUser.phoneNumber ?? '',
@@ -159,7 +157,9 @@ class FirebaseAuthDatasource {
   // CRÉATION D'UTILISATEUR
   // ============================================
 
-  /// Crée un nouvel utilisateur dans Firestore
+  /// Crée un nouvel utilisateur dans Firestore.
+  /// Si aucun utilisateur Firebase Auth n'est connecté, un utilisateur
+  /// anonyme est créé automatiquement.
   Future<AppUser> createUser({
     required String prenom,
     required String telephone,
@@ -168,9 +168,15 @@ class FirebaseAuthDatasource {
     required String monnaie,
   }) async {
     try {
-      final firebaseUser = _auth.currentUser;
+      // ✅ Créer un utilisateur Firebase Auth anonyme si aucun n'est connecté
+      var firebaseUser = _auth.currentUser;
       if (firebaseUser == null) {
-        throw Exception('Aucun utilisateur Firebase connecté');
+        Logger.info('ℹ️ Aucun utilisateur Firebase, création anonyme...');
+        final credential = await _auth.signInAnonymously();
+        firebaseUser = credential.user;
+      }
+      if (firebaseUser == null) {
+        throw Exception('Impossible de créer un utilisateur Firebase');
       }
 
       final user = AppUser(
@@ -203,9 +209,9 @@ class FirebaseAuthDatasource {
   Future<void> updateUser(AppUser user) async {
     try {
       await _firestore.collection('users').doc(user.id).set(
-        user.toMap(),
-        SetOptions(merge: true),
-      );
+            user.toMap(),
+            SetOptions(merge: true),
+          );
       Logger.info('📝 Utilisateur mis à jour: ${user.prenom}');
     } catch (e) {
       Logger.error('❌ Erreur updateUser: $e');
@@ -264,10 +270,7 @@ class FirebaseAuthDatasource {
         );
       }
 
-      // Supprimer les données Firestore
       await _firestore.collection('users').doc(firebaseUser.uid).delete();
-
-      // Supprimer le compte Firebase
       await firebaseUser.delete();
 
       Logger.success('🗑️ Compte supprimé avec succès');

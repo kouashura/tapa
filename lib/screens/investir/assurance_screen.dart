@@ -226,8 +226,8 @@ class _AssuranceScreenState extends ConsumerState<AssuranceScreen> with SingleTi
                     ),
                     Text(
                       isAuto
-                          ? 'Partenaire assurance auto de TAPA Budget'
-                          : 'Partenaire assurance de TAPA Budget',
+                          ? 'Partenaire assurance auto de TAPA Invest'
+                          : 'Partenaire assurance de TAPA Invest',
                       style: const TextStyle(
                         fontSize: 11.5,
                         color: TAPAColors.textSecond,

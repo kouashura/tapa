@@ -379,7 +379,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                             ),
                             TextSpan(
-                              text: ' Budget',
+                              text: ' Invest',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: TAPAColors.white,

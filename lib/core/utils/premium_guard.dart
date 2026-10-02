@@ -62,7 +62,7 @@ class PremiumGuard {
             const SizedBox(height: 8),
             const Text(
               'Cette fonctionnalité est réservée aux\n'
-                  'membres premium TAPA Budget.',
+                  'membres premium TAPA Invest.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: TAPAColors.textSecond,

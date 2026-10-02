@@ -111,7 +111,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                           TextSpan(
-                            text: ' Budget',
+                            text: ' Invest',
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w400,

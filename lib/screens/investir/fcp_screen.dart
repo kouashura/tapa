@@ -152,7 +152,7 @@ class _InvestirFCPScreenState extends State<InvestirFCPScreen> {
               const SizedBox(width: 10),
               Expanded(child: Text(
                 'Les fonds sont geres par notre partenaire agree. '
-                'TAPA Budget facilite uniquement la mise en relation.',
+                'TAPA Invest facilite uniquement la mise en relation.',
                 style: TextStyle(
                   fontSize: 11.5,
                   color: TAPAColors.textSecond,
