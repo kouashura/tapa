@@ -33,7 +33,9 @@ class _DettesScreenState extends ConsumerState<DettesScreen> {
   @override
   void initState() {
     super.initState();
-    _chargerDettes();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _chargerDettes();
+    });
   }
 
   Future<void> _chargerDettes() async {

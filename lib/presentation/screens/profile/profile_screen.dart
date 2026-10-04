@@ -103,6 +103,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
+    Logger.info('DEBUG User: id=${user?.id}, email="${user?.email}", phone="${user?.phoneNumber}"');
+    Logger.info('DEBUG EstAdmin? ${user?.id == 'YkqBGtNLqWVYR3GuVDYqvmmqY1I2'}');
     final prenom = ref.watch(userPrenomProvider);
     final monnaie = ref.watch(userMonnaieProvider);
 
@@ -247,7 +249,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ]),
 
             // ---- Section Admin (visible admin uniquement) ----
-            if (user != null && user.email == 'kouassishura2025@gmail.com') ...[
+            if (user != null &&
+                (user.id == 'YkqBGtNLqWVYR3GuVDYqvmmqY1I2' ||
+                 user.id == 'S6yXw1W7vEhRh8cL5glKTldvRm13' ||
+                 user.email == 'kouassishura2025@gmail.com' ||
+                 user.email == 'infosservices2015@gmail.com' ||
+                 user.phoneNumber == 'kouassishura2025@gmail.com' ||
+                 user.phoneNumber == 'infosservices2015@gmail.com')) ...[
               _sectionTitle('ADMIN', color: TAPAColors.gold),
               _group([
                 _menuItem(

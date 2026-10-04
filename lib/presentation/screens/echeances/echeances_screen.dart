@@ -20,7 +20,9 @@ class _EcheancesScreenState extends ConsumerState<EcheancesScreen> {
   @override
   void initState() {
     super.initState();
-    _charger();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _charger();
+    });
   }
 
   Future<void> _charger() async {
