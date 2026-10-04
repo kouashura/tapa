@@ -53,6 +53,7 @@ import '../screens/investir/devis_auto_screen.dart';
 import '../screens/investir/assurance_success_screen.dart';
 import '../screens/profile/historique_paiements_screen.dart';
 import '../screens/admin/admin_tarifs_screen.dart';
+import '../screens/admin/admin_souscriptions_screen.dart';
 import '../screens/migration/migration_page.dart';
 
 class AppRouter {
@@ -329,6 +330,10 @@ class AppRouter {
         GoRoute(
           path: '/admin/tarifs',
           builder: (context, state) => const AdminTarifsScreen(),
+        ),
+        GoRoute(
+          path: '/admin/souscriptions',
+          builder: (context, state) => const AdminSouscriptionsScreen(),
         ),
         GoRoute(
           path: '/migration',

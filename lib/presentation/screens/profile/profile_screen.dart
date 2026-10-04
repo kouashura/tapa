@@ -266,6 +266,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   subtitle: 'Gerer les tarifs assurance auto',
                   onTap: () => context.push('/admin/tarifs'),
                 ),
+                _menuItem(
+                  icon: Icons.receipt_long,
+                  iconColor: const Color(0xFF27AE60),
+                  bgColor: const Color(0xFFEAF7EF),
+                  title: 'Administration des souscriptions',
+                  subtitle: 'Valider ou annuler les souscriptions',
+                  onTap: () => context.push('/admin/souscriptions'),
+                ),
               ]),
             ],
 

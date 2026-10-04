@@ -51,4 +51,40 @@ class SouscriptionRepositoryImpl implements ISouscriptionRepository {
       return null;
     }
   }
+
+  // ============================================
+  // METHODES ADMIN
+  // ============================================
+
+  @override
+  Future<List<SouscriptionModel>> getAllSouscriptions() async {
+    try {
+      return await _firestoreDatasource.getAllSouscriptions();
+    } catch (e) {
+      Logger.error('Erreur recuperation toutes souscriptions: $e');
+      throw ErrorHandler().handleException(e);
+    }
+  }
+
+  @override
+  Stream<List<SouscriptionModel>> watchAllSouscriptions() {
+    return _firestoreDatasource.listenToAllSouscriptions().map((snapshot) {
+      return snapshot.docs
+          .map((doc) => SouscriptionModel.fromMap(
+                {...doc.data(), 'id': doc.id},
+                doc.id,
+              ))
+          .toList();
+    });
+  }
+
+  @override
+  Future<void> updateSouscriptionStatut(String reference, String statut) async {
+    try {
+      await _firestoreDatasource.updateSouscriptionStatut(reference, statut);
+    } catch (e) {
+      Logger.error('Erreur mise a jour statut: $e');
+      throw ErrorHandler().handleException(e);
+    }
+  }
 }

@@ -410,6 +410,46 @@ class FirebaseFirestoreDatasource {
   }
 
   // ============================================
+  // SOUSCRIPTIONS - ADMIN
+  // ============================================
+
+  Future<List<SouscriptionModel>> getAllSouscriptions() async {
+    try {
+      final query = await souscriptions
+          .orderBy('dateCreation', descending: true)
+          .get();
+      return query.docs
+          .map((doc) => SouscriptionModel.fromMap(
+                {...doc.data(), 'id': doc.id},
+                doc.id,
+              ))
+          .toList();
+    } catch (e) {
+      Logger.error('Erreur recuperation toutes souscriptions: $e');
+      return [];
+    }
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> listenToAllSouscriptions() {
+    return souscriptions
+        .orderBy('dateCreation', descending: true)
+        .snapshots();
+  }
+
+  Future<void> updateSouscriptionStatut(String reference, String statut) async {
+    try {
+      await souscriptions.doc(reference).update({
+        'statut': statut,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      Logger.success('Souscription $reference -> $statut');
+    } catch (e) {
+      Logger.error('Erreur mise a jour statut: $e');
+      throw ErrorHandler().handleException(e);
+    }
+  }
+
+  // ============================================
   // BUDGETS
   // ============================================
 
