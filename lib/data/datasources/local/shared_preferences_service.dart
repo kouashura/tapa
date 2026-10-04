@@ -404,7 +404,7 @@ class SharedPreferencesService {
 
   void _ensureInitialized() {
     if (!_isInitialized) {
-      throw CacheFailure(
+      throw const CacheFailure(
         message: 'SharedPreferencesService non initialisé. Appelez init() d\'abord.',
         code: 'NOT_INITIALIZED',
       );

@@ -136,10 +136,10 @@ class AppStrings {
   // ============================================
   // ÉPARGNE
   // ============================================
-  static const String savingsTitle = 'Épargne';
+  static const String savingsTitle = 'Enveloppe';
   static const String savingsTotal = 'TOTAL ÉPARGNÉ';
-  static const String savingsGoals = 'Objectifs d\'épargne';
-  static const String savingsProgrammed = 'Épargne programmée';
+  static const String savingsGoals = 'Objectifs d\'enveloppe';
+  static const String savingsProgrammed = 'Enveloppe programmée';
   static const String savingsAdd = 'Nouvel objectif';
   static const String savingsName = 'Nom de l\'objectif *';
   static const String savingsNameHint = 'ex : Rentrée scolaire';

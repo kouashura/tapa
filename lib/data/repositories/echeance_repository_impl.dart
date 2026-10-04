@@ -88,7 +88,7 @@ class EcheanceRepositoryImpl implements IEcheanceRepository {
     try {
       final echeances = await _firestoreDatasource.getEcheances(echeanceId);
       if (echeances.isEmpty) {
-        throw DatabaseFailure(
+        throw const DatabaseFailure(
           message: 'Échéance non trouvée.',
           code: 'ECHEANCE_NOT_FOUND',
         );

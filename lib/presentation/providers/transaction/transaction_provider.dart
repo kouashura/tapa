@@ -4,12 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/models.dart';
 import '../../../domain/repositories/i_transaction_repository.dart';
 import '../../../data/repositories/transaction_repository_impl.dart';
-import '../../../domain/repositories/i_wallet_repository.dart';
 import '../../../domain/usecases/transaction/add_transaction_usecase.dart';
 import '../../../domain/usecases/transaction/get_transactions_usecase.dart';
 import '../../../domain/usecases/transaction/delete_transaction_usecase.dart';
 import '../../../domain/usecases/transaction/update_transaction_usecase.dart';
-import '../app_state.dart';
 import '../wallet/wallet_provider.dart';  // ✅ Utiliser wallet_provider
 import '../../../core/utils/logger.dart';
 

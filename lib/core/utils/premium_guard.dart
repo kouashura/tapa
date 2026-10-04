@@ -40,7 +40,7 @@ class PremiumGuard {
             Container(
               width: 60,
               height: 60,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: TAPAColors.goldLight,
                 shape: BoxShape.circle,
               ),
@@ -77,9 +77,9 @@ class PremiumGuard {
                 color: TAPAColors.navy,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Column(
+              child: const Column(
                 children: [
-                  const Text(
+                  Text(
                     'Accès à vie',
                     style: TextStyle(
                       color: TAPAColors.gold,
@@ -87,8 +87,8 @@ class PremiumGuard {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
+                  SizedBox(height: 4),
+                  Text(
                     '5 000 FCFA',
                     style: TextStyle(
                       color: TAPAColors.white,
@@ -96,7 +96,7 @@ class PremiumGuard {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const Text(
+                  Text(
                     'Paiement unique — toutes les fonctionnalités',
                     style: TextStyle(
                       color: Colors.white54,

@@ -40,7 +40,7 @@ class ScoreTAPA {
 class ScoreService {
   static Future<ScoreTAPA> calculer(DBService db) async {
     // ✅ CORRECTION: Ajouter await
-    final txs = await await db.getTransactions();
+    final txs = await db.getTransactions();
     final revenus = txs.where((t) => t.isRevenu).toList();
     final depenses = txs.where((t) => t.isDepense).toList();
     final epargnes = db.getSavingsGoals();
@@ -64,8 +64,9 @@ class ScoreService {
 
     // 2. SCORE DEPENSES (20 pts)
     int scoreDepenses = 0;
-    if (totalRev > 0 && totalDep < totalRev) scoreDepenses += 10;
-    else if (totalDep == 0) scoreDepenses += 5;
+    if (totalRev > 0 && totalDep < totalRev) {
+      scoreDepenses += 10;
+    } else if (totalDep == 0) scoreDepenses += 5;
     final budget = await db.getBudget(now.month, now.year);
     if (budget != null) scoreDepenses += 6;
     if (budget != null && totalDep <= budget.totalDepensesPrevu) {
@@ -125,8 +126,9 @@ class ScoreService {
 
     // PENALITE COHERENCE
     int penalite = 0;
-    if (scoreCoherence < 60) penalite = 20;
-    else if (scoreCoherence < 80) penalite = 10;
+    if (scoreCoherence < 60) {
+      penalite = 20;
+    } else if (scoreCoherence < 80) penalite = 10;
 
     final total = (scoreRevenus + scoreDepenses +
         scoreEpargne + scoreDettes + scoreRegularite - penalite)

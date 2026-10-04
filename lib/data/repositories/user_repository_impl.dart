@@ -134,7 +134,7 @@ class UserRepositoryImpl implements IUserRepository {
     try {
       final user = await getCurrentUser();
       if (user == null) {
-        throw AuthFailure(
+        throw const AuthFailure(
           message: 'Aucun utilisateur connecté.',
           code: 'NOT_AUTHENTICATED',
         );
@@ -158,7 +158,7 @@ class UserRepositoryImpl implements IUserRepository {
     try {
       final user = await getCurrentUser();
       if (user == null) {
-        throw AuthFailure(
+        throw const AuthFailure(
           message: 'Aucun utilisateur connecté.',
           code: 'NOT_AUTHENTICATED',
         );
@@ -200,7 +200,7 @@ class UserRepositoryImpl implements IUserRepository {
     try {
       final user = await getCurrentUser();
       if (user == null) {
-        throw AuthFailure(
+        throw const AuthFailure(
           message: 'Aucun utilisateur connecté.',
           code: 'NOT_AUTHENTICATED',
         );
@@ -224,7 +224,7 @@ class UserRepositoryImpl implements IUserRepository {
     try {
       final user = await getCurrentUser();
       if (user == null) {
-        throw AuthFailure(
+        throw const AuthFailure(
           message: 'Aucun utilisateur connecté.',
           code: 'NOT_AUTHENTICATED',
         );

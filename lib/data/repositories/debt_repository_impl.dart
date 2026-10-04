@@ -87,7 +87,7 @@ class DebtRepositoryImpl implements IDebtRepository {
     try {
       final dettes = await _firestoreDatasource.getDettes(detteId);
       if (dettes.isEmpty) {
-        throw DatabaseFailure(
+        throw const DatabaseFailure(
           message: 'Dette non trouvée.',
           code: 'DEBT_NOT_FOUND',
         );

@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../../../core/utils/logger.dart';
-import '../../../../core/errors/failure.dart';
 import '../../../../core/errors/error_handler.dart';
 import '../../../models/models.dart';
 
@@ -12,7 +11,7 @@ import '../../../models/models.dart';
 /// Gère toutes les interactions avec Firebase Firestore
 class FirebaseFirestoreDatasource {
   static final FirebaseFirestoreDatasource _instance =
-  FirebaseFirestoreDatasource._internal();
+      FirebaseFirestoreDatasource._internal();
 
   factory FirebaseFirestoreDatasource() => _instance;
 
@@ -39,6 +38,10 @@ class FirebaseFirestoreDatasource {
       _firestore.collection('dettes');
   CollectionReference<Map<String, dynamic>> get budgets =>
       _firestore.collection('budgets');
+  CollectionReference<Map<String, dynamic>> get souscriptions =>
+      _firestore.collection('souscriptions');
+  CollectionReference<Map<String, dynamic>> get config =>
+      _firestore.collection('config');
   CollectionReference<Map<String, dynamic>> get echeances =>
       _firestore.collection('echeances');
   CollectionReference<Map<String, dynamic>> get epargneProgrammee =>
@@ -48,7 +51,6 @@ class FirebaseFirestoreDatasource {
   // UTILISATEURS
   // ============================================
 
-  /// Récupère un utilisateur par son UID
   Future<AppUser?> getUser(String uid) async {
     try {
       final doc = await users.doc(uid).get();
@@ -60,10 +62,10 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Récupère un utilisateur par son numéro de téléphone
   Future<List<AppUser>> findUserByPhone(String phoneNumber) async {
     try {
-      final query = await users.where('phoneNumber', isEqualTo: phoneNumber).get();
+      final query =
+          await users.where('phoneNumber', isEqualTo: phoneNumber).get();
       return query.docs
           .map((doc) => AppUser.fromMap(doc.data(), doc.id))
           .toList();
@@ -73,7 +75,6 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Sauvegarde un utilisateur
   Future<void> saveUser(AppUser user) async {
     try {
       await users.doc(user.id).set(user.toMap(), SetOptions(merge: true));
@@ -84,13 +85,10 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Supprime un utilisateur
   Future<void> deleteUserData(String uid) async {
     try {
-      // Supprimer l'utilisateur
       await users.doc(uid).delete();
 
-      // Supprimer toutes les données liées
       final collections = [
         wallets,
         transactions,
@@ -122,7 +120,6 @@ class FirebaseFirestoreDatasource {
   // PORTEFEUILLES
   // ============================================
 
-  /// Récupère tous les portefeuilles d'un utilisateur
   Future<List<WalletModel>> getWallets(String uid) async {
     try {
       final query = await wallets.where('uid', isEqualTo: uid).get();
@@ -135,7 +132,6 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Sauvegarde un portefeuille
   Future<void> saveWallet(WalletModel wallet) async {
     try {
       await wallets.doc(wallet.id).set(wallet.toMap(), SetOptions(merge: true));
@@ -146,7 +142,6 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Supprime un portefeuille
   Future<void> deleteWallet(String walletId) async {
     try {
       await wallets.doc(walletId).delete();
@@ -161,12 +156,11 @@ class FirebaseFirestoreDatasource {
   // TRANSACTIONS
   // ============================================
 
-  /// Récupère les transactions d'un utilisateur
   Future<List<TransactionModel>> getTransactions(
-      String uid, {
-        int limit = 50,
-        bool descending = true,
-      }) async {
+    String uid, {
+    int limit = 50,
+    bool descending = true,
+  }) async {
     try {
       final query = await transactions
           .where('uid', isEqualTo: uid)
@@ -175,9 +169,9 @@ class FirebaseFirestoreDatasource {
           .get();
       return query.docs
           .map((doc) => TransactionModel.fromMap(
-        {...doc.data(), 'id': doc.id},
-        doc.id,
-      ))
+                {...doc.data(), 'id': doc.id},
+                doc.id,
+              ))
           .toList();
     } catch (e) {
       Logger.error('❌ Erreur récupération transactions: $e');
@@ -185,11 +179,10 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Récupère les transactions d'un portefeuille
   Future<List<TransactionModel>> getWalletTransactions(
-      String walletId, {
-        int limit = 50,
-      }) async {
+    String walletId, {
+    int limit = 50,
+  }) async {
     try {
       final query = await transactions
           .where('walletId', isEqualTo: walletId)
@@ -198,9 +191,9 @@ class FirebaseFirestoreDatasource {
           .get();
       return query.docs
           .map((doc) => TransactionModel.fromMap(
-        {...doc.data(), 'id': doc.id},
-        doc.id,
-      ))
+                {...doc.data(), 'id': doc.id},
+                doc.id,
+              ))
           .toList();
     } catch (e) {
       Logger.error('❌ Erreur récupération transactions portefeuille: $e');
@@ -208,7 +201,6 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Sauvegarde une transaction
   Future<void> saveTransaction(TransactionModel transaction) async {
     try {
       await transactions.doc(transaction.id).set(transaction.toMap());
@@ -219,7 +211,6 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Supprime une transaction
   Future<void> deleteTransaction(String txId) async {
     try {
       await transactions.doc(txId).delete();
@@ -234,15 +225,14 @@ class FirebaseFirestoreDatasource {
   // CATÉGORIES
   // ============================================
 
-  /// Récupère les catégories d'un utilisateur
   Future<List<CategorieModel>> getCategories(String uid) async {
     try {
       final query = await categories.where('uid', isEqualTo: uid).get();
       return query.docs
           .map((doc) => CategorieModel.fromMap(
-        {...doc.data(), 'id': doc.id},
-        doc.id,
-      ))
+                {...doc.data(), 'id': doc.id},
+                doc.id,
+              ))
           .toList();
     } catch (e) {
       Logger.error('❌ Erreur récupération catégories: $e');
@@ -250,10 +240,11 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Sauvegarde une catégorie
   Future<void> saveCategory(CategorieModel category) async {
     try {
-      await categories.doc(category.id).set(category.toMap(), SetOptions(merge: true));
+      await categories
+          .doc(category.id)
+          .set(category.toMap(), SetOptions(merge: true));
       Logger.info('📝 Catégorie sauvegardée: ${category.label}');
     } catch (e) {
       Logger.error('❌ Erreur sauvegarde catégorie: $e');
@@ -261,7 +252,6 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Supprime une catégorie
   Future<void> deleteCategory(String categoryId) async {
     try {
       await categories.doc(categoryId).delete();
@@ -276,15 +266,14 @@ class FirebaseFirestoreDatasource {
   // OBJECTIFS D'ÉPARGNE
   // ============================================
 
-  /// Récupère les objectifs d'épargne d'un utilisateur
   Future<List<SavingsGoalModel>> getSavingsGoals(String uid) async {
     try {
       final query = await savingsGoals.where('uid', isEqualTo: uid).get();
       return query.docs
           .map((doc) => SavingsGoalModel.fromMap(
-        {...doc.data(), 'id': doc.id},
-        doc.id,
-      ))
+                {...doc.data(), 'id': doc.id},
+                doc.id,
+              ))
           .toList();
     } catch (e) {
       Logger.error('❌ Erreur récupération objectifs: $e');
@@ -292,18 +281,23 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Sauvegarde un objectif d'épargne
+  /// Sauvegarde un objectif d'épargne.
+  /// ✅ Si l'ID est vide, un nouvel ID est généré automatiquement.
   Future<void> saveSavingsGoal(SavingsGoalModel goal) async {
     try {
-      await savingsGoals.doc(goal.id).set(goal.toMap(), SetOptions(merge: true));
-      Logger.info('📝 Objectif sauvegardé: ${goal.nom}');
+      final docId = goal.id.isEmpty ? savingsGoals.doc().id : goal.id;
+      final goalToSave = goal.id.isEmpty ? goal.copyWith(id: docId) : goal;
+
+      await savingsGoals
+          .doc(docId)
+          .set(goalToSave.toMap(), SetOptions(merge: true));
+      Logger.info('📝 Objectif sauvegardé: ${goal.nom} (id: $docId)');
     } catch (e) {
       Logger.error('❌ Erreur sauvegarde objectif: $e');
       throw ErrorHandler().handleException(e);
     }
   }
 
-  /// Supprime un objectif d'épargne
   Future<void> deleteSavingsGoal(String goalId) async {
     try {
       await savingsGoals.doc(goalId).delete();
@@ -318,15 +312,14 @@ class FirebaseFirestoreDatasource {
   // DETTES
   // ============================================
 
-  /// Récupère les dettes d'un utilisateur
   Future<List<DetteModel>> getDettes(String uid) async {
     try {
       final query = await dettes.where('uid', isEqualTo: uid).get();
       return query.docs
           .map((doc) => DetteModel.fromMap(
-        {...doc.data(), 'id': doc.id},
-        doc.id,
-      ))
+                {...doc.data(), 'id': doc.id},
+                doc.id,
+              ))
           .toList();
     } catch (e) {
       Logger.error('❌ Erreur récupération dettes: $e');
@@ -334,7 +327,6 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Sauvegarde une dette
   Future<void> saveDette(DetteModel dette) async {
     try {
       await dettes.doc(dette.id).set(dette.toMap(), SetOptions(merge: true));
@@ -345,7 +337,6 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Supprime une dette
   Future<void> deleteDette(String detteId) async {
     try {
       await dettes.doc(detteId).delete();
@@ -357,12 +348,73 @@ class FirebaseFirestoreDatasource {
   }
 
   // ============================================
+  // CONFIG (Tarifs assurance auto)
+  // ============================================
+
+  Future<TarifConfigModel?> getTarifsConfig() async {
+    try {
+      final doc = await config.doc('tarifs_assurance_auto').get();
+      if (!doc.exists) {
+        Logger.info('Config tarifs non trouvee, valeurs par defaut');
+        return null;
+      }
+      return TarifConfigModel.fromMap(doc.data()!);
+    } catch (e) {
+      Logger.error('Erreur recuperation tarifs: $e');
+      return null;
+    }
+  }
+
+  Future<void> saveTarifsConfig(TarifConfigModel tarifConfig) async {
+    try {
+      await config
+          .doc('tarifs_assurance_auto')
+          .set(tarifConfig.toMap(), SetOptions(merge: true));
+      Logger.success('Config tarifs sauvegardee');
+    } catch (e) {
+      Logger.error('Erreur sauvegarde tarifs: $e');
+      throw ErrorHandler().handleException(e);
+    }
+  }
+
+  Stream<TarifConfigModel?> listenToTarifsConfig() {
+    return config.doc('tarifs_assurance_auto').snapshots().map((doc) {
+      if (!doc.exists) return null;
+      return TarifConfigModel.fromMap(doc.data()!);
+    });
+  }
+
+  // ============================================
+  // SOUSCRIPTIONS (Assurances)
+  // ============================================
+
+  Future<List<SouscriptionModel>> getSouscriptions(String uid) async {
+    try {
+      final query = await souscriptions
+          .where('userId', isEqualTo: uid)
+          .get();
+      return query.docs
+          .map((doc) => SouscriptionModel.fromMap(
+                {...doc.data(), 'id': doc.id},
+                doc.id,
+              ))
+          .toList();
+    } catch (e) {
+      Logger.error('Erreur recuperation souscriptions: $e');
+      return [];
+    }
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> listenToSouscriptions(String uid) {
+    return souscriptions.where('userId', isEqualTo: uid).snapshots();
+  }
+
+  // ============================================
   // BUDGETS
   // ============================================
 
   String _budgetDocId(int mois, int annee) => '$annee-$mois';
 
-  /// Récupère le budget d'un mois
   Future<BudgetMensuel?> getBudget(String uid, int mois, int annee) async {
     try {
       final doc = await budgets
@@ -376,7 +428,6 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Sauvegarde un budget
   Future<void> saveBudget(BudgetMensuel budget, String uid) async {
     try {
       await budgets
@@ -389,12 +440,9 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Supprime un budget
   Future<void> deleteBudget(String uid, int mois, int annee) async {
     try {
-      await budgets
-          .doc('${uid}_${_budgetDocId(mois, annee)}')
-          .delete();
+      await budgets.doc('${uid}_${_budgetDocId(mois, annee)}').delete();
       Logger.info('🗑️ Budget supprimé: $mois/$annee');
     } catch (e) {
       Logger.error('❌ Erreur suppression budget: $e');
@@ -406,15 +454,14 @@ class FirebaseFirestoreDatasource {
   // ÉCHÉANCES
   // ============================================
 
-  /// Récupère les échéances d'un utilisateur
   Future<List<EcheanceModel>> getEcheances(String uid) async {
     try {
       final query = await echeances.where('uid', isEqualTo: uid).get();
       return query.docs
           .map((doc) => EcheanceModel.fromMap(
-        {...doc.data(), 'id': doc.id},
-        doc.id,
-      ))
+                {...doc.data(), 'id': doc.id},
+                doc.id,
+              ))
           .toList();
     } catch (e) {
       Logger.error('❌ Erreur récupération échéances: $e');
@@ -422,10 +469,11 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Sauvegarde une échéance
   Future<void> saveEcheance(EcheanceModel echeance) async {
     try {
-      await echeances.doc(echeance.id).set(echeance.toMap(), SetOptions(merge: true));
+      await echeances
+          .doc(echeance.id)
+          .set(echeance.toMap(), SetOptions(merge: true));
       Logger.info('📝 Échéance sauvegardée: ${echeance.titre}');
     } catch (e) {
       Logger.error('❌ Erreur sauvegarde échéance: $e');
@@ -433,7 +481,6 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Supprime une échéance
   Future<void> deleteEcheance(String echeanceId) async {
     try {
       await echeances.doc(echeanceId).delete();
@@ -448,14 +495,13 @@ class FirebaseFirestoreDatasource {
   // ÉPARGNE PROGRAMMÉE
   // ============================================
 
-  /// Récupère les épargnes programmées d'un utilisateur
   Future<List<EpargneProgrammeeModel>> getEpargneProgrammee(String uid) async {
     try {
       final query = await epargneProgrammee.where('uid', isEqualTo: uid).get();
       return query.docs
           .map((doc) => EpargneProgrammeeModel.fromMap(
-        {...doc.data(), 'id': doc.id},
-      ))
+                {...doc.data(), 'id': doc.id},
+              ))
           .toList();
     } catch (e) {
       Logger.error('❌ Erreur récupération épargne programmée: $e');
@@ -463,18 +509,26 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  /// Sauvegarde une épargne programmée
+  /// Sauvegarde une épargne programmée.
+  /// ✅ Si l'ID est vide, un nouvel ID est généré automatiquement.
   Future<void> saveEpargneProgrammee(EpargneProgrammeeModel epargne) async {
     try {
-      await epargneProgrammee.doc(epargne.id).set(epargne.toMap(), SetOptions(merge: true));
-      Logger.info('📝 Épargne programmée sauvegardée: ${epargne.titre}');
+      final docId =
+          epargne.id.isEmpty ? epargneProgrammee.doc().id : epargne.id;
+
+      final data = epargne.toMap();
+      data['uid'] = _auth.currentUser?.uid ?? '';
+
+      await epargneProgrammee
+          .doc(docId)
+          .set(data, SetOptions(merge: true));
+      Logger.info('📝 Épargne programmée sauvegardée: ${epargne.titre} (id: $docId)');
     } catch (e) {
       Logger.error('❌ Erreur sauvegarde épargne programmée: $e');
       throw ErrorHandler().handleException(e);
     }
   }
 
-  /// Supprime une épargne programmée
   Future<void> deleteEpargneProgrammee(String id) async {
     try {
       await epargneProgrammee.doc(id).delete();
@@ -536,7 +590,6 @@ class FirebaseFirestoreDatasource {
       double total = 0;
       for (final doc in query.docs) {
         final data = doc.data();
-        if (data == null) continue;
         total += (data['montant'] as num?)?.toDouble() ?? 0;
       }
       return total;
@@ -561,7 +614,6 @@ class FirebaseFirestoreDatasource {
       double total = 0;
       for (final doc in query.docs) {
         final data = doc.data();
-        if (data == null) continue;
         total += (data['montant'] as num?)?.toDouble() ?? 0;
       }
       return total;
@@ -572,11 +624,11 @@ class FirebaseFirestoreDatasource {
   }
 
   Future<double> getDepensesReellesByCategorie(
-      String uid,
-      String categorieId,
-      int mois,
-      int annee,
-      ) async {
+    String uid,
+    String categorieId,
+    int mois,
+    int annee,
+  ) async {
     final debut = DateTime(annee, mois, 1);
     final fin = DateTime(annee, mois + 1, 1);
 
@@ -591,7 +643,6 @@ class FirebaseFirestoreDatasource {
       double total = 0;
       for (final doc in query.docs) {
         final data = doc.data();
-        if (data == null) continue;
         total += (data['montant'] as num?)?.toDouble() ?? 0;
       }
       return total;
@@ -613,9 +664,9 @@ class FirebaseFirestoreDatasource {
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> listenToTransactions(
-      String uid, {
-        int limit = 50,
-      }) {
+    String uid, {
+    int limit = 50,
+  }) {
     return transactions
         .where('uid', isEqualTo: uid)
         .orderBy('dateTransaction', descending: true)
@@ -674,6 +725,6 @@ class FirebaseFirestoreDatasource {
 
   Future<bool> hasInternetConnection() async {
     final connectivityResult = await Connectivity().checkConnectivity();
-    return connectivityResult != ConnectivityResult.none;
+    return !connectivityResult.contains(ConnectivityResult.none);
   }
 }

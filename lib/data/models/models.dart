@@ -12,6 +12,8 @@ export 'debt_model.dart';
 export 'savings_goal_model.dart';
 export 'echeance_model.dart';
 export 'epargne_programmee_model.dart';
+export 'souscription_model.dart';
+export 'tarif_config_model.dart';
 
 // ============================================
 // APP USER (pour auth_provider)

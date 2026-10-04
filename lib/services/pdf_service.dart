@@ -249,8 +249,9 @@ class PdfService {
     final dateStr = '${now.day} ${mois[now.month]} ${now.year}';
 
     PdfColor scoreColor;
-    if (score.scoreTotal >= 80) scoreColor = PdfColors.green800;
-    else if (score.scoreTotal >= 60) scoreColor = PdfColors.blue800;
+    if (score.scoreTotal >= 80) {
+      scoreColor = PdfColors.green800;
+    } else if (score.scoreTotal >= 60) scoreColor = PdfColors.blue800;
     else if (score.scoreTotal >= 40) scoreColor = PdfColors.orange800;
     else scoreColor = PdfColors.red800;
 
@@ -266,7 +267,7 @@ class PdfService {
         margin: const pw.EdgeInsets.all(32),
         build: (ctx) => [
           _entete('RAPPORT SCORE TAPA', prenom, tel),
-          _sousTitre('Genere le ' + dateStr),
+          _sousTitre('Genere le $dateStr'),
           pw.SizedBox(height: 20),
           pw.Container(
               padding: const pw.EdgeInsets.all(16),
@@ -278,9 +279,9 @@ class PdfService {
                   children: [
                     pw.Column(children: [
                       pw.Text('SCORE TAPA',
-                          style: pw.TextStyle(fontSize: 11, color: PdfColors.grey300)),
+                          style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey300)),
                       pw.SizedBox(height: 8),
-                      pw.Text(score.scoreTotal.toString() + '/100',
+                      pw.Text('${score.scoreTotal}/100',
                           style: pw.TextStyle(fontSize: 32,
                               fontWeight: pw.FontWeight.bold, color: scoreColor)),
                       pw.SizedBox(height: 4),
@@ -349,7 +350,7 @@ class PdfService {
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.green800)),
                   pw.Expanded(child: pw.Text(p,
-                      style: pw.TextStyle(fontSize: 10))),
+                      style: const pw.TextStyle(fontSize: 10))),
                 ]))),
             pw.SizedBox(height: 16),
           ],
@@ -362,7 +363,7 @@ class PdfService {
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.orange800)),
                   pw.Expanded(child: pw.Text(c,
-                      style: pw.TextStyle(fontSize: 10))),
+                      style: const pw.TextStyle(fontSize: 10))),
                 ]))),
             pw.SizedBox(height: 16),
           ],
@@ -385,7 +386,7 @@ class PdfService {
                             'l utilisateur dans TAPA Invest. Il est fourni a titre '
                             'indicatif et educatif. Pour une evaluation officielle, '
                             'des donnees vérifiees par des tiers sont nécessaires.',
-                        style: pw.TextStyle(fontSize: 9,
+                        style: const pw.TextStyle(fontSize: 9,
                             color: PdfColors.grey700, lineSpacing: 3)),
                   ])),
           pw.SizedBox(height: 20),
@@ -412,7 +413,7 @@ class PdfService {
                                   ? PdfColors.green800 : PdfColors.red800)),
                       pw.Spacer(),
                       pw.Text(
-                          'Cohérence: ' + score.scoreCoherence.toString() + '/100',
+                          'Cohérence: ${score.scoreCoherence}/100',
                           style: pw.TextStyle(fontSize: 10,
                               fontWeight: pw.FontWeight.bold,
                               color: score.estFiable
@@ -439,20 +440,20 @@ class PdfService {
                                     fontWeight: pw.FontWeight.bold,
                                     color: PdfColors.red800)),
                             pw.Expanded(child: pw.Text(a,
-                                style: pw.TextStyle(fontSize: 9,
+                                style: const pw.TextStyle(fontSize: 9,
                                     color: PdfColors.red900))),
                           ]))),
                     ],
                     pw.SizedBox(height: 6),
                     pw.Row(children: [
                       pw.Text('Transactions signees: ',
-                          style: pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+                          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
                       pw.Text(score.txAvecHash.toString(),
                           style: pw.TextStyle(fontSize: 9,
                               fontWeight: pw.FontWeight.bold,
                               color: PdfColors.green800)),
                       pw.Text('   Non signees: ',
-                          style: pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+                          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
                       pw.Text(score.txSansHash.toString(),
                           style: pw.TextStyle(fontSize: 9,
                               fontWeight: pw.FontWeight.bold,
@@ -465,7 +466,7 @@ class PdfService {
 
     await Printing.sharePdf(
         bytes: await pdf.save(),
-        filename: 'Score_TAPA_' + prenom + '.pdf');
+        filename: '${'Score_TAPA_' + prenom}.pdf');
   }
 
   static pw.Widget _scoreRow(String label, int score, int max) {
@@ -474,10 +475,10 @@ class PdfService {
         child: pw.Row(children: [
           pw.SizedBox(width: 80,
               child: pw.Text(label,
-                  style: pw.TextStyle(fontSize: 9,
+                  style: const pw.TextStyle(fontSize: 9,
                       color: PdfColors.white))),
           pw.SizedBox(width: 8),
-          pw.Text(score.toString() + '/' + max.toString(),
+          pw.Text('$score/$max',
               style: pw.TextStyle(fontSize: 9,
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.white)),
@@ -499,7 +500,7 @@ class PdfService {
                               fontWeight: pw.FontWeight.bold,
                               color: PdfColors.blueGrey900)),
                       pw.Text('Le budget simple pour tous.',
-                          style: pw.TextStyle(fontSize: 10,
+                          style: const pw.TextStyle(fontSize: 10,
                               color: PdfColors.grey600)),
                     ]),
                 pw.Column(
@@ -509,10 +510,10 @@ class PdfService {
                           style: pw.TextStyle(fontSize: 12,
                               fontWeight: pw.FontWeight.bold)),
                       pw.Text(tel,
-                          style: pw.TextStyle(fontSize: 10,
+                          style: const pw.TextStyle(fontSize: 10,
                               color: PdfColors.grey600)),
                       pw.Text('Document genere automatiquement',
-                          style: pw.TextStyle(fontSize: 8,
+                          style: const pw.TextStyle(fontSize: 8,
                               color: PdfColors.grey500)),
                     ]),
               ]),
@@ -530,7 +531,7 @@ class PdfService {
     return pw.Padding(
         padding: const pw.EdgeInsets.only(top: 4),
         child: pw.Text(texte,
-            style: pw.TextStyle(fontSize: 12,
+            style: const pw.TextStyle(fontSize: 12,
                 color: PdfColors.grey700)));
   }
 
@@ -557,7 +558,7 @@ class PdfService {
       String label, String valeur, PdfColor color) {
     return pw.Column(children: [
       pw.Text(label,
-          style: pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
       pw.SizedBox(height: 4),
       pw.Text(valeur,
           style: pw.TextStyle(fontSize: 13,
@@ -674,7 +675,7 @@ class PdfService {
     return pw.Padding(
         padding: const pw.EdgeInsets.all(6),
         child: pw.Text(text,
-            style: pw.TextStyle(fontSize: 9)));
+            style: const pw.TextStyle(fontSize: 9)));
   }
 
   static pw.Widget _cellColor(String text, PdfColor color) {
@@ -693,10 +694,10 @@ class PdfService {
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
             pw.Text('TAPA Invest — Le budget simple pour tous.',
-                style: pw.TextStyle(fontSize: 8,
+                style: const pw.TextStyle(fontSize: 8,
                     color: PdfColors.grey500)),
             pw.Text('Document confidentiel',
-                style: pw.TextStyle(fontSize: 8,
+                style: const pw.TextStyle(fontSize: 8,
                     color: PdfColors.grey500)),
           ]),
     ]);

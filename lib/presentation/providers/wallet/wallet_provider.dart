@@ -8,7 +8,6 @@ import '../../../domain/usecases/wallet/create_wallet_usecase.dart';
 import '../../../domain/usecases/wallet/get_wallets_usecase.dart';
 import '../../../domain/usecases/wallet/update_wallet_usecase.dart';
 import '../../../domain/usecases/wallet/delete_wallet_usecase.dart';
-import '../app_state.dart';
 import '../../../core/utils/logger.dart';
 
 // ============================================

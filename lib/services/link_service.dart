@@ -1,6 +1,5 @@
 // lib/services/link_service.dart
 
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart'; // ✅ AJOUTÉ pour TAPAColors
@@ -100,11 +99,11 @@ class LinkService {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Row(
+        title: const Row(
           children: [
-            const Icon(Icons.shopping_bag_outlined),
-            const SizedBox(width: 10),
-            const Text('Boutique TAPA'),
+            Icon(Icons.shopping_bag_outlined),
+            SizedBox(width: 10),
+            Text('Boutique TAPA'),
           ],
         ),
         content: Column(

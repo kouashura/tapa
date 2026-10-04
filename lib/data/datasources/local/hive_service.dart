@@ -2,7 +2,6 @@
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 import '../../../core/utils/logger.dart';
 import '../../../core/errors/failure.dart';
 import '../../../core/errors/error_handler.dart';
@@ -442,7 +441,7 @@ class HiveService {
 
   void _ensureInitialized() {
     if (!_isInitialized) {
-      throw CacheFailure(
+      throw const CacheFailure(
         message: 'HiveService non initialisé. Appelez init() d\'abord.',
         code: 'NOT_INITIALIZED',
       );

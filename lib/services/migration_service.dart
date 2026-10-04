@@ -34,9 +34,7 @@ class MigrationService {
           }
 
           // Fallback : date actuelle
-          if (dateStr == null) {
-            dateStr = DateTime.now().toIso8601String();
-          }
+          dateStr ??= DateTime.now().toIso8601String();
 
           // Mettre à jour le document
           await doc.reference.update({
@@ -85,9 +83,7 @@ class MigrationService {
           }
         }
 
-        if (dateStr == null) {
-          dateStr = DateTime.now().toIso8601String();
-        }
+        dateStr ??= DateTime.now().toIso8601String();
 
         await doc.reference.update({
           'dateInscription': dateStr,

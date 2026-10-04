@@ -144,7 +144,7 @@ class SavingsRepositoryImpl implements ISavingsRepository {
     try {
       final epargnes = await _firestoreDatasource.getEpargneProgrammee(epargneId);
       if (epargnes.isEmpty) {
-        throw DatabaseFailure(
+        throw const DatabaseFailure(
           message: 'Épargne programmée non trouvée.',
           code: 'EPARGNE_NOT_FOUND',
         );

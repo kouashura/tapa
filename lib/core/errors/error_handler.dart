@@ -2,13 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
 import 'dart:async';  // ✅ AJOUTER POUR TimeoutException
 import 'failure.dart';
 import '../utils/logger.dart';
-import '../constants/strings.dart';
 
 /// Gestionnaire d'erreurs global
 /// Centralise la gestion des exceptions et les convertit en Failures
@@ -437,7 +435,7 @@ class ErrorHandler {
               color: Colors.red,
               size: 28,
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Text(
               'Erreur',
               style: TextStyle(

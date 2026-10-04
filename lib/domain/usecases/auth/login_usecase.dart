@@ -50,7 +50,7 @@ class LoginResult {
 
   /// Nécessite une vérification du numéro
   factory LoginResult.needVerification() {
-    return LoginResult(
+    return const LoginResult(
       requiresVerification: true,
       message: 'Un code de vérification a été envoyé par SMS.',
     );
@@ -58,7 +58,7 @@ class LoginResult {
 
   /// Nécessite la création d'un PIN
   factory LoginResult.needPin() {
-    return LoginResult(
+    return const LoginResult(
       requiresPin: true,
       message: 'Veuillez créer un code PIN pour sécuriser votre compte.',
     );
@@ -66,7 +66,7 @@ class LoginResult {
 
   /// Nécessite l'onboarding
   factory LoginResult.needOnboarding() {
-    return LoginResult(
+    return const LoginResult(
       requiresOnboarding: true,
       message: 'Bienvenue ! Découvrez TAPA Invest.',
     );

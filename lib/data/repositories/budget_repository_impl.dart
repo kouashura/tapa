@@ -3,7 +3,6 @@
 import '../../domain/repositories/i_budget_repository.dart';
 import '../models/models.dart';  // ✅ Utiliser models.dart au lieu de domain/entities
 import '../datasources/remote/firebase/firebase_firestore_datasource.dart';
-import '../../core/errors/failure.dart';
 import '../../core/errors/error_handler.dart';
 import '../../core/utils/logger.dart';
 

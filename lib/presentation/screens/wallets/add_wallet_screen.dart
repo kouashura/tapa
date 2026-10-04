@@ -1,11 +1,10 @@
-// lib/presentation/screens/wallets/add_wallet_screen.dart
+// lib/screens/wallets/add_wallet_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import '../../../core/theme/app_theme.dart';
 import 'package:tapa_budget/presentation/providers/providers.dart';
-import '../../providers/wallet/wallet_provider.dart';  // ✅ CHEMIN CORRIGÉ
 import '../../../domain/usecases/wallet/create_wallet_usecase.dart';
 import '../../../core/utils/logger.dart';
 
@@ -54,7 +53,7 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez vous connecter'),
-          backgroundColor: Colors.red,
+          backgroundColor: TAPAColors.red,
         ),
       );
       return;
@@ -80,7 +79,7 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Portefeuille créé avec succès !'),
-            backgroundColor: Colors.green,
+            backgroundColor: TAPAColors.green,
           ),
         );
       }
@@ -89,7 +88,7 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
-            backgroundColor: Colors.red,
+            backgroundColor: TAPAColors.red,
           ),
         );
       }
@@ -137,7 +136,7 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: _selectedEmoji == type['emoji']
-                                ? Colors.amber.shade700
+                                ? TAPAColors.gold
                                 : Colors.transparent,
                             width: 2,
                           ),
@@ -163,20 +162,17 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: TAPAColors.background,
       appBar: AppBar(
         title: const Text('Nouveau portefeuille'),
-        backgroundColor: const Color(0xFF1A237E),
-        foregroundColor: Colors.white,
+        backgroundColor: TAPAColors.navy,
+        foregroundColor: TAPAColors.white,
       ),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // ============================================
-            // 1. ÉMOJI / ICÔNE (cliquable)
-            // ============================================
             Center(
               child: GestureDetector(
                 onTap: _showEmojiPicker,
@@ -184,10 +180,10 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: TAPAColors.surface,
                     borderRadius: BorderRadius.circular(40),
                     border: Border.all(
-                      color: Colors.grey.shade300,
+                      color: TAPAColors.border,
                       width: 2,
                     ),
                   ),
@@ -201,10 +197,6 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // ============================================
-            // 2. NOM DU PORTEFEUILLE
-            // ============================================
             TextFormField(
               controller: _nomController,
               decoration: const InputDecoration(
@@ -220,10 +212,6 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
               },
             ),
             const SizedBox(height: 16),
-
-            // ============================================
-            // 3. TYPE DE PORTEFEUILLE (Dropdown)
-            // ============================================
             DropdownButtonFormField<String>(
               value: _selectedType,
               decoration: const InputDecoration(
@@ -253,10 +241,6 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
               },
             ),
             const SizedBox(height: 16),
-
-            // ============================================
-            // 4. SOLDE INITIAL
-            // ============================================
             TextFormField(
               controller: _soldeController,
               decoration: const InputDecoration(
@@ -284,10 +268,6 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
               },
             ),
             const SizedBox(height: 16),
-
-            // ============================================
-            // 5. DESCRIPTION (optionnelle)
-            // ============================================
             TextFormField(
               controller: _descriptionController,
               decoration: const InputDecoration(
@@ -298,38 +278,34 @@ class _AddWalletScreenState extends ConsumerState<AddWalletScreen> {
               maxLines: 2,
             ),
             const SizedBox(height: 24),
-
-            // ============================================
-            // 6. BOUTON CRÉER
-            // ============================================
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _saveWallet,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFC107),
-                  foregroundColor: const Color(0xFF1A237E),
+                  backgroundColor: TAPAColors.gold,
+                  foregroundColor: TAPAColors.navy,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: _isLoading
                     ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Color(0xFF1A237E),
-                  ),
-                )
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: TAPAColors.navy,
+                        ),
+                      )
                     : const Text(
-                  'Créer le portefeuille',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                        'Créer le portefeuille',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
             ),
             const SizedBox(height: 80),

@@ -63,7 +63,7 @@ class AuthState {
 
   /// État de vérification en cours
   factory AuthState.verifying() {
-    return AuthState(
+    return const AuthState(
       isPhoneVerificationInProgress: true,
       isLoading: true,
     );

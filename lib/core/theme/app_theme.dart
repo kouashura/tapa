@@ -42,12 +42,10 @@ class AppTheme {
         primary: TAPAColors.navy,
         secondary: TAPAColors.gold,
         surface: TAPAColors.surface,
-        background: TAPAColors.background,
         error: TAPAColors.red,
         onPrimary: TAPAColors.white,
         onSecondary: TAPAColors.white,
         onSurface: TAPAColors.textPrimary,
-        onBackground: TAPAColors.textPrimary,
         onError: TAPAColors.white,
       ),
 

@@ -90,7 +90,7 @@ class PinSecurity {
 
     if (isValid) {
       await _resetAttempts(prefs, userId);
-      return PinCheckResult(
+      return const PinCheckResult(
         success: true,
         isLocked: false,
         remainingAttempts: maxAttempts,

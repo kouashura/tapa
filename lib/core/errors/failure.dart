@@ -26,169 +26,143 @@ abstract class Failure extends Equatable {
 /// Erreurs de connexion réseau
 class NetworkFailure extends Failure {
   const NetworkFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'NETWORK_ERROR',
-    originalError: originalError,
   );
 }
 
 /// Erreurs d'authentification (Firebase, OTP, etc.)
 class AuthFailure extends Failure {
   const AuthFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'AUTH_ERROR',
-    originalError: originalError,
   );
 }
 
 /// Erreurs de validation (formulaires, données invalides)
 class ValidationFailure extends Failure {
   const ValidationFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'VALIDATION_ERROR',
-    originalError: originalError,
   );
 }
 
 /// Erreurs de base de données (Firestore, Hive, etc.)
 class DatabaseFailure extends Failure {
   const DatabaseFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'DATABASE_ERROR',
-    originalError: originalError,
   );
 }
 
 /// Erreurs de cache (SharedPreferences, Hive)
 class CacheFailure extends Failure {
   const CacheFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'CACHE_ERROR',
-    originalError: originalError,
   );
 }
 
 /// Erreurs de paiement (Wave, Orange Money, etc.)
 class PaymentFailure extends Failure {
   const PaymentFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'PAYMENT_ERROR',
-    originalError: originalError,
   );
 }
 
 /// Erreurs de permissions (caméra, microphone, etc.)
 class PermissionFailure extends Failure {
   const PermissionFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'PERMISSION_ERROR',
-    originalError: originalError,
   );
 }
 
 /// Erreurs de serveur / API (HTTP 500, etc.)
 class ServerFailure extends Failure {
   const ServerFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'SERVER_ERROR',
-    originalError: originalError,
   );
 }
 
 /// Erreurs inattendues (catch-all)
 class UnexpectedFailure extends Failure {
   const UnexpectedFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'UNEXPECTED_ERROR',
-    originalError: originalError,
   );
 }
 
 /// Erreurs de PIN (verrouillage, incorrect, etc.)
 class PinFailure extends Failure {
   const PinFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'PIN_ERROR',
-    originalError: originalError,
   );
 }
 
 /// Erreurs de session (expirée, invalide)
 class SessionFailure extends Failure {
   const SessionFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'SESSION_ERROR',
-    originalError: originalError,
   );
 }
 
 /// Erreurs de notifications
 class NotificationFailure extends Failure {
   const NotificationFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'NOTIFICATION_ERROR',
-    originalError: originalError,
   );
 }
 
 /// Erreurs de PDF / génération de documents
 class PdfFailure extends Failure {
   const PdfFailure({
-    required String message,
+    required super.message,
     String? code,
-    dynamic originalError,
+    super.originalError,
   }) : super(
-    message: message,
     code: code ?? 'PDF_ERROR',
-    originalError: originalError,
   );
 }
 

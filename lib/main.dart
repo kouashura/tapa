@@ -7,7 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'services/firebase_service.dart';
-import 'presentation/providers/auth/auth_provider.dart';  // ✅ CHEMIN CORRIGÉ
+// ✅ CHEMIN CORRIGÉ
 import 'presentation/routes/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/logger.dart';

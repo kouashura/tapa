@@ -2,57 +2,58 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../providers/auth/auth_provider.dart';
-import '../providers/app_state.dart';
 import '../providers/providers.dart';
-import '../../services/firebase_service.dart';
 import '../../services/db_service_mysql.dart';
 import '../../core/utils/logger.dart';
 
 // ============================================
 // IMPORTS DES ÉCRANS
 // ============================================
-import '../../screens/splash/splash_screen.dart';
-import '../../screens/auth/inscription_screen.dart';
-import '../../screens/auth/pin_screen.dart';
-import '../../screens/auth/verify_phone_screen.dart';
-import '../../screens/auth/activation_screen.dart';
-import '../../screens/auth/setup_wallets_screen.dart';
-import '../../screens/onboarding/onboarding_screen.dart';
-import '../../screens/home/home_screen.dart';
-import '../../screens/wallets/wallets_screen.dart';
-import '../../screens/wallet/wallet_screen.dart';
-import '../../screens/profile/profile_screen.dart';
-import '../../screens/profile/edit_profile_screen.dart';
-import '../../screens/profile/categories_screen.dart';
-import '../../screens/profile/change_pin_screen.dart';
-import '../../screens/profile/abonnement_screen.dart';
-import '../../screens/transactions/add_transaction_screen.dart';
-import '../../screens/transactions/history_screen.dart';
-import '../../screens/transactions/voice_transaction_screen.dart';
-import '../../screens/transactions/scanner_screen.dart';
-import '../../screens/savings/savings_screen.dart';
-import '../../screens/savings/add_goal_screen.dart';
-import '../../screens/savings/epargne_programmee_screen.dart';
-import '../../screens/savings/creer_epargne_screen.dart';
-import '../../screens/budget/budget_screen.dart';
-import '../../screens/dettes/dettes_screen.dart';
-import '../../screens/rapports/rapports_screen.dart';
-import '../../screens/score/score_screen.dart';
-import '../../screens/analyse/analyse_screen.dart';
-import '../../screens/coach/coach_screen.dart';
-import '../../screens/guide/guide_screen.dart';
-import '../../screens/transfer/transfer_screen.dart';
-import '../../screens/echeances/echeances_screen.dart';
-import '../../screens/echeances/ajouter_echeance_screen.dart';
-import '../../screens/investir/investir_screen.dart';
-import '../../screens/investir/fcp_screen.dart';
-import '../../screens/investir/produit_detail_screen.dart';
-import '../../screens/investir/portefeuille_screen.dart';
-import '../../screens/investir/assurance_screen.dart';
-import '../../screens/investir/assurance_detail_screen.dart';
-import '../../screens/investir/devis_auto_screen.dart';
-import '../../screens/migration/migration_page.dart';
+import '../screens/splash/splash_screen.dart';
+import '../screens/auth/inscription_screen.dart';
+import '../screens/auth/pin_screen.dart';
+import '../screens/auth/verify_phone_screen.dart';
+import '../screens/auth/activation_screen.dart';
+import '../screens/auth/setup_wallets_screen.dart';
+import '../screens/onboarding/onboarding_screen.dart';
+import '../screens/home/home_screen.dart';
+import '../screens/wallets/wallets_screen.dart';
+import '../screens/wallets/add_wallet_screen.dart';
+import '../screens/wallet/wallet_screen.dart';
+import '../screens/profile/profile_screen.dart';
+import '../screens/profile/edit_profile_screen.dart';
+import '../screens/profile/categories_screen.dart';
+import '../screens/profile/change_pin_screen.dart';
+import '../screens/profile/abonnement_screen.dart';
+import '../screens/transactions/add_transaction_screen.dart';
+import '../screens/transactions/history_screen.dart';
+import '../screens/transactions/voice_transaction_screen.dart';
+import '../screens/transactions/scanner_screen.dart';
+import '../screens/savings/savings_screen.dart';
+import '../screens/savings/add_goal_screen.dart';
+import '../screens/savings/epargne_programmee_screen.dart';
+import '../screens/savings/creer_epargne_screen.dart';
+import '../screens/budget/budget_screen.dart';
+import '../screens/dettes/dettes_screen.dart';
+import '../screens/rapports/rapports_screen.dart';
+import '../screens/score/score_screen.dart';
+import '../screens/analyse/analyse_screen.dart';
+import '../screens/coach/coach_screen.dart';
+import '../screens/guide/guide_screen.dart';
+import '../screens/transfer/transfer_screen.dart';
+import '../screens/echeances/echeances_screen.dart';
+import '../screens/echeances/ajouter_echeance_screen.dart';
+import '../screens/investir/investir_screen.dart';
+import '../screens/investir/fcp_screen.dart';
+import '../screens/investir/produit_detail_screen.dart';
+import '../screens/investir/portefeuille_screen.dart';
+import '../screens/investir/assurance_screen.dart';
+import '../screens/investir/assurance_detail_screen.dart';
+import '../screens/investir/devis_auto_screen.dart';
+import '../screens/investir/assurance_success_screen.dart';
+import '../screens/profile/historique_paiements_screen.dart';
+import '../screens/admin/admin_tarifs_screen.dart';
+import '../screens/migration/migration_page.dart';
 
 class AppRouter {
   final GoRouter router;
@@ -194,6 +195,10 @@ class AppRouter {
           builder: (context, state) => const WalletsScreen(),
         ),
         GoRoute(
+          path: '/wallets/add',
+          builder: (context, state) => const AddWalletScreen(),
+        ),
+        GoRoute(
           path: '/wallet',
           builder: (context, state) => const WalletScreen(),
         ),
@@ -305,6 +310,25 @@ class AppRouter {
             final produitNom = state.pathParameters['produit'] ?? 'Assurance Auto';
             return DevisAutoScreen(produitNom: produitNom);
           },
+        ),
+        GoRoute(
+          path: '/assurance/success',
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>? ?? {};
+            return AssuranceSuccessScreen(
+              produitNom: extra['produitNom'] ?? 'Auto',
+              montantPaye: extra['montantPaye'] ?? 0,
+              reference: extra['reference'] ?? '',
+            );
+          },
+        ),
+        GoRoute(
+          path: '/historique-paiements',
+          builder: (context, state) => const HistoriquePaiementsScreen(),
+        ),
+        GoRoute(
+          path: '/admin/tarifs',
+          builder: (context, state) => const AdminTarifsScreen(),
         ),
         GoRoute(
           path: '/migration',

@@ -1,7 +1,5 @@
 // lib/data/repositories/auth_repository_impl.dart
 
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/repositories/i_auth_repository.dart';
 import '../models/models.dart';
 import '../datasources/remote/firebase/firebase_auth_datasource.dart';
@@ -73,14 +71,14 @@ class AuthRepositoryImpl implements IAuthRepository {
 
       // Vérification des paramètres
       if (verificationId.isEmpty || smsCode.isEmpty) {
-        throw AuthFailure(
+        throw const AuthFailure(
           message: 'VerificationId ou code SMS vide',
           code: 'INVALID_PARAMS',
         );
       }
 
       if (smsCode.length != 6 || !RegExp(r'^\d{6}$').hasMatch(smsCode)) {
-        throw AuthFailure(
+        throw const AuthFailure(
           message: 'Le code SMS doit contenir 6 chiffres',
           code: 'INVALID_CODE',
         );
@@ -89,7 +87,7 @@ class AuthRepositoryImpl implements IAuthRepository {
       final user = await _authDatasource.verifyPhoneNumber(verificationId, smsCode);
 
       if (user == null) {
-        throw AuthFailure(
+        throw const AuthFailure(
           message: 'Utilisateur non trouvé après vérification.',
           code: 'USER_NOT_FOUND',
         );
@@ -107,7 +105,7 @@ class AuthRepositoryImpl implements IAuthRepository {
   Future<AppUser> signInWithPhoneNumber(String phoneNumber) async {
     try {
       Logger.info('📱 Connexion avec numéro: $phoneNumber');
-      throw AuthFailure(
+      throw const AuthFailure(
         message: 'Aucun compte trouvé avec ce numéro. Veuillez vous inscrire.',
         code: 'USER_NOT_FOUND',
       );
@@ -233,7 +231,7 @@ class AuthRepositoryImpl implements IAuthRepository {
     try {
       final user = await getCurrentUser();
       if (user == null) {
-        throw AuthFailure(
+        throw const AuthFailure(
           message: 'Aucun utilisateur connecté.',
           code: 'NOT_AUTHENTICATED',
         );
@@ -257,7 +255,7 @@ class AuthRepositoryImpl implements IAuthRepository {
     try {
       final user = await getCurrentUser();
       if (user == null) {
-        throw AuthFailure(
+        throw const AuthFailure(
           message: 'Aucun utilisateur connecté.',
           code: 'NOT_AUTHENTICATED',
         );
@@ -285,7 +283,7 @@ class AuthRepositoryImpl implements IAuthRepository {
     try {
       final user = await getCurrentUser();
       if (user == null) {
-        throw AuthFailure(
+        throw const AuthFailure(
           message: 'Aucun utilisateur connecté.',
           code: 'NOT_AUTHENTICATED',
         );
@@ -309,7 +307,7 @@ class AuthRepositoryImpl implements IAuthRepository {
     try {
       final user = await getCurrentUser();
       if (user == null) {
-        throw AuthFailure(
+        throw const AuthFailure(
           message: 'Aucun utilisateur connecté.',
           code: 'NOT_AUTHENTICATED',
         );

@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/repositories/i_transaction_repository.dart';
 import '../models/models.dart';
 import '../datasources/remote/firebase/firebase_firestore_datasource.dart';
-import '../../core/errors/failure.dart';
 import '../../core/errors/error_handler.dart';
 import '../../core/utils/logger.dart';
 

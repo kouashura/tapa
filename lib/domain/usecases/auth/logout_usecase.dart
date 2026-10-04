@@ -2,7 +2,6 @@
 
 import '../../repositories/i_auth_repository.dart';
 import '../../repositories/i_user_repository.dart';
-import '../../../core/errors/failure.dart';
 import '../../../core/errors/error_handler.dart';
 import '../../../core/utils/logger.dart';
 

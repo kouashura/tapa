@@ -2,7 +2,6 @@
 
 import '../../repositories/i_transaction_repository.dart';
 import '../../../data/models/models.dart';
-import '../../../core/errors/failure.dart';
 import '../../../core/errors/error_handler.dart';
 import '../../../core/utils/logger.dart';
 

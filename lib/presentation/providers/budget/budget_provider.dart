@@ -4,11 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/models.dart';
 import '../../../domain/repositories/i_budget_repository.dart';
 import '../../../data/repositories/budget_repository_impl.dart';
-import '../../../domain/repositories/i_transaction_repository.dart';
-import '../../../data/repositories/transaction_repository_impl.dart';
 import '../../../domain/usecases/budget/create_budget_usecase.dart';
 import '../../../domain/usecases/budget/get_budget_usecase.dart';
-import '../app_state.dart';
 import '../transaction/transaction_provider.dart';  // ✅ Importer le provider depuis transaction_provider.dart
 import '../../../core/utils/logger.dart';
 

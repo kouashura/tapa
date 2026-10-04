@@ -59,7 +59,7 @@ class RegisterResult {
 
   /// Nécessite une vérification du numéro
   factory RegisterResult.needVerification() {
-    return RegisterResult(
+    return const RegisterResult(
       requiresVerification: true,
       message: 'Un code de vérification a été envoyé par SMS.',
     );
