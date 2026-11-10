@@ -29,7 +29,6 @@ GoogleService-Info.plist
 google-services.json
 
 # Autres
-.DS_Store
 *.log
 *.pid
 *.tmp
@@ -47,6 +46,7 @@ upload_certificate.pem
 # Dossiers de sauvegarde (ne pas commiter)
 screens_backup_hors_lib/
 _backups_hors_lib/
-*.bak
-*.bak2
 *.dart.bak
+
+# macOS
+.DS_Store
