@@ -132,12 +132,12 @@ class BalanceCard extends ConsumerWidget {
   }
 
   Widget _miniCard(
-      String label,
-      String valeur,
-      Color color,
-      IconData icone,
-      bool isSmall,
-      ) {
+    String label,
+    String valeur,
+    Color color,
+    IconData icone,
+    bool isSmall,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(

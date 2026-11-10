@@ -19,16 +19,23 @@ class AppStrings {
   // ONBOARDING
   // ============================================
   static const String onboardingTitle1 = 'Bienvenue sur TAPA Invest';
-  static const String onboardingSubtitle1 = 'LE COACH FINANCIER DE CHAQUE AFRICAIN';
-  static const String onboardingDesc1 = 'Prenez le contrôle de votre argent et construisez votre avenir financier pas à pas.';
+  static const String onboardingSubtitle1 =
+      'LE COACH FINANCIER DE CHAQUE AFRICAIN';
+  static const String onboardingDesc1 =
+      'Prenez le contrôle de votre argent et construisez votre avenir financier pas à pas.';
 
-  static const String onboardingTitle2 = 'Tous vos portefeuilles en un seul endroit';
-  static const String onboardingSubtitle2 = 'WAVE · ORANGE MONEY · MTN · MOOV · CASH · BANQUE';
-  static const String onboardingDesc2 = 'Centralisez tous vos comptes et suivez chaque FCFA peu importe où il se trouve.';
+  static const String onboardingTitle2 =
+      'Tous vos portefeuilles en un seul endroit';
+  static const String onboardingSubtitle2 =
+      'WAVE · ORANGE MONEY · MTN · MOOV · CASH · BANQUE';
+  static const String onboardingDesc2 =
+      'Centralisez tous vos comptes et suivez chaque FCFA peu importe où il se trouve.';
 
-  static const String onboardingTitle3 = 'Investissez et protégez votre famille';
+  static const String onboardingTitle3 =
+      'Investissez et protégez votre famille';
   static const String onboardingSubtitle3 = 'FCP ET ASSURANCE VIE SONAM VIE';
-  static const String onboardingDesc3 = 'Faites fructifier votre épargne et protégez vos proches avec nos partenaires agréés.';
+  static const String onboardingDesc3 =
+      'Faites fructifier votre épargne et protégez vos proches avec nos partenaires agréés.';
 
   static const String onboardingButtonNext = 'Suivant';
   static const String onboardingButtonStart = 'Commencer maintenant';
@@ -45,7 +52,8 @@ class AppStrings {
   static const String authNameLabel = 'Prénom';
   static const String authPhoneInfo = 'Numéro utilisé pour te contacter';
   static const String authMonnaieQuestion = 'Quelle monnaie tu utilises ?';
-  static const String authMonnaieSubtitle = 'Tu pourras changer ça dans les réglages.';
+  static const String authMonnaieSubtitle =
+      'Tu pourras changer ça dans les réglages.';
   static const String authCreateAccount = 'Créer mon compte';
   static const String authContinue = 'Continuer';
 
@@ -53,18 +61,22 @@ class AppStrings {
   static const String authPinSubtitle = 'Code PIN à 4 chiffres';
   static const String authPinConfirmTitle = 'Confirme ton code PIN';
   static const String authPinLoginTitle = 'Entre ton code PIN';
-  static const String authPinLoginSubtitle = 'Entrez votre code PIN à 4 chiffres';
+  static const String authPinLoginSubtitle =
+      'Entrez votre code PIN à 4 chiffres';
 
   // ============================================
   // ACTIVATION
   // ============================================
   static const String activationTitle = 'Obtenir l\'accès à vie';
   static const String activationPrice = 'Paiement unique de 5 000 FCFA';
-  static const String activationFeatures = '✅ Toutes les fonctionnalités à vie\n✅ Toutes les mises à jour futures\n✅ Support prioritaire\n✅ Accès aux nouvelles fonctionnalités';
+  static const String activationFeatures =
+      '✅ Toutes les fonctionnalités à vie\n✅ Toutes les mises à jour futures\n✅ Support prioritaire\n✅ Accès aux nouvelles fonctionnalités';
   static const String activationPayButton = 'Payer maintenant — 5 000 FCFA';
-  static const String activationWhatsAppButton = 'Demander une clé par WhatsApp';
+  static const String activationWhatsAppButton =
+      'Demander une clé par WhatsApp';
   static const String activationKeyTitle = 'J\'ai déjà ma clé d\'accès';
-  static const String activationKeyHint = 'Entre la clé reçue après ton paiement';
+  static const String activationKeyHint =
+      'Entre la clé reçue après ton paiement';
   static const String activationKeyPlaceholder = 'TB-2026-XXXXXXXX';
   static const String activationActivateButton = 'Activer mon accès';
 
@@ -126,7 +138,8 @@ class AppStrings {
   static const String budgetCreate = 'Créer le budget';
   static const String budgetEdit = 'Modifier';
   static const String budgetEmpty = 'Aucun budget ce mois-ci';
-  static const String budgetEmptyHint = 'Créez le budget de {mois} pour suivre vos dépenses et revenus au fil du mois';
+  static const String budgetEmptyHint =
+      'Créez le budget de {mois} pour suivre vos dépenses et revenus au fil du mois';
   static const String budgetIncome = 'Revenus prévus';
   static const String budgetExpense = 'Dépenses prévues';
   static const String budgetCategories = 'Catégories';
@@ -149,7 +162,8 @@ class AppStrings {
   static const String savingsWallet = 'Portefeuille dédié *';
   static const String savingsCreate = 'Créer mon objectif';
   static const String savingsEmpty = 'Commencez à épargner';
-  static const String savingsEmptyHint = 'Créez un objectif ou une épargne programmée pour atteindre vos projets plus vite';
+  static const String savingsEmptyHint =
+      'Créez un objectif ou une épargne programmée pour atteindre vos projets plus vite';
 
   // ============================================
   // DETTES
@@ -161,7 +175,8 @@ class AppStrings {
   static const String debtFilterDebts = 'Dettes';
   static const String debtFilterCredits = 'Créances';
   static const String debtEmpty = 'Aucune dette enregistrée';
-  static const String debtEmptyHint = 'Ajoutez vos dettes et créances pour suivre vos remboursements facilement.';
+  static const String debtEmptyHint =
+      'Ajoutez vos dettes et créances pour suivre vos remboursements facilement.';
   static const String debtPaid = 'Soldé';
   static const String debtPending = 'En attente';
   static const String debtRepay = 'Rembourser';
@@ -185,9 +200,11 @@ class AppStrings {
   static const String profileAnalyse = 'Analyse financière';
   static const String profileSupportContact = 'Contacter le support';
   static const String profileLogout = 'Se déconnecter';
-  static const String profileLogoutSubtitle = 'Tes données restent sauvegardées';
+  static const String profileLogoutSubtitle =
+      'Tes données restent sauvegardées';
   static const String profileReset = 'Réinitialiser mon compte';
-  static const String profileResetSubtitle = 'Efface toutes les données définitivement';
+  static const String profileResetSubtitle =
+      'Efface toutes les données définitivement';
   static const String profilePremium = 'Accès à vie';
   static const String profilePremiumSubtitle = '5 000 FCFA - Paiement unique';
   static const String profilePremiumActive = '✅ Accès à vie activé';
@@ -219,14 +236,16 @@ class AppStrings {
   static const String scoreStrengths = 'VOS POINTS FORTS';
   static const String scoreTips = 'COMMENT AMÉLIORER VOTRE SCORE';
   static const String scoreExport = 'Exporter mon Score PDF';
-  static const String scoreExportSubtitle = 'Partagez ce document avec votre banque ou microfinance.';
+  static const String scoreExportSubtitle =
+      'Partagez ce document avec votre banque ou microfinance.';
 
   // ============================================
   // COACH IA
   // ============================================
   static const String coachTitle = 'TAPA Coach';
   static const String coachSubtitle = 'Coach financier personnel';
-  static const String coachWelcome = 'Bonjour {name} ! 👋\n\nJe suis TAPA Coach, votre assistant financier personnel.';
+  static const String coachWelcome =
+      'Bonjour {name} ! 👋\n\nJe suis TAPA Coach, votre assistant financier personnel.';
   static const String coachPlaceholder = 'Posez votre question...';
   static const String coachThinking = 'TAPA Coach réfléchit...';
   static const String coachSuggestion1 = '💰 Comment épargner ?';
@@ -242,7 +261,8 @@ class AppStrings {
   static const String echeanceTitle = 'Mes échéances';
   static const String echeanceAdd = 'Nouvelle échéance';
   static const String echeanceTitleLabel = 'Titre de l\'échéance';
-  static const String echeanceTitleHint = 'Ex: Scolarité enfants, Loyer, CIE...';
+  static const String echeanceTitleHint =
+      'Ex: Scolarité enfants, Loyer, CIE...';
   static const String echeanceAmount = 'Montant';
   static const String echeanceAmountHint = 'Ex: 100000';
   static const String echeanceDate = 'Date de l\'échéance';
@@ -253,7 +273,8 @@ class AppStrings {
   static const String echeanceReminder = 'Me rappeler';
   static const String echeanceSave = 'Enregistrer l\'échéance';
   static const String echeanceEmpty = 'Aucune échéance';
-  static const String echeanceEmptyHint = 'Ajoutez vos échéances pour recevoir des rappels automatiques.';
+  static const String echeanceEmptyHint =
+      'Ajoutez vos échéances pour recevoir des rappels automatiques.';
 
   // ============================================
   // INVESTISSEMENT
@@ -261,9 +282,11 @@ class AppStrings {
   static const String investTitle = 'Investir & Protéger';
   static const String investSubtitle = 'Faites fructifier votre argent';
   static const String investFCP = 'Fonds Communs de Placement';
-  static const String investFCPSubtitle = 'Faites fructifier votre épargne avec nos partenaires SGO agréés';
+  static const String investFCPSubtitle =
+      'Faites fructifier votre épargne avec nos partenaires SGO agréés';
   static const String investAssurance = 'Assurance Vie';
-  static const String investAssuranceSubtitle = 'Protégez votre famille et construisez votre avenir sereinement';
+  static const String investAssuranceSubtitle =
+      'Protégez votre famille et construisez votre avenir sereinement';
   static const String investWhy = 'Pourquoi investir avec TAPA ?';
   static const String investSecurity = '🔒 Sécurité';
   static const String investSecuritySub = 'Partenaires agréés et certifiés';
@@ -282,17 +305,20 @@ class AppStrings {
   static const String assuranceAuto = 'Assurance Auto';
   static const String assurancePartenaire = 'SONAM VIE';
   static const String assurancePartenaireAuto = 'SONAM AUTO';
-  static const String assurancePartenaireSub = 'Partenaire assurance de TAPA Invest';
+  static const String assurancePartenaireSub =
+      'Partenaire assurance de TAPA Invest';
   static const String assuranceDevis = 'Obtenir un devis';
 
   // ============================================
   // GUIDE
   // ============================================
   static const String guideTitle = "Guide d'utilisation";
-  static const String guideSubtitle = 'Apprenez à utiliser TAPA Invest efficacement';
+  static const String guideSubtitle =
+      'Apprenez à utiliser TAPA Invest efficacement';
   static const String guideDownload = 'Télécharger le guide PDF';
   static const String guideSection1 = 'Bienvenue dans TAPA Invest';
-  static const String guideSection2 = 'PREMIÈRE ÉTAPE : Configurez vos portefeuilles';
+  static const String guideSection2 =
+      'PREMIÈRE ÉTAPE : Configurez vos portefeuilles';
   static const String guideSection3 = 'DEUXIÈME ÉTAPE : Créez vos catégories';
   static const String guideSection4 = 'Ajouter une transaction';
   static const String guideSection5 = 'Scanner un reçu';
@@ -336,20 +362,56 @@ class AppStrings {
   // JOURS ET MOIS
   // ============================================
   static const List<String> months = [
-    '', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    '',
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septembre',
+    'Octobre',
+    'Novembre',
+    'Décembre'
   ];
 
   static const List<String> monthsShort = [
-    '', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
-    'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'
+    '',
+    'Jan',
+    'Fév',
+    'Mar',
+    'Avr',
+    'Mai',
+    'Juin',
+    'Juil',
+    'Aoû',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Déc'
   ];
 
   static const List<String> days = [
-    '', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'
+    '',
+    'Lundi',
+    'Mardi',
+    'Mercredi',
+    'Jeudi',
+    'Vendredi',
+    'Samedi',
+    'Dimanche'
   ];
 
   static const List<String> daysShort = [
-    '', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'
+    '',
+    'Lun',
+    'Mar',
+    'Mer',
+    'Jeu',
+    'Ven',
+    'Sam',
+    'Dim'
   ];
 }

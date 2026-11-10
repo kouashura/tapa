@@ -13,10 +13,10 @@ abstract class IAuthRepository {
 
   /// Envoie un code de vérification par SMS avec callback
   Future<void> sendVerificationCodeWithCallback(
-      String phoneNumber, {
-        required void Function(String verificationId) onCodeSent,
-        void Function(String error)? onError,
-      });
+    String phoneNumber, {
+    required void Function(String verificationId) onCodeSent,
+    void Function(String error)? onError,
+  });
 
   /// Vérifie le code SMS et authentifie l'utilisateur
   Future<AppUser> verifyPhoneNumber(String verificationId, String smsCode);
@@ -31,8 +31,7 @@ abstract class IAuthRepository {
   /// Crée un nouvel utilisateur
   Future<AppUser> createUser({
     required String prenom,
-    required String telephone,
-    required String indicatif,
+    required String email,
     required String codePays,
     required String monnaie,
   });

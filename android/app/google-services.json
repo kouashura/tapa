@@ -1,10 +1,30 @@
 {
   "project_info": {
     "project_number": "341897916087",
+    "firebase_url": "https://tapa-budget-6ed7c-default-rtdb.firebaseio.com",
     "project_id": "tapa-budget-6ed7c",
     "storage_bucket": "tapa-budget-6ed7c.firebasestorage.app"
   },
   "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:341897916087:android:ca83d5a916fd14ad61a732",
+        "android_client_info": {
+          "package_name": "com.citapabudget.my"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAmyyM0aElPO_chGEEZuRaHSbTIrtO7aM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
     {
       "client_info": {
         "mobilesdk_app_id": "1:341897916087:android:87c19d339eb64eab61a732",

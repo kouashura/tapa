@@ -19,10 +19,12 @@ class ExpenseChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final transactionsMois = transactions.where((tx) =>
-    tx.dateTransaction.month == now.month &&
-        tx.dateTransaction.year == now.year &&
-        tx.isDepense).toList();
+    final transactionsMois = transactions
+        .where((tx) =>
+            tx.dateTransaction.month == now.month &&
+            tx.dateTransaction.year == now.year &&
+            tx.isDepense)
+        .toList();
 
     if (transactionsMois.isEmpty) return const SizedBox();
 
@@ -32,7 +34,7 @@ class ExpenseChart extends StatelessWidget {
     }
     final total = par.values.fold(0.0, (s, v) => s + v);
     final top = (par.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value)))
+          ..sort((a, b) => b.value.compareTo(a.value)))
         .take(4)
         .toList();
 

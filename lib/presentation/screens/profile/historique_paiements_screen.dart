@@ -75,8 +75,7 @@ class _HistoriquePaiementsScreenState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline,
-                  size: 60, color: TAPAColors.red),
+              const Icon(Icons.error_outline, size: 60, color: TAPAColors.red),
               const SizedBox(height: 16),
               Text(
                 state.error!,
@@ -292,14 +291,16 @@ class _HistoriquePaiementsScreenState
                   ),
                   const SizedBox(height: 4),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: couleur.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      s.estEnCours ? 'En cours' : (s.estPayee ? 'Payee' : 'Annulee'),
+                      s.estEnCours
+                          ? 'En cours'
+                          : (s.estPayee ? 'Payee' : 'Annulee'),
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,

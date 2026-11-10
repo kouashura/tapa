@@ -7,6 +7,7 @@ import '../models/models.dart';
 import '../datasources/remote/firebase/firebase_firestore_datasource.dart';
 import '../../core/errors/error_handler.dart';
 import '../../core/utils/logger.dart';
+import '../../core/utils/date_parser.dart';
 
 /// Implémentation du repository des transactions
 class TransactionRepositoryImpl implements ITransactionRepository {
@@ -14,11 +15,15 @@ class TransactionRepositoryImpl implements ITransactionRepository {
 
   TransactionRepositoryImpl({
     FirebaseFirestoreDatasource? firestoreDatasource,
-  }) : _firestoreDatasource = firestoreDatasource ?? FirebaseFirestoreDatasource();
+  }) : _firestoreDatasource =
+            firestoreDatasource ?? FirebaseFirestoreDatasource();
 
   @override
-  Stream<List<TransactionModel>> getUserTransactions(String uid, {int limit = 50}) {
-    return _firestoreDatasource.listenToTransactions(uid, limit: limit).map((snapshot) {
+  Stream<List<TransactionModel>> getUserTransactions(String uid,
+      {int limit = 50}) {
+    return _firestoreDatasource
+        .listenToTransactions(uid, limit: limit)
+        .map((snapshot) {
       return snapshot.docs.map((doc) {
         final data = doc.data();
         return TransactionModel(
@@ -31,15 +36,16 @@ class TransactionRepositoryImpl implements ITransactionRepository {
           categorieLabel: data['categorieLabel'] ?? 'Autre',
           categorieEmoji: data['categorieEmoji'] ?? '📌',
           note: data['note'],
-          dateTransaction: (data['dateTransaction'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          dateTransaction: parseFirestoreDate(data['dateTransaction']),
+          createdAt: parseFirestoreDate(data['createdAt']),
         );
       }).toList();
     });
   }
 
   @override
-  Future<List<TransactionModel>> getTransactionsOnce(String uid, {int limit = 50}) async {
+  Future<List<TransactionModel>> getTransactionsOnce(String uid,
+      {int limit = 50}) async {
     try {
       return await _firestoreDatasource.getTransactions(uid, limit: limit);
     } catch (e) {
@@ -95,7 +101,8 @@ class TransactionRepositoryImpl implements ITransactionRepository {
   }
 
   @override
-  Future<double> getDepensesByCategorie(String categorieId, int mois, int annee) async {
+  Future<double> getDepensesByCategorie(
+      String categorieId, int mois, int annee) async {
     try {
       // Cette méthode nécessite l'UID de l'utilisateur
       Logger.info('📊 Calcul des dépenses par catégorie: $categorieId');
@@ -145,7 +152,8 @@ class TransactionRepositoryImpl implements ITransactionRepository {
 
   Future<void> _updateWalletBalance(TransactionModel transaction) async {
     try {
-      final walletDoc = await _firestoreDatasource.wallets.doc(transaction.walletId).get();
+      final walletDoc =
+          await _firestoreDatasource.wallets.doc(transaction.walletId).get();
       if (!walletDoc.exists) {
         Logger.warning('⚠️ Portefeuille non trouvé: ${transaction.walletId}');
         return;

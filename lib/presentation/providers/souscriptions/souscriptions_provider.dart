@@ -13,11 +13,13 @@ final souscriptionRepositoryProvider = Provider<ISouscriptionRepository>((ref) {
   return SouscriptionRepositoryImpl();
 });
 
-final getSouscriptionsUseCaseProvider = Provider<GetSouscriptionsUseCase>((ref) {
+final getSouscriptionsUseCaseProvider =
+    Provider<GetSouscriptionsUseCase>((ref) {
   return GetSouscriptionsUseCase(ref.watch(souscriptionRepositoryProvider));
 });
 
-final watchSouscriptionsUseCaseProvider = Provider<WatchSouscriptionsUseCase>((ref) {
+final watchSouscriptionsUseCaseProvider =
+    Provider<WatchSouscriptionsUseCase>((ref) {
   return WatchSouscriptionsUseCase(ref.watch(souscriptionRepositoryProvider));
 });
 
@@ -129,30 +131,36 @@ final nombreSouscriptionsProvider = Provider<int>((ref) {
   return ref.watch(souscriptionsStateProvider).souscriptions.length;
 });
 
-
 // ============================================
 // PROVIDERS ADMIN (toutes les souscriptions)
 // ============================================
 
-final getAllSouscriptionsUseCaseProvider = Provider<GetAllSouscriptionsUseCase>((ref) {
+final getAllSouscriptionsUseCaseProvider =
+    Provider<GetAllSouscriptionsUseCase>((ref) {
   return GetAllSouscriptionsUseCase(ref.watch(souscriptionRepositoryProvider));
 });
 
-final watchAllSouscriptionsUseCaseProvider = Provider<WatchAllSouscriptionsUseCase>((ref) {
-  return WatchAllSouscriptionsUseCase(ref.watch(souscriptionRepositoryProvider));
+final watchAllSouscriptionsUseCaseProvider =
+    Provider<WatchAllSouscriptionsUseCase>((ref) {
+  return WatchAllSouscriptionsUseCase(
+      ref.watch(souscriptionRepositoryProvider));
 });
 
-final updateSouscriptionStatutUseCaseProvider = Provider<UpdateSouscriptionStatutUseCase>((ref) {
-  return UpdateSouscriptionStatutUseCase(ref.watch(souscriptionRepositoryProvider));
+final updateSouscriptionStatutUseCaseProvider =
+    Provider<UpdateSouscriptionStatutUseCase>((ref) {
+  return UpdateSouscriptionStatutUseCase(
+      ref.watch(souscriptionRepositoryProvider));
 });
 
-final allSouscriptionsStreamProvider = StreamProvider<List<SouscriptionModel>>((ref) {
+final allSouscriptionsStreamProvider =
+    StreamProvider<List<SouscriptionModel>>((ref) {
   final useCase = ref.watch(watchAllSouscriptionsUseCaseProvider);
   return useCase.execute();
 });
 
 final adminSouscriptionsStateProvider =
-    StateNotifierProvider<AdminSouscriptionsNotifier, AdminSouscriptionsState>((ref) {
+    StateNotifierProvider<AdminSouscriptionsNotifier, AdminSouscriptionsState>(
+        (ref) {
   return AdminSouscriptionsNotifier(ref);
 });
 
@@ -201,17 +209,22 @@ class AdminSouscriptionsState {
 
   List<SouscriptionModel> get souscriptionsFiltrees {
     if (filtre == 'toutes') return souscriptions;
-    if (filtre == 'en_cours') return souscriptions.where((s) => s.estEnCours).toList();
-    if (filtre == 'payee') return souscriptions.where((s) => s.estPayee).toList();
-    if (filtre == 'annulee') return souscriptions.where((s) => s.estAnnulee).toList();
+    if (filtre == 'en_cours')
+      return souscriptions.where((s) => s.estEnCours).toList();
+    if (filtre == 'payee')
+      return souscriptions.where((s) => s.estPayee).toList();
+    if (filtre == 'annulee')
+      return souscriptions.where((s) => s.estAnnulee).toList();
     return souscriptions;
   }
 }
 
-class AdminSouscriptionsNotifier extends StateNotifier<AdminSouscriptionsState> {
+class AdminSouscriptionsNotifier
+    extends StateNotifier<AdminSouscriptionsState> {
   final Ref _ref;
 
-  AdminSouscriptionsNotifier(this._ref) : super(const AdminSouscriptionsState());
+  AdminSouscriptionsNotifier(this._ref)
+      : super(const AdminSouscriptionsState());
 
   void setFiltre(String filtre) {
     state = state.copyWith(filtre: filtre);

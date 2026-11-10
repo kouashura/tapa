@@ -23,7 +23,8 @@ class GetSouscriptionsResult {
     this.totalPayees = 0,
   });
 
-  factory GetSouscriptionsResult.success(List<SouscriptionModel> souscriptions) {
+  factory GetSouscriptionsResult.success(
+      List<SouscriptionModel> souscriptions) {
     double montantTotal = 0;
     int totalEnCours = 0;
     int totalPayees = 0;

@@ -26,7 +26,8 @@ class MySqlApiService {
     }
   }
 
-  Future<Map<String, dynamic>> createUtilisateur(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> createUtilisateur(
+      Map<String, dynamic> data) async {
     print('📡 Création utilisateur...');
     print('📡 URL: $baseUrl/utilisateurs');
     print('📡 Data: $data');
@@ -53,9 +54,8 @@ class MySqlApiService {
   }
 
   Future<List<dynamic>> getPortefeuilles(int utilisateurId) async {
-    final response = await http.get(
-        Uri.parse('$baseUrl/utilisateurs/$utilisateurId/portefeuilles')
-    );
+    final response = await http
+        .get(Uri.parse('$baseUrl/utilisateurs/$utilisateurId/portefeuilles'));
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -65,7 +65,8 @@ class MySqlApiService {
 
   // Ajoutez ces méthodes à votre MySqlApiService
 
-  Future<Map<String, dynamic>> updateUtilisateur(int id, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> updateUtilisateur(
+      int id, Map<String, dynamic> data) async {
     final response = await http.put(
       Uri.parse('$baseUrl/utilisateurs/$id'),
       headers: {'Content-Type': 'application/json'},
@@ -78,7 +79,8 @@ class MySqlApiService {
     }
   }
 
-  Future<Map<String, dynamic>> updatePortefeuille(int id, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> updatePortefeuille(
+      int id, Map<String, dynamic> data) async {
     final response = await http.put(
       Uri.parse('$baseUrl/portefeuilles/$id'),
       headers: {'Content-Type': 'application/json'},
@@ -91,7 +93,8 @@ class MySqlApiService {
     }
   }
 
-  Future<Map<String, dynamic>> updatePortefeuilleSolde(int id, double variation) async {
+  Future<Map<String, dynamic>> updatePortefeuilleSolde(
+      int id, double variation) async {
     final response = await http.patch(
       Uri.parse('$baseUrl/portefeuilles/$id/solde'),
       headers: {'Content-Type': 'application/json'},
@@ -125,7 +128,9 @@ class MySqlApiService {
       throw Exception('Erreur: ${response.statusCode}');
     }
   }
-  Future<Map<String, dynamic>> createPortefeuille(Map<String, dynamic> data) async {
+
+  Future<Map<String, dynamic>> createPortefeuille(
+      Map<String, dynamic> data) async {
     final response = await http.post(
       Uri.parse('$baseUrl/portefeuilles'),
       headers: {'Content-Type': 'application/json'},
@@ -143,9 +148,8 @@ class MySqlApiService {
   // ============================================
 
   Future<List<dynamic>> getTransactions(int utilisateurId) async {
-    final response = await http.get(
-        Uri.parse('$baseUrl/utilisateurs/$utilisateurId/transactions')
-    );
+    final response = await http
+        .get(Uri.parse('$baseUrl/utilisateurs/$utilisateurId/transactions'));
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -153,7 +157,8 @@ class MySqlApiService {
     }
   }
 
-  Future<Map<String, dynamic>> createTransaction(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>> createTransaction(
+      Map<String, dynamic> data) async {
     final response = await http.post(
       Uri.parse('$baseUrl/transactions'),
       headers: {'Content-Type': 'application/json'},
@@ -171,9 +176,8 @@ class MySqlApiService {
   // ============================================
 
   Future<Map<String, dynamic>> getStatistiques(int utilisateurId) async {
-    final response = await http.get(
-        Uri.parse('$baseUrl/utilisateurs/$utilisateurId/statistiques')
-    );
+    final response = await http
+        .get(Uri.parse('$baseUrl/utilisateurs/$utilisateurId/statistiques'));
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -186,9 +190,8 @@ class MySqlApiService {
   // ============================================
 
   Future<List<dynamic>> getCategories(int utilisateurId) async {
-    final response = await http.get(
-        Uri.parse('$baseUrl/utilisateurs/$utilisateurId/categories')
-    );
+    final response = await http
+        .get(Uri.parse('$baseUrl/utilisateurs/$utilisateurId/categories'));
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -201,9 +204,8 @@ class MySqlApiService {
   // ============================================
 
   Future<List<dynamic>> getBudgets(int utilisateurId) async {
-    final response = await http.get(
-        Uri.parse('$baseUrl/utilisateurs/$utilisateurId/budgets')
-    );
+    final response = await http
+        .get(Uri.parse('$baseUrl/utilisateurs/$utilisateurId/budgets'));
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {

@@ -3,11 +3,12 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/repositories/i_echeance_repository.dart';
-import '../models/models.dart';  // ✅ Utiliser models.dart
+import '../models/models.dart'; // ✅ Utiliser models.dart
 import '../datasources/remote/firebase/firebase_firestore_datasource.dart';
 import '../../core/errors/failure.dart';
 import '../../core/errors/error_handler.dart';
 import '../../core/utils/logger.dart';
+import '../../core/utils/date_parser.dart';
 
 /// Implémentation du repository des échéances
 class EcheanceRepositoryImpl implements IEcheanceRepository {
@@ -15,7 +16,8 @@ class EcheanceRepositoryImpl implements IEcheanceRepository {
 
   EcheanceRepositoryImpl({
     FirebaseFirestoreDatasource? firestoreDatasource,
-  }) : _firestoreDatasource = firestoreDatasource ?? FirebaseFirestoreDatasource();
+  }) : _firestoreDatasource =
+            firestoreDatasource ?? FirebaseFirestoreDatasource();
 
   @override
   Stream<List<EcheanceModel>> getUserEcheances(String uid) {
@@ -28,13 +30,13 @@ class EcheanceRepositoryImpl implements IEcheanceRepository {
           titre: data['titre'] ?? '',
           description: data['description'] ?? '',
           montant: (data['montant'] as num?)?.toDouble() ?? 0,
-          dateEcheance: (data['dateEcheance'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          dateEcheance: parseFirestoreDate(data['dateEcheance']),
           type: data['type'] ?? 'unique',
           statut: data['statut'] ?? 'en_attente',
           descriptionRecurrence: data['descriptionRecurrence'] ?? '',
           descriptionRappel: data['descriptionRappel'] ?? '',
-          createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          createdAt: parseFirestoreDate(data['createdAt']),
+          updatedAt: parseFirestoreDate(data['updatedAt']),
         );
       }).toList();
     });
@@ -43,7 +45,8 @@ class EcheanceRepositoryImpl implements IEcheanceRepository {
   @override
   Future<List<EcheanceModel>> getEcheancesOnce(String uid) async {
     try {
-      return await _firestoreDatasource.getEcheances(uid);  // ✅ Retourne List<EcheanceModel>
+      return await _firestoreDatasource
+          .getEcheances(uid); // ✅ Retourne List<EcheanceModel>
     } catch (e) {
       Logger.error('❌ Erreur récupération échéances: $e');
       throw ErrorHandler().handleException(e);
@@ -123,7 +126,9 @@ class EcheanceRepositoryImpl implements IEcheanceRepository {
   Future<List<EcheanceModel>> getEcheancesEnRetard(String uid) async {
     try {
       final echeances = await _firestoreDatasource.getEcheances(uid);
-      return echeances.where((e) => e.estEnRetard).toList();  // ✅ Retourne List<EcheanceModel>
+      return echeances
+          .where((e) => e.estEnRetard)
+          .toList(); // ✅ Retourne List<EcheanceModel>
     } catch (e) {
       Logger.error('❌ Erreur récupération échéances en retard: $e');
       throw ErrorHandler().handleException(e);

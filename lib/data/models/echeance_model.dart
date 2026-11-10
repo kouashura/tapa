@@ -89,7 +89,8 @@ class EcheanceModel {
       dateEcheance: dateEcheance ?? this.dateEcheance,
       type: type ?? this.type,
       statut: statut ?? this.statut,
-      descriptionRecurrence: descriptionRecurrence ?? this.descriptionRecurrence,
+      descriptionRecurrence:
+          descriptionRecurrence ?? this.descriptionRecurrence,
       descriptionRappel: descriptionRappel ?? this.descriptionRappel,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

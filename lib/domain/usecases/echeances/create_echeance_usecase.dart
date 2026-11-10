@@ -68,7 +68,8 @@ class CreateEcheanceUseCase {
       }
 
       if (params.montant <= 0) {
-        return CreateEcheanceResult.error('Le montant doit etre superieur a 0.');
+        return CreateEcheanceResult.error(
+            'Le montant doit etre superieur a 0.');
       }
 
       final now = DateTime.now();

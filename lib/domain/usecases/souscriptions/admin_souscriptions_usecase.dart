@@ -25,7 +25,8 @@ class GetAllSouscriptionsResult {
     this.totalAnnulees = 0,
   });
 
-  factory GetAllSouscriptionsResult.success(List<SouscriptionModel> souscriptions) {
+  factory GetAllSouscriptionsResult.success(
+      List<SouscriptionModel> souscriptions) {
     double montantTotal = 0;
     int totalEnCours = 0;
     int totalPayees = 0;

@@ -73,8 +73,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
     setState(() {
       _messages.add({
         'role': 'assistant',
-        'content':
-        'Bonjour $prenom ! 👋\n\n'
+        'content': 'Bonjour $prenom ! 👋\n\n'
             'Je suis TAPA Coach, votre assistant financier personnel. '
             'Je suis là pour vous aider à mieux gérer votre argent, '
             'épargner intelligemment et construire votre avenir.\n\n'
@@ -99,8 +98,9 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
     if (wallets.isNotEmpty) {
       final walletStrings = <String>[];
       for (final w in wallets) {
-        walletStrings.add('${w.nom ?? 'Inconnu'}: ${(w.solde ?? 0).toStringAsFixed(0)} $monnaie');
-            }
+        walletStrings.add(
+            '${w.nom ?? 'Inconnu'}: ${(w.solde ?? 0).toStringAsFixed(0)} $monnaie');
+      }
       walletsStr = walletStrings.join(', ');
     } else {
       walletsStr = 'Aucun portefeuille';
@@ -160,7 +160,8 @@ RÈGLES :
 
       // ✅ VÉRIFIER SI LA CLÉ API EXISTE
       if (_apiKey.isEmpty) {
-        Logger.warning('⚠️ ANTHROPIC_API_KEY manquante - Utilisation du mode simulation');
+        Logger.warning(
+            '⚠️ ANTHROPIC_API_KEY manquante - Utilisation du mode simulation');
         _reponseSimulee(msg);
         return;
       }
@@ -212,7 +213,8 @@ RÈGLES :
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('❌ Clé API Anthropic invalide. Vérifiez votre fichier .env'),
+        content:
+            Text('❌ Clé API Anthropic invalide. Vérifiez votre fichier .env'),
         backgroundColor: TAPAColors.red,
         duration: Duration(seconds: 4),
       ),
@@ -234,7 +236,9 @@ RÈGLES :
           '2️⃣ Commencez par 10% de vos revenus chaque mois\n'
           '3️⃣ Utilisez les objectifs d\'épargne dans TAPA Invest\n\n'
           'Quels sont vos objectifs d\'épargne actuels ? 🎯';
-    } else if (msg.contains('budget') || msg.contains('dépense') || msg.contains('depense')) {
+    } else if (msg.contains('budget') ||
+        msg.contains('dépense') ||
+        msg.contains('depense')) {
       reponse = 'Bonjour $prenom ! 📊\n\n'
           'Un bon budget est la base d\'une santé financière solide.\n\n'
           '✅ Listez TOUTES vos dépenses\n'
@@ -249,15 +253,19 @@ RÈGLES :
           '- BRVM : actions cotées\n'
           '- Assurance vie : épargne + protection\n\n'
           'Quelle option vous intéresse ? 🚀';
-    } else if (msg.contains('assurance') || msg.contains('protég') || msg.contains('protege')) {
+    } else if (msg.contains('assurance') ||
+        msg.contains('protég') ||
+        msg.contains('protege')) {
       reponse = 'Bonjour $prenom ! 🛡️\n\n'
           'L\'assurance vie est un outil puissant pour protéger vos proches.\n\n'
           'Avec SONAM VIE, partenaire de TAPA Invest :\n'
           '✅ Assurance décès : jusqu\'à 10 000 000 FCFA\n'
-          '✅ Assurance épargne : rendement garanti\n'
+          '✅ ÉPARGNE DE PRÉCAUTIONS : rendement garanti\n'
           '✅ Assurance éducation\n\n'
           'Quel type vous intéresse ? 💡';
-    } else if (msg.contains('dette') || msg.contains('credit') || msg.contains('crédit')) {
+    } else if (msg.contains('dette') ||
+        msg.contains('credit') ||
+        msg.contains('crédit')) {
       reponse = 'Bonjour $prenom ! 💳\n\n'
           'Gérer ses dettes est essentiel pour une santé financière solide.\n\n'
           '✅ Priorisez les dettes avec les taux d\'intérêt les plus élevés\n'
@@ -287,10 +295,8 @@ RÈGLES :
   void _scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 300), () {
       if (_scrollCtrl.hasClients) {
-        _scrollCtrl.animateTo(
-            _scrollCtrl.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut);
+        _scrollCtrl.animateTo(_scrollCtrl.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
       }
     });
   }
@@ -308,15 +314,13 @@ RÈGLES :
                   backgroundColor: Color(0xFFE8F4FD),
                   child: Text('🎯', style: TextStyle(fontSize: 16))),
               SizedBox(width: 10),
-              Column(crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('TAPA Coach',
-                        style: TextStyle(fontSize: 15,
-                            fontWeight: FontWeight.w700)),
-                    Text('Coach financier personnel',
-                        style: TextStyle(fontSize: 11,
-                            color: Colors.white70)),
-                  ]),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('TAPA Coach',
+                    style:
+                        TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                Text('Coach financier personnel',
+                    style: TextStyle(fontSize: 11, color: Colors.white70)),
+              ]),
             ]),
             backgroundColor: TAPAColors.navy,
             foregroundColor: TAPAColors.white,
@@ -329,7 +333,9 @@ RÈGLES :
                 margin: const EdgeInsets.only(right: 12),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: hasApiKey ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+                  color: hasApiKey
+                      ? Colors.green.withOpacity(0.2)
+                      : Colors.red.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -366,7 +372,6 @@ RÈGLES :
                       _suggestion('🧠 Mindset financier'),
                       _suggestion('💳 Gérer mes dettes'),
                     ]))),
-
           Expanded(
               child: ListView.builder(
                   controller: _scrollCtrl,
@@ -380,44 +385,50 @@ RÈGLES :
                     final isUser = msg['role'] == 'user';
                     return _bulle(msg['content']!, isUser);
                   })),
-
           Container(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              decoration: BoxDecoration(
-                  color: TAPAColors.surface,
-                  boxShadow: [BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10, offset: const Offset(0, -3))]),
+              decoration: BoxDecoration(color: TAPAColors.surface, boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -3))
+              ]),
               child: Row(children: [
-                Expanded(child: TextField(
-                    controller: _msgCtrl,
-                    textCapitalization: TextCapitalization.sentences,
-                    maxLines: 3,
-                    minLines: 1,
-                    decoration: InputDecoration(
-                        hintText: hasApiKey ? 'Posez votre question...' : 'Mode simulation...',
-                        hintStyle: const TextStyle(
-                            color: TAPAColors.textHint),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            borderSide: BorderSide.none),
-                        filled: true,
-                        fillColor: TAPAColors.background,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10)),
-                    onSubmitted: (_) => _envoyer())),
+                Expanded(
+                    child: TextField(
+                        controller: _msgCtrl,
+                        textCapitalization: TextCapitalization.sentences,
+                        maxLines: 3,
+                        minLines: 1,
+                        decoration: InputDecoration(
+                            hintText: hasApiKey
+                                ? 'Posez votre question...'
+                                : 'Mode simulation...',
+                            hintStyle:
+                                const TextStyle(color: TAPAColors.textHint),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(24),
+                                borderSide: BorderSide.none),
+                            filled: true,
+                            fillColor: TAPAColors.background,
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10)),
+                        onSubmitted: (_) => _envoyer())),
                 const SizedBox(width: 8),
                 GestureDetector(
                     onTap: _envoyer,
                     child: Container(
-                        width: 44, height: 44,
+                        width: 44,
+                        height: 44,
                         decoration: BoxDecoration(
                             color: _loading
-                                ? TAPAColors.textHint : TAPAColors.navy,
+                                ? TAPAColors.textHint
+                                : TAPAColors.navy,
                             shape: BoxShape.circle),
                         child: Icon(
                             _loading ? Icons.hourglass_empty : Icons.send,
-                            color: TAPAColors.white, size: 20))),
+                            color: TAPAColors.white,
+                            size: 20))),
               ])),
         ]));
   }
@@ -426,8 +437,8 @@ RÈGLES :
     return Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: Row(
-            mainAxisAlignment: isUser
-                ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment:
+                isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (!isUser) ...[
@@ -437,23 +448,28 @@ RÈGLES :
                     child: Text('🎯', style: TextStyle(fontSize: 14))),
                 const SizedBox(width: 8),
               ],
-              Flexible(child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                      color: isUser ? TAPAColors.navy : TAPAColors.surface,
-                      borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(18),
-                          topRight: const Radius.circular(18),
-                          bottomLeft: Radius.circular(isUser ? 18 : 4),
-                          bottomRight: Radius.circular(isUser ? 4 : 18)),
-                      boxShadow: [BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 4, offset: const Offset(0, 2))]),
-                  child: Text(texte,
-                      style: TextStyle(
-                          fontSize: 14,
-                          color: isUser ? TAPAColors.white : TAPAColors.navy,
-                          height: 1.5)))),
+              Flexible(
+                  child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                          color: isUser ? TAPAColors.navy : TAPAColors.surface,
+                          borderRadius: BorderRadius.only(
+                              topLeft: const Radius.circular(18),
+                              topRight: const Radius.circular(18),
+                              bottomLeft: Radius.circular(isUser ? 18 : 4),
+                              bottomRight: Radius.circular(isUser ? 4 : 18)),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2))
+                          ]),
+                      child: Text(texte,
+                          style: TextStyle(
+                              fontSize: 14,
+                              color:
+                                  isUser ? TAPAColors.white : TAPAColors.navy,
+                              height: 1.5)))),
               if (isUser) const SizedBox(width: 8),
             ]));
   }
@@ -474,13 +490,14 @@ RÈGLES :
                   borderRadius: BorderRadius.circular(18)),
               child: const Row(children: [
                 SizedBox(
-                    width: 16, height: 16,
+                    width: 16,
+                    height: 16,
                     child: CircularProgressIndicator(
                         strokeWidth: 2, color: TAPAColors.navy)),
                 SizedBox(width: 8),
                 Text('TAPA Coach réfléchit...',
-                    style: TextStyle(
-                        fontSize: 13, color: TAPAColors.textSecond)),
+                    style:
+                        TextStyle(fontSize: 13, color: TAPAColors.textSecond)),
               ])),
         ]));
   }
@@ -493,13 +510,11 @@ RÈGLES :
         },
         child: Container(
             margin: const EdgeInsets.only(right: 8),
-            padding: const EdgeInsets.symmetric(
-                horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
                 color: TAPAColors.navy.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                    color: TAPAColors.navy.withOpacity(0.2))),
+                border: Border.all(color: TAPAColors.navy.withOpacity(0.2))),
             child: Text(texte,
                 style: const TextStyle(
                     fontSize: 12,

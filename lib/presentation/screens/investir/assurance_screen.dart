@@ -14,7 +14,8 @@ class AssuranceScreen extends ConsumerStatefulWidget {
   ConsumerState<AssuranceScreen> createState() => _AssuranceScreenState();
 }
 
-class _AssuranceScreenState extends ConsumerState<AssuranceScreen> with SingleTickerProviderStateMixin {
+class _AssuranceScreenState extends ConsumerState<AssuranceScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _selectedIndex = 1;
 
@@ -23,37 +24,55 @@ class _AssuranceScreenState extends ConsumerState<AssuranceScreen> with SingleTi
       'id': 'assurance_deces',
       'nom': 'Assurance Décès',
       'emoji': '🛡️',
-      'description': 'Protégez votre famille en cas de décès. Vos proches reçoivent un capital garanti.',
+      'description':
+          'Protégez votre famille en cas de décès. Vos proches reçoivent un capital garanti.',
       'primeMin': 5000,
       'primeMax': 50000,
       'garantie': 'Capital décès jusqu\'à 10 000 000 FCFA',
       'duree': '1 an renouvelable',
       'couleurValue': 0xFF1A237E,
-      'avantages': ['Souscription rapide', 'Pas de visite médicale', 'Capital versé en 72h', 'Bénéficiaire au choix'],
+      'avantages': [
+        'Souscription rapide',
+        'Pas de visite médicale',
+        'Capital versé en 72h',
+        'Bénéficiaire au choix'
+      ],
     },
     {
       'id': 'assurance_epargne',
-      'nom': 'Assurance Épargne',
+      'nom': 'ÉPARGNE DE PRÉCAUTIONS',
       'emoji': '💰',
-      'description': 'Épargnez tout en étant protégé. Constituez un capital garanti à terme.',
+      'description':
+          'Épargnez tout en étant protégé. Constituez un capital garanti à terme.',
       'primeMin': 10000,
       'primeMax': 100000,
       'garantie': 'Capital garanti + rendement annuel',
       'duree': '5 à 20 ans',
       'couleurValue': 0xFFC9A227,
-      'avantages': ['Rendement garanti', 'Protection décès incluse', 'Retrait partiel possible', 'Déductible fiscalement'],
+      'avantages': [
+        'Rendement garanti',
+        'Protection décès incluse',
+        'Retrait partiel possible',
+        'Déductible fiscalement'
+      ],
     },
     {
       'id': 'assurance_education',
       'nom': 'Assurance Éducation',
       'emoji': '🎓',
-      'description': 'Garantissez l\'avenir scolaire de vos enfants. Un capital est versé à chaque rentrée.',
+      'description':
+          'Garantissez l\'avenir scolaire de vos enfants. Un capital est versé à chaque rentrée.',
       'primeMin': 5000,
       'primeMax': 30000,
       'garantie': 'Capital versé à chaque rentrée scolaire',
       'duree': 'Jusqu\'à la majorité de l\'enfant',
       'couleurValue': 0xFF3498DB,
-      'avantages': ['Versements programmés', 'Protection parents incluse', 'Continue si parent décède', 'Adapté au rythme africain'],
+      'avantages': [
+        'Versements programmés',
+        'Protection parents incluse',
+        'Continue si parent décède',
+        'Adapté au rythme africain'
+      ],
     },
   ];
 
@@ -62,37 +81,55 @@ class _AssuranceScreenState extends ConsumerState<AssuranceScreen> with SingleTi
       'id': 'assurance_auto_tiers',
       'nom': 'Assurance Auto Tiers',
       'emoji': '🚗',
-      'description': 'Protection minimale obligatoire pour votre véhicule. Couvre les dommages causés à autrui.',
+      'description':
+          'Protection minimale obligatoire pour votre véhicule. Couvre les dommages causés à autrui.',
       'primeMin': 15000,
       'primeMax': 45000,
       'garantie': 'Responsabilité civile jusqu\'à 50 000 000 FCFA',
       'duree': '1 an renouvelable',
       'couleurValue': 0xFF1A237E,
-      'avantages': ['Prix abordable', 'Protection légale', 'Assistance 24/7', 'Paiement mensuel possible'],
+      'avantages': [
+        'Prix abordable',
+        'Protection légale',
+        'Assistance 24/7',
+        'Paiement mensuel possible'
+      ],
     },
     {
       'id': 'assurance_auto_tous_risques',
       'nom': 'Assurance Auto Tous Risques',
       'emoji': '🚙',
-      'description': 'Protection complète pour votre véhicule. Couvre les dommages, le vol et les accidents.',
+      'description':
+          'Protection complète pour votre véhicule. Couvre les dommages, le vol et les accidents.',
       'primeMin': 45000,
       'primeMax': 120000,
       'garantie': 'Couverture complète - vol, incendie, dommages',
       'duree': '1 an renouvelable',
       'couleurValue': 0xFF1A237E,
-      'avantages': ['Couverture complète', 'Assistance dépannage', 'Véhicule de remplacement', 'Protection conducteur'],
+      'avantages': [
+        'Couverture complète',
+        'Assistance dépannage',
+        'Véhicule de remplacement',
+        'Protection conducteur'
+      ],
     },
     {
       'id': 'assurance_auto_bonus',
       'nom': 'Assurance Auto Bonus',
       'emoji': '🏆',
-      'description': 'Récompensez votre bonne conduite ! Tarifs préférentiels pour les conducteurs responsables.',
+      'description':
+          'Récompensez votre bonne conduite ! Tarifs préférentiels pour les conducteurs responsables.',
       'primeMin': 20000,
       'primeMax': 60000,
       'garantie': 'Bonus de 10% par an sans accident',
       'duree': '1 an renouvelable',
       'couleurValue': 0xFF1A237E,
-      'avantages': ['Réduction jusqu\'à 50%', 'Conduite responsable', 'Paiement trimestriel', 'Assistance routière'],
+      'avantages': [
+        'Réduction jusqu\'à 50%',
+        'Conduite responsable',
+        'Paiement trimestriel',
+        'Assistance routière'
+      ],
     },
   ];
 
@@ -171,14 +208,14 @@ class _AssuranceScreenState extends ConsumerState<AssuranceScreen> with SingleTi
   }
 
   Widget _buildAssuranceList(
-      BuildContext context,
-      List<Map<String, dynamic>> produits,
-      String monnaie,
-      bool isSmall,
-      bool isTablet,
-      double paddingSize,
-      bool isAuto,
-      ) {
+    BuildContext context,
+    List<Map<String, dynamic>> produits,
+    String monnaie,
+    bool isSmall,
+    bool isTablet,
+    double paddingSize,
+    bool isAuto,
+  ) {
     final titleSize = isSmall ? 14.0 : (isTablet ? 20.0 : 16.0);
 
     return ListView(
@@ -368,7 +405,7 @@ class _AssuranceScreenState extends ConsumerState<AssuranceScreen> with SingleTi
                 const SizedBox(height: 6),
                 Text(
                   'Prime: ${Fmt.montant((p['primeMin'] as int).toDouble(), monnaie: monnaie)} '
-                      'à ${Fmt.montant((p['primeMax'] as int).toDouble(), monnaie: monnaie)} / mois',
+                  'à ${Fmt.montant((p['primeMax'] as int).toDouble(), monnaie: monnaie)} / mois',
                   style: TextStyle(
                     fontSize: isSmall ? 11 : 12,
                     fontWeight: FontWeight.w600,
@@ -506,20 +543,20 @@ class _AssuranceScreenState extends ConsumerState<AssuranceScreen> with SingleTi
               decoration: BoxDecoration(
                 gradient: isActive
                     ? const LinearGradient(
-                  colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
+                        colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
                     : null,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: isActive
                     ? [
-                  BoxShadow(
-                    color: const Color(0xFF1A237E).withOpacity(0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
+                        BoxShadow(
+                          color: const Color(0xFF1A237E).withOpacity(0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
                     : null,
               ),
               child: Icon(
@@ -534,7 +571,8 @@ class _AssuranceScreenState extends ConsumerState<AssuranceScreen> with SingleTi
               style: TextStyle(
                 fontSize: isActive ? 10 : 9,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive ? const Color(0xFF1A237E) : Colors.grey.shade500,
+                color:
+                    isActive ? const Color(0xFF1A237E) : Colors.grey.shade500,
                 letterSpacing: 0.1,
               ),
               maxLines: 1,

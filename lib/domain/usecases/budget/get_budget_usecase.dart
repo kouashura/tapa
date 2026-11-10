@@ -47,7 +47,7 @@ class BudgetWithComparison {
 
   /// Budget vide
   factory BudgetWithComparison.empty() {
-    return  BudgetWithComparison();
+    return BudgetWithComparison();
   }
 
   /// Récupère l'écart pour une catégorie
@@ -228,7 +228,8 @@ class GetBudgetUseCase {
       );
 
       Logger.success('✅ Budget récupéré: ${budget.moisLabel}');
-      Logger.info('💰 Prévu: ${budget.totalRevenusPrevu}/${budget.totalDepensesPrevu}');
+      Logger.info(
+          '💰 Prévu: ${budget.totalRevenusPrevu}/${budget.totalDepensesPrevu}');
       Logger.info('📊 Réel: $totalRevenusReels/$totalDepensesReelles');
 
       return GetBudgetResult.success(comparison);

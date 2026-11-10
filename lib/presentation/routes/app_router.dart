@@ -51,10 +51,13 @@ import '../screens/investir/assurance_screen.dart';
 import '../screens/investir/assurance_detail_screen.dart';
 import '../screens/investir/devis_auto_screen.dart';
 import '../screens/investir/assurance_success_screen.dart';
+import '../screens/investir/sonam_simulator_screen.dart';
 import '../screens/profile/historique_paiements_screen.dart';
 import '../screens/admin/admin_tarifs_screen.dart';
 import '../screens/admin/admin_souscriptions_screen.dart';
 import '../screens/migration/migration_page.dart';
+import '../screens/admin/admin_withdraw_screen.dart';
+import '../screens/investir/my_sonam_contracts_screen.dart';
 
 class AppRouter {
   final GoRouter router;
@@ -83,7 +86,8 @@ class AppRouter {
         final location = state.matchedLocation;
 
         final isOnboardingScreen = location == '/onboarding';
-        final isPinScreen = location == '/pin-setup' || location == '/pin-login';
+        final isPinScreen =
+            location == '/pin-setup' || location == '/pin-login';
         final isActivationScreen = location == '/activation';
         final isAuthScreen = location == '/inscription' ||
             location == '/pin-login' ||
@@ -172,6 +176,15 @@ class AppRouter {
           builder: (context, state) => const HomeScreen(),
         ),
         GoRoute(
+          path: '/admin/withdraws',
+          builder: (context, state) => const AdminWithdrawScreen(),
+        ),
+        // ✅ Route Admin (accès réservé)
+        GoRoute(
+          path: '/admin/withdraws',
+          builder: (context, state) => const AdminWithdrawScreen(),
+        ),
+        GoRoute(
           path: '/profile',
           builder: (context, state) => const ProfileScreen(),
         ),
@@ -205,7 +218,7 @@ class AppRouter {
         ),
         GoRoute(
           path: '/add-transaction',
-          builder: (context, state) => const AddTransactionScreen(),
+          builder: (context, state) => AddTransactionScreen(initialData: state.extra as Map<String, dynamic>?),
         ),
         GoRoute(
           path: '/history',
@@ -299,6 +312,14 @@ class AppRouter {
           builder: (context, state) => const AssuranceScreen(),
         ),
         GoRoute(
+          path: '/investir/sonam',
+          builder: (context, state) => const SonamSimulatorScreen(),
+        ),
+        GoRoute(
+          path: '/investir/sonam/contrats',
+          builder: (context, state) => const MySonamContractsScreen(),
+        ),
+        GoRoute(
           path: '/investir/assurance/:id',
           builder: (context, state) {
             final produit = state.extra as Map<String, dynamic>? ?? {};
@@ -308,7 +329,8 @@ class AppRouter {
         GoRoute(
           path: '/devis-auto/:produit',
           builder: (context, state) {
-            final produitNom = state.pathParameters['produit'] ?? 'Assurance Auto';
+            final produitNom =
+                state.pathParameters['produit'] ?? 'Assurance Auto';
             return DevisAutoScreen(produitNom: produitNom);
           },
         ),

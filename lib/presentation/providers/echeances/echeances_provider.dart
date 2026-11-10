@@ -41,7 +41,8 @@ final marquerPayeeUseCaseProvider = Provider<MarquerPayeeUseCase>((ref) {
   return MarquerPayeeUseCase(ref.watch(echeanceRepositoryProvider));
 });
 
-final echeancesListProvider = StreamProvider.family<List<EcheanceModel>, String>(
+final echeancesListProvider =
+    StreamProvider.family<List<EcheanceModel>, String>(
   (ref, uid) {
     final useCase = ref.watch(watchEcheancesUseCaseProvider);
     return useCase.execute(uid);
@@ -63,7 +64,9 @@ final createEcheanceProvider =
 
     if (result.success && result.echeance != null) {
       Logger.success('Echeance creee: ${result.echeance!.id}');
-      ref.read(echeancesStateProvider.notifier).addEcheanceLocally(result.echeance!);
+      ref
+          .read(echeancesStateProvider.notifier)
+          .addEcheanceLocally(result.echeance!);
     } else {
       Logger.error('Erreur creation echeance: ${result.message}');
     }
@@ -80,7 +83,9 @@ final updateEcheanceProvider =
 
     if (result.success && result.echeance != null) {
       Logger.success('Echeance mise a jour: ${result.echeance!.id}');
-      ref.read(echeancesStateProvider.notifier).updateEcheanceLocally(result.echeance!);
+      ref
+          .read(echeancesStateProvider.notifier)
+          .updateEcheanceLocally(result.echeance!);
     } else {
       Logger.error('Erreur mise a jour echeance: ${result.message}');
     }
@@ -90,7 +95,8 @@ final updateEcheanceProvider =
 );
 
 final deleteEcheanceProvider =
-    FutureProvider.family<DeleteEcheanceResult, String>((ref, echeanceId) async {
+    FutureProvider.family<DeleteEcheanceResult, String>(
+        (ref, echeanceId) async {
   final useCase = ref.watch(deleteEcheanceUseCaseProvider);
   final result = await useCase.execute(echeanceId);
 
@@ -172,10 +178,12 @@ class EcheancesState {
   List<EcheanceModel> get cetteSemaine {
     final now = DateTime.now();
     final dans7Jours = now.add(const Duration(days: 7));
-    return echeances.where((e) =>
-        e.statut != 'payee' &&
-        e.dateEcheance.isAfter(now) &&
-        e.dateEcheance.isBefore(dans7Jours)).toList();
+    return echeances
+        .where((e) =>
+            e.statut != 'payee' &&
+            e.dateEcheance.isAfter(now) &&
+            e.dateEcheance.isBefore(dans7Jours))
+        .toList();
   }
 }
 

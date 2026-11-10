@@ -6,7 +6,7 @@ import '../../../domain/repositories/i_budget_repository.dart';
 import '../../../data/repositories/budget_repository_impl.dart';
 import '../../../domain/usecases/budget/create_budget_usecase.dart';
 import '../../../domain/usecases/budget/get_budget_usecase.dart';
-import '../transaction/transaction_provider.dart';  // ✅ Importer le provider depuis transaction_provider.dart
+import '../transaction/transaction_provider.dart'; // ✅ Importer le provider depuis transaction_provider.dart
 import '../../../core/utils/logger.dart';
 
 // ============================================
@@ -31,7 +31,8 @@ final updateBudgetUseCaseProvider = Provider<UpdateBudgetUseCase>((ref) {
 /// Provider du Use Case pour récupérer un budget
 final getBudgetUseCaseProvider = Provider<GetBudgetUseCase>((ref) {
   final budgetRepo = ref.watch(budgetRepositoryProvider);
-  final transactionRepo = ref.watch(transactionRepositoryProvider);  // ✅ Utilise le provider importé
+  final transactionRepo =
+      ref.watch(transactionRepositoryProvider); // ✅ Utilise le provider importé
   return GetBudgetUseCase(
     budgetRepository: budgetRepo,
     transactionRepository: transactionRepo,
@@ -39,7 +40,8 @@ final getBudgetUseCaseProvider = Provider<GetBudgetUseCase>((ref) {
 });
 
 /// Provider du Use Case pour récupérer les budgets d'une année
-final getBudgetsForYearUseCaseProvider = Provider<GetBudgetsForYearUseCase>((ref) {
+final getBudgetsForYearUseCaseProvider =
+    Provider<GetBudgetsForYearUseCase>((ref) {
   return GetBudgetsForYearUseCase(ref.watch(budgetRepositoryProvider));
 });
 
@@ -53,41 +55,44 @@ final deleteBudgetUseCaseProvider = Provider<DeleteBudgetUseCase>((ref) {
 // ============================================
 
 /// Provider pour créer un budget
-final createBudgetProvider = FutureProvider.family<CreateBudgetResult, CreateBudgetParams>(
+final createBudgetProvider =
+    FutureProvider.family<CreateBudgetResult, CreateBudgetParams>(
   (ref, params) async {
     final useCase = ref.watch(createBudgetUseCaseProvider);
     final result = await useCase.execute(params);
-    
+
     if (result.success) {
       Logger.success('✅ Budget créé: ${result.budget?.moisLabel}');
       ref.read(budgetStateProvider.notifier).setBudget(result.budget);
     } else {
       Logger.error('❌ Erreur création budget: ${result.message}');
     }
-    
+
     return result;
   },
 );
 
 /// Provider pour mettre à jour un budget
-final updateBudgetProvider = FutureProvider.family<CreateBudgetResult, CreateBudgetParams>(
+final updateBudgetProvider =
+    FutureProvider.family<CreateBudgetResult, CreateBudgetParams>(
   (ref, params) async {
     final useCase = ref.watch(updateBudgetUseCaseProvider);
     final result = await useCase.execute(params);
-    
+
     if (result.success) {
       Logger.success('📝 Budget mis à jour: ${result.budget?.moisLabel}');
       ref.read(budgetStateProvider.notifier).setBudget(result.budget);
     } else {
       Logger.error('❌ Erreur mise à jour budget: ${result.message}');
     }
-    
+
     return result;
   },
 );
 
 /// Provider pour récupérer un budget
-final getBudgetProvider = FutureProvider.family<GetBudgetResult, GetBudgetParams>(
+final getBudgetProvider =
+    FutureProvider.family<GetBudgetResult, GetBudgetParams>(
   (ref, params) async {
     final useCase = ref.watch(getBudgetUseCaseProvider);
     return await useCase.execute(
@@ -99,7 +104,8 @@ final getBudgetProvider = FutureProvider.family<GetBudgetResult, GetBudgetParams
 );
 
 /// Provider pour récupérer les budgets de l'année
-final getBudgetsForYearProvider = FutureProvider.family<List<BudgetMensuel>, GetBudgetsForYearParams>(
+final getBudgetsForYearProvider =
+    FutureProvider.family<List<BudgetMensuel>, GetBudgetsForYearParams>(
   (ref, params) async {
     final useCase = ref.watch(getBudgetsForYearUseCaseProvider);
     return await useCase.execute(
@@ -118,14 +124,14 @@ final deleteBudgetProvider = FutureProvider.family<bool, DeleteBudgetParams>(
       mois: params.mois,
       annee: params.annee,
     );
-    
+
     if (result) {
       Logger.success('🗑️ Budget supprimé: ${params.mois}/${params.annee}');
       ref.read(budgetStateProvider.notifier).clearBudget();
     } else {
       Logger.error('❌ Erreur suppression budget');
     }
-    
+
     return result;
   },
 );
@@ -134,8 +140,8 @@ final deleteBudgetProvider = FutureProvider.family<bool, DeleteBudgetParams>(
 // NOTIFIER PROVIDER (État local du budget)
 // ============================================
 
-/// Provider pour l'état du budget
-final budgetStateProvider = StateNotifierProvider<BudgetNotifier, BudgetState>((ref) {
+final budgetStateProvider =
+    StateNotifierProvider<BudgetNotifier, BudgetState>((ref) {
   return BudgetNotifier(ref);
 });
 
@@ -207,7 +213,7 @@ class BudgetState {
   /// Récupère l'écart pour une catégorie
   double getEcartForCategorie(String categorieId) {
     if (currentBudget == null) return 0;
-    
+
     final ligne = currentBudget!.lignes.firstWhere(
       (l) => l.categorieId == categorieId,
       orElse: () => BudgetLigne(
@@ -219,7 +225,7 @@ class BudgetState {
         isRevenu: false,
       ),
     );
-    
+
     final reel = depensesReelles[categorieId] ?? 0;
     return ligne.montantPrevu - reel;
   }
@@ -227,7 +233,7 @@ class BudgetState {
   /// Vérifie si une catégorie est en dépassement
   bool isCategorieExceeded(String categorieId) {
     if (currentBudget == null) return false;
-    
+
     final ligne = currentBudget!.lignes.firstWhere(
       (l) => l.categorieId == categorieId,
       orElse: () => BudgetLigne(
@@ -239,9 +245,9 @@ class BudgetState {
         isRevenu: false,
       ),
     );
-    
+
     if (ligne.montantPrevu <= 0) return false;
-    
+
     final reel = depensesReelles[categorieId] ?? 0;
     return reel > ligne.montantPrevu;
   }
@@ -267,6 +273,63 @@ class BudgetNotifier extends StateNotifier<BudgetState> {
       currentBudget: budget,
       hasBudget: true,
     );
+  }
+
+  /// Sauvegarde (creation ou mise a jour) d'un budget
+  Future<bool> saveBudget({
+    required String uid,
+    required BudgetMensuel budget,
+    bool isUpdate = false,
+  }) async {
+    state = state.copyWith(isLoading: true);
+
+    try {
+      final params = CreateBudgetParams(
+        uid: uid,
+        mois: budget.mois,
+        annee: budget.annee,
+        lignes: budget.lignes
+            .map((l) => CreateBudgetLigneParams(
+                  categorieId: l.categorieId,
+                  categorieLabel: l.categorieLabel,
+                  categorieEmoji: l.categorieEmoji,
+                  montantPrevu: l.montantPrevu,
+                  isRevenu: l.isRevenu,
+                ))
+            .toList(),
+      );
+
+      final CreateBudgetResult result;
+      if (isUpdate) {
+        final useCase = _ref.read(updateBudgetUseCaseProvider);
+        result = await useCase.execute(params);
+      } else {
+        final useCase = _ref.read(createBudgetUseCaseProvider);
+        result = await useCase.execute(params);
+      }
+
+      if (result.success && result.budget != null) {
+        state = state.copyWith(
+          currentBudget: result.budget,
+          hasBudget: true,
+          isLoading: false,
+          error: null,
+        );
+        return true;
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          error: result.message,
+        );
+        return false;
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+      return false;
+    }
   }
 
   /// Met à jour les données réelles
@@ -410,7 +473,7 @@ final budgetEcartRevenusProvider = Provider<double>((ref) {
 final exceededCategoriesProvider = Provider<List<String>>((ref) {
   final state = ref.watch(budgetStateProvider);
   if (state.currentBudget == null) return [];
-  
+
   return state.currentBudget!.lignes
       .where((l) => state.isCategorieExceeded(l.categorieId))
       .map((l) => l.categorieLabel)
@@ -421,5 +484,6 @@ final exceededCategoriesProvider = Provider<List<String>>((ref) {
 final budgetUsagePercentageProvider = Provider<double>((ref) {
   final state = ref.watch(budgetStateProvider);
   if (!state.hasBudget || state.totalDepensesPrevues == 0) return 0;
-  return (state.totalDepensesReelles / state.totalDepensesPrevues * 100).clamp(0, 100);
+  return (state.totalDepensesReelles / state.totalDepensesPrevues * 100)
+      .clamp(0, 100);
 });

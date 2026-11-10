@@ -153,9 +153,9 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
     String? suffix,
   }) {
     OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: c, width: w),
-    );
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: c, width: w),
+        );
     return InputDecoration(
       labelText: label,
       hintText: hint,
@@ -163,8 +163,7 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
       prefixIcon: Icon(icon, color: TAPAColors.navy, size: 22),
       filled: true,
       fillColor: TAPAColors.background,
-      contentPadding:
-      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: border(TAPAColors.border),
       enabledBorder: border(TAPAColors.border),
       focusedBorder: border(TAPAColors.gold, 1.6),
@@ -322,17 +321,11 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                       value: progress,
                       minHeight: 8,
                       backgroundColor: Colors.white.withOpacity(0.15),
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                          TAPAColors.gold),
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(TAPAColors.gold),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Pour le ${Fmt.dateFuture(_targetDate)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12, color: Colors.white54),
-                  ),
                 ],
               ),
             ),
@@ -363,12 +356,12 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
             final days = q['days'] as int;
             final selected = _isQuickSelected(days);
             return GestureDetector(
-              onTap: () => setState(() =>
-              _targetDate = DateTime.now().add(Duration(days: days))),
+              onTap: () => setState(
+                  () => _targetDate = DateTime.now().add(Duration(days: days))),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                 decoration: BoxDecoration(
                   color: selected ? TAPAColors.navy : TAPAColors.background,
                   borderRadius: BorderRadius.circular(20),
@@ -496,7 +489,7 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                   TextField(
                     controller: _targetController,
                     keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                        const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: amountFormatters,
                     textInputAction: TextInputAction.next,
                     onChanged: (_) => setState(() {}),
@@ -512,7 +505,7 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                   TextField(
                     controller: _currentController,
                     keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                        const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: amountFormatters,
                     onChanged: (_) => setState(() {}),
                     style: amountStyle,
@@ -545,33 +538,33 @@ class _AddGoalScreenState extends ConsumerState<AddGoalScreen> {
                 ),
                 child: _isLoading
                     ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.4,
-                    valueColor:
-                    AlwaysStoppedAnimation<Color>(TAPAColors.gold),
-                  ),
-                )
-                    : const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.check_circle_outline,
-                        color: TAPAColors.gold, size: 20),
-                    SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        'Créer l\'objectif',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.4,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(TAPAColors.gold),
                         ),
+                      )
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.check_circle_outline,
+                              color: TAPAColors.gold, size: 20),
+                          SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'Créer l\'objectif',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ],

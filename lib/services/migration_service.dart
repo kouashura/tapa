@@ -22,7 +22,8 @@ class MigrationService {
         final userId = doc.id;
 
         // Vérifier si la date d'inscription existe
-        if (!data.containsKey('dateInscription') || data['dateInscription'] == null) {
+        if (!data.containsKey('dateInscription') ||
+            data['dateInscription'] == null) {
           String? dateStr;
 
           // Essayer d'utiliser la date de création
@@ -47,7 +48,8 @@ class MigrationService {
         }
       }
 
-      Logger.success('✅ Migration terminée ! $updated utilisateurs mis à jour sur $count.');
+      Logger.success(
+          '✅ Migration terminée ! $updated utilisateurs mis à jour sur $count.');
     } catch (e) {
       Logger.error('❌ Erreur migration: $e');
       rethrow;
@@ -67,13 +69,15 @@ class MigrationService {
       final data = doc.data()!;
       Logger.info('📋 Données utilisateur $userId:');
       Logger.info('  - prenom: ${data['prenom']}');
-      Logger.info('  - dateInscription: ${data['dateInscription'] ?? 'MANQUANTE'}');
+      Logger.info(
+          '  - dateInscription: ${data['dateInscription'] ?? 'MANQUANTE'}');
       Logger.info('  - createdAt: ${data['createdAt']}');
       Logger.info('  - hasAccessVie: ${data['hasAccessVie']}');
       Logger.info('  - onboardingVu: ${data['onboardingVu']}');
 
       // Si la date d'inscription est manquante, la corriger
-      if (!data.containsKey('dateInscription') || data['dateInscription'] == null) {
+      if (!data.containsKey('dateInscription') ||
+          data['dateInscription'] == null) {
         String? dateStr;
 
         if (data.containsKey('createdAt')) {
@@ -107,7 +111,8 @@ class MigrationService {
 
       for (final doc in snapshot.docs) {
         final data = doc.data();
-        if (data.containsKey('dateInscription') && data['dateInscription'] != null) {
+        if (data.containsKey('dateInscription') &&
+            data['dateInscription'] != null) {
           avecDate++;
         } else {
           sansDate++;
@@ -141,7 +146,8 @@ class MigrationService {
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      Logger.success('✅ Date d\'inscription mise à jour pour $userId: $dateStr');
+      Logger.success(
+          '✅ Date d\'inscription mise à jour pour $userId: $dateStr');
       return true;
     } catch (e) {
       Logger.error('❌ Erreur correction date: $e');

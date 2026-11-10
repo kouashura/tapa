@@ -39,25 +39,34 @@ class EpargneProgrammeeModel {
   int get nombreDepotsTotal => (duree / _frequenceEnJours).ceil();
   int get nombreDepotsEffectues => (montantEpargne / montantParDepot).floor();
 
-  double get pourcentageAtteint => (montantEpargne / montantObjectif * 100).clamp(0, 100);
+  double get pourcentageAtteint =>
+      (montantEpargne / montantObjectif * 100).clamp(0, 100);
 
   int get joursRestants => dateFinPrevue.difference(DateTime.now()).inDays;
 
   int get _frequenceEnJours {
     switch (frequence) {
-      case 'jour': return 1;
-      case 'semaine': return 7;
-      case 'mois': return 30;
-      default: return 1;
+      case 'jour':
+        return 1;
+      case 'semaine':
+        return 7;
+      case 'mois':
+        return 30;
+      default:
+        return 1;
     }
   }
 
   String get descriptionFrequence {
     switch (frequence) {
-      case 'jour': return 'Quotidien';
-      case 'semaine': return 'Hebdomadaire';
-      case 'mois': return 'Mensuel';
-      default: return '';
+      case 'jour':
+        return 'Quotidien';
+      case 'semaine':
+        return 'Hebdomadaire';
+      case 'mois':
+        return 'Mensuel';
+      default:
+        return '';
     }
   }
 

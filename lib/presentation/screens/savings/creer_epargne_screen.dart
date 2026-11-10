@@ -153,9 +153,9 @@ class _CreerEpargneScreenState extends ConsumerState<CreerEpargneScreen> {
     String? suffix,
   }) {
     OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
-      borderSide: BorderSide(color: c, width: w),
-    );
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: c, width: w),
+        );
     return InputDecoration(
       labelText: label,
       hintText: hint,
@@ -163,8 +163,7 @@ class _CreerEpargneScreenState extends ConsumerState<CreerEpargneScreen> {
       prefixIcon: Icon(icon, color: TAPAColors.navy, size: 22),
       filled: true,
       fillColor: TAPAColors.background,
-      contentPadding:
-      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: border(TAPAColors.border),
       enabledBorder: border(TAPAColors.border),
       focusedBorder: border(TAPAColors.gold, 1.6),
@@ -232,7 +231,7 @@ class _CreerEpargneScreenState extends ConsumerState<CreerEpargneScreen> {
   Widget _previewCard(String monnaie) {
     final amount = double.tryParse(_amountController.text) ?? 0;
     final freq = _frequencies.firstWhere(
-          (f) => f['value'] == _selectedFrequency,
+      (f) => f['value'] == _selectedFrequency,
       orElse: () => _frequencies.last,
     );
     final name = _nameController.text.trim();
@@ -413,7 +412,8 @@ class _CreerEpargneScreenState extends ConsumerState<CreerEpargneScreen> {
     );
   }
 
-  Widget _walletSection(String monnaie, AsyncValue<List<dynamic>> walletsAsync) {
+  Widget _walletSection(
+      String monnaie, AsyncValue<List<dynamic>> walletsAsync) {
     return walletsAsync.when(
       loading: () => const Center(
         child: Padding(
@@ -461,17 +461,17 @@ class _CreerEpargneScreenState extends ConsumerState<CreerEpargneScreen> {
           ),
           selectedItemBuilder: (context) => wallets
               .map<Widget>((w) => Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              '${w.emoji} ${w.nom}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: TAPAColors.navy,
-              ),
-            ),
-          ))
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '${w.emoji} ${w.nom}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: TAPAColors.navy,
+                      ),
+                    ),
+                  ))
               .toList(),
           items: wallets.map<DropdownMenuItem<String>>((wallet) {
             return DropdownMenuItem<String>(
@@ -519,7 +519,7 @@ class _CreerEpargneScreenState extends ConsumerState<CreerEpargneScreen> {
   Widget build(BuildContext context) {
     final monnaie = ref.watch(userMonnaieProvider);
     final walletsAsync =
-    ref.watch(walletListProvider(ref.watch(currentUserProvider)?.id ?? ''));
+        ref.watch(walletListProvider(ref.watch(currentUserProvider)?.id ?? ''));
 
     return Scaffold(
       backgroundColor: TAPAColors.background,
@@ -568,7 +568,7 @@ class _CreerEpargneScreenState extends ConsumerState<CreerEpargneScreen> {
                   TextField(
                     controller: _amountController,
                     keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                        const TextInputType.numberWithOptions(decimal: true),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                     ],
@@ -612,33 +612,33 @@ class _CreerEpargneScreenState extends ConsumerState<CreerEpargneScreen> {
                 ),
                 child: _isLoading
                     ? const SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.4,
-                    valueColor:
-                    AlwaysStoppedAnimation<Color>(TAPAColors.gold),
-                  ),
-                )
-                    : const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.check_circle_outline,
-                        color: TAPAColors.gold, size: 20),
-                    SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        'Créer l\'épargne programmée',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.4,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(TAPAColors.gold),
                         ),
+                      )
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.check_circle_outline,
+                              color: TAPAColors.gold, size: 20),
+                          SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'Créer l\'épargne programmée',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ],

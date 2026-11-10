@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
-import 'dart:async';  // ✅ AJOUTER POUR TimeoutException
+import 'dart:async'; // ✅ AJOUTER POUR TimeoutException
 import 'failure.dart';
 import '../utils/logger.dart';
 
@@ -370,11 +370,11 @@ class ErrorHandler {
 
   /// Affiche un SnackBar d'erreur
   static void showErrorSnackBar(
-      BuildContext context,
-      Failure failure, {
-        VoidCallback? onRetry,
-        Duration duration = const Duration(seconds: 4),
-      }) {
+    BuildContext context,
+    Failure failure, {
+    VoidCallback? onRetry,
+    Duration duration = const Duration(seconds: 4),
+  }) {
     final message = failure.toUserMessage();
     final isRetryable = failure.isRetryable;
 
@@ -419,11 +419,11 @@ class ErrorHandler {
 
   /// Affiche un dialogue d'erreur
   static Future<void> showErrorDialog(
-      BuildContext context,
-      Failure failure, {
-        VoidCallback? onRetry,
-        VoidCallback? onDismiss,
-      }) {
+    BuildContext context,
+    Failure failure, {
+    VoidCallback? onRetry,
+    VoidCallback? onDismiss,
+  }) {
     return showDialog(
       context: context,
       barrierDismissible: true,
@@ -502,9 +502,9 @@ extension ErrorHandlerExtension on dynamic {
 
   /// Affiche l'erreur dans un SnackBar
   void showErrorSnackBar(
-      BuildContext context, {
-        VoidCallback? onRetry,
-      }) {
+    BuildContext context, {
+    VoidCallback? onRetry,
+  }) {
     final failure = toFailure();
     ErrorHandler.showErrorSnackBar(
       context,
@@ -515,10 +515,10 @@ extension ErrorHandlerExtension on dynamic {
 
   /// Affiche l'erreur dans un Dialog
   Future<void> showErrorDialog(
-      BuildContext context, {
-        VoidCallback? onRetry,
-        VoidCallback? onDismiss,
-      }) {
+    BuildContext context, {
+    VoidCallback? onRetry,
+    VoidCallback? onDismiss,
+  }) {
     final failure = toFailure();
     return ErrorHandler.showErrorDialog(
       context,

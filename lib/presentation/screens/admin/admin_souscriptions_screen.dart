@@ -31,7 +31,8 @@ class _AdminSouscriptionsScreenState
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Valider la souscription ?'),
-        content: Text('Valider "${s.produitNom}" pour ${_format(s.montant)} FCFA ?'),
+        content:
+            Text('Valider "${s.produitNom}" pour ${_format(s.montant)} FCFA ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -350,7 +351,8 @@ class _AdminSouscriptionsScreenState
           const SizedBox(height: 10),
           Row(
             children: [
-              const Icon(Icons.person_outline, size: 14, color: TAPAColors.textSecond),
+              const Icon(Icons.person_outline,
+                  size: 14, color: TAPAColors.textSecond),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(

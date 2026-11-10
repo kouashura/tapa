@@ -1,8 +1,7 @@
 plugins {
-    id 'com.android.application'
-    id 'kotlin-android'
-    id 'dev.flutter.flutter-gradle-plugin'
-    id 'com.google.gms.google-services'
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+    id "dev.flutter.flutter-gradle-plugin"
 }
 
 def localProperties = new Properties()
@@ -23,31 +22,53 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+// ✅ Charger les infos du keystore depuis key.properties
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
-    namespace "com.example.tapa1"
-    compileSdk 35
+    // ✅ Nouveau namespace = celui de TAPA BUDGET
+    namespace "com.citapabudget.my"
+    compileSdk 36
 
     buildFeatures {
         buildConfig true
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
+    // ✅ Configuration de signature RELEASE
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+
     defaultConfig {
-        applicationId "com.example.tapa1"
-        minSdk 23
-        targetSdk 35
+        // ✅ Nouveau applicationId = celui de TAPA BUDGET
+        applicationId "com.citapabudget.my"
+        minSdk 24
+        targetSdk 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
@@ -55,9 +76,13 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            // ✅ Utiliser la signature RELEASE au lieu de DEBUG
+            signingConfig keystorePropertiesFile.exists()
+                    ? signingConfigs.release
+                    : signingConfigs.debug
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
@@ -67,10 +92,23 @@ flutter {
 }
 
 dependencies {
+    // ✅ Core library desugaring (requis par flutter_local_notifications)
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.multidex:multidex:2.0.1'
+    
+    // ✅ BOM Firebase (compatible avec Kotlin 2.1.0)
     implementation platform('com.google.firebase:firebase-bom:33.12.0')
+    
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'com.google.firebase:firebase-auth'
+    
+    // ✅ Forcer Kotlin 2.1.0 partout
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:2.1.0'
 }
+// ============================================
+// Google Services Plugin
+// ============================================
+apply plugin: 'com.google.gms.google-services'

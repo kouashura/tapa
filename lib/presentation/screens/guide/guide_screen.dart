@@ -4,6 +4,7 @@ import 'package:printing/printing.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../../../core/theme/app_theme.dart';
+
 class GuideScreen extends StatelessWidget {
   const GuideScreen({super.key});
 
@@ -188,64 +189,68 @@ class GuideScreen extends StatelessWidget {
       final pdf = pw.Document();
 
       pdf.addPage(pw.Page(
-        pageFormat: PdfPageFormat.a4,
-        build: (ctx) => pw.Container(
-          color: PdfColors.blueGrey900,
-          child: pw.Center(child: pw.Column(
-            mainAxisAlignment: pw.MainAxisAlignment.center,
-            children: [
-              pw.Text('TAPA Invest',
-                style: pw.TextStyle(fontSize: 48,
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.amber)),
-              pw.SizedBox(height: 16),
-              pw.Text('Guide Pratique d Utilisation',
-                style: const pw.TextStyle(fontSize: 24,
-                  color: PdfColors.white)),
-              pw.SizedBox(height: 48),
-              pw.Text('Support : +225 01 60 25 41 02',
-                style: const pw.TextStyle(fontSize: 14,
-                  color: PdfColors.grey400)),
-            ])))));
+          pageFormat: PdfPageFormat.a4,
+          build: (ctx) => pw.Container(
+              color: PdfColors.blueGrey900,
+              child: pw.Center(
+                  child: pw.Column(
+                      mainAxisAlignment: pw.MainAxisAlignment.center,
+                      children: [
+                    pw.Text('TAPA Invest',
+                        style: pw.TextStyle(
+                            fontSize: 48,
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.amber)),
+                    pw.SizedBox(height: 16),
+                    pw.Text('Guide Pratique d Utilisation',
+                        style: const pw.TextStyle(
+                            fontSize: 24, color: PdfColors.white)),
+                    pw.SizedBox(height: 48),
+                    pw.Text('Support : +225 01 60 25 41 02',
+                        style: const pw.TextStyle(
+                            fontSize: 14, color: PdfColors.grey400)),
+                  ])))));
 
       for (final section in _sections) {
         pdf.addPage(pw.MultiPage(
-          pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.all(40),
-          build: (ctx) => [
-            pw.Container(
-              padding: const pw.EdgeInsets.all(16),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.blueGrey800,
-                borderRadius: pw.BorderRadius.circular(8)),
-              child: pw.Text(
-                section['numero'] + ' — ' + section['titre'],
-                style: pw.TextStyle(fontSize: 18,
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.white))),
-            pw.SizedBox(height: 20),
-            ...(section['contenu'] as List<String>).map((ligne) =>
-              pw.Padding(
-                padding: const pw.EdgeInsets.only(bottom: 10),
-                child: pw.Text(ligne,
-                  style: const pw.TextStyle(fontSize: 14,
-                    lineSpacing: 4,
-                    color: PdfColors.blueGrey900)))),
-            pw.SizedBox(height: 20),
-            pw.Divider(),
-            pw.Text('TAPA Invest — Guide Pratique | +225 01 60 25 41 02',
-              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey500)),
-          ]));
+            pageFormat: PdfPageFormat.a4,
+            margin: const pw.EdgeInsets.all(40),
+            build: (ctx) => [
+                  pw.Container(
+                      padding: const pw.EdgeInsets.all(16),
+                      decoration: pw.BoxDecoration(
+                          color: PdfColors.blueGrey800,
+                          borderRadius: pw.BorderRadius.circular(8)),
+                      child: pw.Text(
+                          section['numero'] + ' — ' + section['titre'],
+                          style: pw.TextStyle(
+                              fontSize: 18,
+                              fontWeight: pw.FontWeight.bold,
+                              color: PdfColors.white))),
+                  pw.SizedBox(height: 20),
+                  ...(section['contenu'] as List<String>).map((ligne) =>
+                      pw.Padding(
+                          padding: const pw.EdgeInsets.only(bottom: 10),
+                          child: pw.Text(
+                              ligne,
+                              style: const pw.TextStyle(
+                                  fontSize: 14,
+                                  lineSpacing: 4,
+                                  color: PdfColors.blueGrey900)))),
+                  pw.SizedBox(height: 20),
+                  pw.Divider(),
+                  pw.Text('TAPA Invest — Guide Pratique | +225 01 60 25 41 02',
+                      style: const pw.TextStyle(
+                          fontSize: 9, color: PdfColors.grey500)),
+                ]));
       }
 
       await Printing.sharePdf(
-        bytes: await pdf.save(),
-        filename: 'Guide_TAPA_Invest.pdf');
+          bytes: await pdf.save(), filename: 'Guide_TAPA_Invest.pdf');
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erreur: \$e'),
-            backgroundColor: TAPAColors.red));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Erreur: \$e'), backgroundColor: TAPAColors.red));
       }
     }
   }
@@ -253,110 +258,107 @@ class GuideScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TAPAColors.background,
-      appBar: AppBar(
-        title: const Text('Guide d utilisation'),
-        backgroundColor: TAPAColors.navy,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => context.pop()),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.download_outlined,
-              color: TAPAColors.gold),
-            onPressed: () => _telechargerGuide(context)),
-        ]),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _sections.length + 1,
-        itemBuilder: (ctx, i) {
-          if (i == 0) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 20),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: TAPAColors.navy,
-                borderRadius: BorderRadius.circular(16)),
-              child: Column(children: [
-                const Text('📖',
-                  style: TextStyle(fontSize: 40)),
-                const SizedBox(height: 12),
-                const Text('Guide Pratique',
-                  style: TextStyle(fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: TAPAColors.white)),
-                const Text('TAPA Invest',
-                  style: TextStyle(fontSize: 16,
-                    color: TAPAColors.gold,
-                    fontWeight: FontWeight.w600)),
-                const SizedBox(height: 8),
-                const Text(
-                  'Apprenez a utiliser TAPA Invest efficacement',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13,
-                    color: Colors.white60)),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () => _telechargerGuide(context),
-                  icon: const Icon(Icons.download,
-                    color: TAPAColors.navy),
-                  label: const Text(
-                    'Telecharger le guide PDF',
-                    style: TextStyle(
-                      color: TAPAColors.navy,
-                      fontWeight: FontWeight.w700)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: TAPAColors.gold)),
-              ]));
-          }
-          final section = _sections[i - 1];
-          return Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            decoration: BoxDecoration(
-              color: TAPAColors.surface,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: TAPAColors.border, width: 0.5)),
-            child: ExpansionTile(
-              leading: Container(
-                width: 40, height: 40,
-                decoration: BoxDecoration(
-                  color: TAPAColors.navy,
-                  borderRadius: BorderRadius.circular(8)),
-                child: Center(child: Text(
-                  section['numero'] as String,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: TAPAColors.gold)))),
-              title: Text(
-                section['titre'] as String,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: TAPAColors.navy)),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    16, 0, 16, 16),
-                  child: Column(
-                    crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                    children: (section['contenu']
-                        as List<String>).map((ligne) =>
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: 8),
-                        child: Text(ligne,
+        backgroundColor: TAPAColors.background,
+        appBar: AppBar(
+            title: const Text('Guide d utilisation'),
+            backgroundColor: TAPAColors.navy,
+            leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios),
+                onPressed: () => context.pop()),
+            actions: [
+              IconButton(
+                  icon: const Icon(Icons.download_outlined,
+                      color: TAPAColors.gold),
+                  onPressed: () => _telechargerGuide(context)),
+            ]),
+        body: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: _sections.length + 1,
+            itemBuilder: (ctx, i) {
+              if (i == 0) {
+                return Container(
+                    margin: const EdgeInsets.only(bottom: 20),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                        color: TAPAColors.navy,
+                        borderRadius: BorderRadius.circular(16)),
+                    child: Column(children: [
+                      const Text('📖', style: TextStyle(fontSize: 40)),
+                      const SizedBox(height: 12),
+                      const Text('Guide Pratique',
                           style: TextStyle(
-                            fontSize: 14,
-                            height: 1.6,
-                            color: ligne.startsWith('⚠️')
-                              ? TAPAColors.red
-                              : ligne.startsWith('💡')
-                                ? const Color(0xFF996600)
-                                : TAPAColors.navy)))).toList())),
-              ]));
-        }));
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: TAPAColors.white)),
+                      const Text('TAPA Invest',
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: TAPAColors.gold,
+                              fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
+                      const Text('Apprenez a utiliser TAPA Invest efficacement',
+                          textAlign: TextAlign.center,
+                          style:
+                              TextStyle(fontSize: 13, color: Colors.white60)),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                          onPressed: () => _telechargerGuide(context),
+                          icon: const Icon(Icons.download,
+                              color: TAPAColors.navy),
+                          label: const Text('Telecharger le guide PDF',
+                              style: TextStyle(
+                                  color: TAPAColors.navy,
+                                  fontWeight: FontWeight.w700)),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: TAPAColors.gold)),
+                    ]));
+              }
+              final section = _sections[i - 1];
+              return Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  decoration: BoxDecoration(
+                      color: TAPAColors.surface,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: TAPAColors.border, width: 0.5)),
+                  child: ExpansionTile(
+                      leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                              color: TAPAColors.navy,
+                              borderRadius: BorderRadius.circular(8)),
+                          child: Center(
+                              child: Text(section['numero'] as String,
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                      color: TAPAColors.gold)))),
+                      title: Text(section['titre'] as String,
+                          style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: TAPAColors.navy)),
+                      children: [
+                        Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: (section['contenu'] as List<String>)
+                                    .map((ligne) => Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 8),
+                                        child: Text(ligne,
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                height: 1.6,
+                                                color: ligne.startsWith('⚠️')
+                                                    ? TAPAColors.red
+                                                    : ligne.startsWith('💡')
+                                                        ? const Color(
+                                                            0xFF996600)
+                                                        : TAPAColors.navy))))
+                                    .toList())),
+                      ]));
+            }));
   }
 }

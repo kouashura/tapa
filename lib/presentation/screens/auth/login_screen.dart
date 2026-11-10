@@ -14,7 +14,8 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController(); // ✅ CHANGÉ : email
+  final TextEditingController _emailController =
+      TextEditingController(); // ✅ CHANGÉ : email
   bool _isLoading = false;
   String? _error;
 
@@ -26,7 +27,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   // ✅ AJOUT : Validation d'email
   bool _isValidEmail(String email) {
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     return emailRegex.hasMatch(email);
   }
 
@@ -47,7 +49,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         // ✅ CHANGÉ : Envoyer l'email
         context.push('/verify-phone', extra: {
           'prenom': 'Utilisateur',
-          'telephone': email, // L'email est envoyé comme "telephone" pour compatibilité
+          'telephone':
+              email, // L'email est envoyé comme "telephone" pour compatibilité
           'indicatif': '',
           'codePays': 'CI',
           'monnaie': 'FCFA',
@@ -163,7 +166,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 decoration: InputDecoration(
                   labelText: 'Adresse Email',
                   hintText: 'Ex: kouassi@gmail.com',
-                  prefixIcon: const Icon(Icons.email_outlined, color: Colors.white54),
+                  prefixIcon:
+                      const Icon(Icons.email_outlined, color: Colors.white54),
                   labelStyle: const TextStyle(color: Colors.white54),
                   hintStyle: const TextStyle(color: Colors.white38),
                   filled: true,
@@ -174,7 +178,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: TAPAColors.gold, width: 2),
+                    borderSide:
+                        const BorderSide(color: TAPAColors.gold, width: 2),
                   ),
                   errorText: _error,
                   errorStyle: const TextStyle(color: TAPAColors.red),
@@ -198,27 +203,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   child: _isLoading
                       ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: TAPAColors.navy,
-                    ),
-                  )
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: TAPAColors.navy,
+                          ),
+                        )
                       : const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Se connecter',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Se connecter',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Icon(Icons.arrow_forward_rounded, size: 20),
+                          ],
                         ),
-                      ),
-                      SizedBox(width: 8),
-                      Icon(Icons.arrow_forward_rounded, size: 20),
-                    ],
-                  ),
                 ),
               ),
               const SizedBox(height: 24),

@@ -41,8 +41,7 @@ class _WalletsScreenState extends ConsumerState<WalletsScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_circle_outline,
-                color: TAPAColors.gold),
+            icon: const Icon(Icons.add_circle_outline, color: TAPAColors.gold),
             onPressed: () async {
               final result = await context.push('/wallets/add');
               if (result == true) {
@@ -144,8 +143,8 @@ class _WalletsScreenState extends ConsumerState<WalletsScreen> {
                       decoration: BoxDecoration(
                         color: TAPAColors.surface,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                            color: TAPAColors.border, width: 0.5),
+                        border:
+                            Border.all(color: TAPAColors.border, width: 0.5),
                       ),
                       child: Row(
                         children: [

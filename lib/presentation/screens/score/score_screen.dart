@@ -46,7 +46,8 @@ class _ScoreScreenState extends State<ScoreScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 48, color: TAPAColors.red),
+                  const Icon(Icons.error_outline,
+                      size: 48, color: TAPAColors.red),
                   const SizedBox(height: 16),
                   Text('Erreur: ${snapshot.error}'),
                 ],
@@ -68,10 +69,14 @@ class _ScoreScreenState extends State<ScoreScreen> {
     Color scoreColor;
     if (score.scoreTotal >= 80) {
       scoreColor = TAPAColors.green;
-    } else if (score.scoreTotal >= 60) scoreColor = Colors.blue;
-    else if (score.scoreTotal >= 40) scoreColor = TAPAColors.amber;
-    else if (score.scoreTotal >= 20) scoreColor = Colors.orange;
-    else scoreColor = TAPAColors.red;
+    } else if (score.scoreTotal >= 60)
+      scoreColor = Colors.blue;
+    else if (score.scoreTotal >= 40)
+      scoreColor = TAPAColors.amber;
+    else if (score.scoreTotal >= 20)
+      scoreColor = Colors.orange;
+    else
+      scoreColor = TAPAColors.red;
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -123,7 +128,8 @@ class _ScoreScreenState extends State<ScoreScreen> {
               ),
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 decoration: BoxDecoration(
                   color: scoreColor.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -164,11 +170,16 @@ class _ScoreScreenState extends State<ScoreScreen> {
           ),
         ),
         const SizedBox(height: 10),
-        _criterCard('Revenus', score.scoreRevenus, 20, Icons.trending_up, TAPAColors.green),
-        _criterCard('Dépenses', score.scoreDepenses, 20, Icons.shopping_cart_outlined, TAPAColors.red),
-        _criterCard('Épargne', score.scoreEpargne, 20, Icons.savings_outlined, Colors.blue),
-        _criterCard('Dettes', score.scoreDettes, 20, Icons.credit_card_outlined, TAPAColors.amber),
-        _criterCard('Régularité', score.scoreRegularite, 20, Icons.calendar_today_outlined, TAPAColors.purple),
+        _criterCard('Revenus', score.scoreRevenus, 20, Icons.trending_up,
+            TAPAColors.green),
+        _criterCard('Dépenses', score.scoreDepenses, 20,
+            Icons.shopping_cart_outlined, TAPAColors.red),
+        _criterCard('Épargne', score.scoreEpargne, 20, Icons.savings_outlined,
+            Colors.blue),
+        _criterCard('Dettes', score.scoreDettes, 20, Icons.credit_card_outlined,
+            TAPAColors.amber),
+        _criterCard('Régularité', score.scoreRegularite, 20,
+            Icons.calendar_today_outlined, TAPAColors.purple),
 
         const SizedBox(height: 20),
 
@@ -185,29 +196,29 @@ class _ScoreScreenState extends State<ScoreScreen> {
           ),
           const SizedBox(height: 10),
           ...score.pointsForts.map((p) => Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: TAPAColors.greenLight,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                const Text('✅', style: TextStyle(fontSize: 16)),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    p,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: TAPAColors.green,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: TAPAColors.greenLight,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ],
-            ),
-          )),
+                child: Row(
+                  children: [
+                    const Text('✅', style: TextStyle(fontSize: 16)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        p,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: TAPAColors.green,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
           const SizedBox(height: 16),
         ],
 
@@ -224,29 +235,29 @@ class _ScoreScreenState extends State<ScoreScreen> {
           ),
           const SizedBox(height: 10),
           ...score.conseils.map((c) => Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: TAPAColors.goldLight,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                const Text('💡', style: TextStyle(fontSize: 16)),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    c,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: TAPAColors.navy,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: TAPAColors.goldLight,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ],
-            ),
-          )),
+                child: Row(
+                  children: [
+                    const Text('💡', style: TextStyle(fontSize: 16)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        c,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: TAPAColors.navy,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )),
           const SizedBox(height: 16),
         ],
 
@@ -316,7 +327,8 @@ class _ScoreScreenState extends State<ScoreScreen> {
     );
   }
 
-  Widget _criterCard(String label, int score, int max, IconData icon, Color color) {
+  Widget _criterCard(
+      String label, int score, int max, IconData icon, Color color) {
     final pct = score / max;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),

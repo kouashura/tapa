@@ -162,9 +162,7 @@ class _SetupWalletsScreenState extends ConsumerState<SetupWalletsScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
-          onPressed: _isLoading || _isSkipping
-              ? null
-              : () => context.pop(),
+          onPressed: _isLoading || _isSkipping ? null : () => context.pop(),
         ),
       ),
       body: SafeArea(
@@ -245,7 +243,9 @@ class _SetupWalletsScreenState extends ConsumerState<SetupWalletsScreen> {
                   final isDisabled = _isLoading || _isSkipping;
 
                   return GestureDetector(
-                    onTap: isDisabled ? null : () => _toggleWalletSelection(wallet['id'] as String),
+                    onTap: isDisabled
+                        ? null
+                        : () => _toggleWalletSelection(wallet['id'] as String),
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.symmetric(
@@ -253,10 +253,12 @@ class _SetupWalletsScreenState extends ConsumerState<SetupWalletsScreen> {
                         vertical: 14,
                       ),
                       decoration: BoxDecoration(
-                        color: isSelected ? TAPAColors.navy : TAPAColors.surface,
+                        color:
+                            isSelected ? TAPAColors.navy : TAPAColors.surface,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: isSelected ? TAPAColors.gold : TAPAColors.border,
+                          color:
+                              isSelected ? TAPAColors.gold : TAPAColors.border,
                           width: isSelected ? 2 : 1,
                         ),
                         boxShadow: [
@@ -359,9 +361,8 @@ class _SetupWalletsScreenState extends ConsumerState<SetupWalletsScreen> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: _isLoading || _isSkipping
-                          ? null
-                          : _saveWallets,
+                      onPressed:
+                          _isLoading || _isSkipping ? null : _saveWallets,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: TAPAColors.navy,
                         foregroundColor: TAPAColors.white,
@@ -371,54 +372,52 @@ class _SetupWalletsScreenState extends ConsumerState<SetupWalletsScreen> {
                       ),
                       child: _isLoading
                           ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.4,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            TAPAColors.gold,
-                          ),
-                        ),
-                      )
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.4,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  TAPAColors.gold,
+                                ),
+                              ),
+                            )
                           : const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.check_circle_outline, size: 20),
-                          SizedBox(width: 8),
-                          Text(
-                            'Continuer',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.check_circle_outline, size: 20),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Continuer',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
                   TextButton(
-                    onPressed: _isLoading || _isSkipping
-                        ? null
-                        : _skipWallets,
+                    onPressed: _isLoading || _isSkipping ? null : _skipWallets,
                     child: _isSkipping
                         ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          TAPAColors.navy,
-                        ),
-                      ),
-                    )
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                TAPAColors.navy,
+                              ),
+                            ),
+                          )
                         : const Text(
-                      'Passer cette étape',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: TAPAColors.textSecond,
-                      ),
-                    ),
+                            'Passer cette étape',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: TAPAColors.textSecond,
+                            ),
+                          ),
                   ),
                 ],
               ),

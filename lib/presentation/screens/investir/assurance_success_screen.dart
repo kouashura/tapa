@@ -71,7 +71,8 @@ class AssuranceSuccessScreen extends StatelessWidget {
                   children: [
                     _ligne('Produit', produitNom),
                     const SizedBox(height: 8),
-                    _ligne('Montant', '${montantPaye.toString().replaceAllMapped(RegExp(r"(\d)(?=(\d{3})+(?!\d))"), (m) => "${m[1]} ")} FCFA'),
+                    _ligne('Montant',
+                        '${montantPaye.toString().replaceAllMapped(RegExp(r"(\d)(?=(\d{3})+(?!\d))"), (m) => "${m[1]} ")} FCFA'),
                     const SizedBox(height: 8),
                     _ligne('Reference', reference),
                     const SizedBox(height: 8),

@@ -34,23 +34,26 @@ class FirebaseAuthDatasource {
   /// Envoie un code de vérification par SMS avec callbacks complets
   Future<void> sendVerificationCode({
     required String phoneNumber,
-    required void Function(String verificationId, int? forceResendingToken) onCodeSent,
+    required void Function(String verificationId, int? forceResendingToken)
+        onCodeSent,
     required void Function(FirebaseAuthException) onError,
     void Function(PhoneAuthCredential)? onVerificationCompleted,
   }) async {
     try {
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
-        verificationCompleted: onVerificationCompleted ?? (credential) async {
-          await _auth.signInWithCredential(credential);
-          Logger.success('✅ Auto-vérification réussie');
-        },
+        verificationCompleted: onVerificationCompleted ??
+            (credential) async {
+              await _auth.signInWithCredential(credential);
+              Logger.success('✅ Auto-vérification réussie');
+            },
         verificationFailed: (error) {
           Logger.error('❌ Erreur vérification SMS: ${error.message}');
           onError(error);
         },
         codeSent: (verificationId, forceResendingToken) {
-          Logger.info('📱 Code SMS envoyé: ${verificationId.substring(0, 10)}...');
+          Logger.info(
+              '📱 Code SMS envoyé: ${verificationId.substring(0, 10)}...');
           onCodeSent(verificationId, forceResendingToken);
         },
         codeAutoRetrievalTimeout: (verificationId) {
@@ -103,7 +106,8 @@ class FirebaseAuthDatasource {
   // ============================================
 
   /// Connecte avec des credentials PhoneAuth
-  Future<UserCredential> signInWithCredential(PhoneAuthCredential credential) async {
+  Future<UserCredential> signInWithCredential(
+      PhoneAuthCredential credential) async {
     try {
       final result = await _auth.signInWithCredential(credential);
       Logger.success('✅ Connexion réussie: ${result.user?.uid}');
@@ -115,7 +119,8 @@ class FirebaseAuthDatasource {
   }
 
   /// Vérifie le code SMS et retourne l'utilisateur
-  Future<AppUser?> verifyPhoneNumber(String verificationId, String smsCode) async {
+  Future<AppUser?> verifyPhoneNumber(
+      String verificationId, String smsCode) async {
     try {
       final credential = PhoneAuthProvider.credential(
         verificationId: verificationId,
@@ -129,7 +134,8 @@ class FirebaseAuthDatasource {
         return null;
       }
 
-      final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
+      final doc =
+          await _firestore.collection('users').doc(firebaseUser.uid).get();
 
       if (doc.exists) {
         final data = doc.data() as Map<String, dynamic>;
@@ -162,26 +168,44 @@ class FirebaseAuthDatasource {
   /// anonyme est créé automatiquement.
   Future<AppUser> createUser({
     required String prenom,
-    required String telephone,
-    required String indicatif,
+    required String email,
     required String codePays,
     required String monnaie,
   }) async {
     try {
-      // ✅ Créer un utilisateur Firebase Auth anonyme si aucun n'est connecté
-      var firebaseUser = _auth.currentUser;
-      if (firebaseUser == null) {
-        Logger.info('ℹ️ Aucun utilisateur Firebase, création anonyme...');
-        final credential = await _auth.signInAnonymously();
-        firebaseUser = credential.user;
+      // Mot de passe derive de l'email (passwordless)
+      final password = 'TAPA_${email}_secure_2024';
+
+      UserCredential credential;
+      try {
+        // Essayer de creer un compte
+        Logger.info('Creation compte Firebase pour: $email');
+        credential = await _auth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'email-already-in-use') {
+          // Email deja utilise -> se connecter
+          Logger.info('Email existant, connexion: $email');
+          credential = await _auth.signInWithEmailAndPassword(
+            email: email,
+            password: password,
+          );
+        } else {
+          rethrow;
+        }
       }
+
+      final firebaseUser = credential.user;
       if (firebaseUser == null) {
-        throw Exception('Impossible de créer un utilisateur Firebase');
+        throw Exception('Impossible de creer un utilisateur Firebase');
       }
 
       final user = AppUser(
         id: firebaseUser.uid,
-        phoneNumber: telephone,
+        email: email,
+        phoneNumber: '',
         prenom: prenom,
         monnaie: monnaie,
         codePays: codePays,
@@ -192,11 +216,14 @@ class FirebaseAuthDatasource {
         dernierActive: DateTime.now(),
       );
 
-      await _firestore.collection('users').doc(firebaseUser.uid).set(user.toMap());
-      Logger.info('✅ Utilisateur créé: ${user.prenom}');
+      await _firestore.collection('users').doc(firebaseUser.uid).set(
+            user.toMap(),
+            SetOptions(merge: true),
+          );
+      Logger.info('Utilisateur cree/connecte: ${user.prenom} (${user.id})');
       return user;
     } catch (e) {
-      Logger.error('❌ Erreur createUser: $e');
+      Logger.error('Erreur createUser: $e');
       throw ErrorHandler().handleException(e);
     }
   }
@@ -231,7 +258,8 @@ class FirebaseAuthDatasource {
         return null;
       }
 
-      final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
+      final doc =
+          await _firestore.collection('users').doc(firebaseUser.uid).get();
       if (!doc.exists) {
         return null;
       }

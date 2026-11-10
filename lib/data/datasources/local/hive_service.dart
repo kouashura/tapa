@@ -282,13 +282,37 @@ class HiveService {
     await delete(boxWallets, walletId);
   }
 
+  Future<void> clearAll() async {
+    final boxes = [
+      boxUser,
+      boxWallets,
+      boxTransactions,
+      boxBudget,
+      boxDebts,
+      boxSavings,
+      boxEcheances,
+      boxCategories,
+      boxSettings,
+      boxCache,
+    ];
+    for (final b in boxes) {
+      try {
+        await clearBox(b);
+      } catch (e) {
+        Logger.error('Erreur clearAll box $b: $e');
+      }
+    }
+    Logger.success('🗑️ Hive: toutes les boxes vidées');
+  }
+
   Future<void> clearWallets() async {
     await clearBox(boxWallets);
   }
 
   // --- Transactions ---
 
-  Future<void> saveTransaction(String txId, Map<String, dynamic> transaction) async {
+  Future<void> saveTransaction(
+      String txId, Map<String, dynamic> transaction) async {
     await put(boxTransactions, txId, transaction);
   }
 
@@ -364,7 +388,8 @@ class HiveService {
 
   // --- Catégories ---
 
-  Future<void> saveCategory(String categoryId, Map<String, dynamic> category) async {
+  Future<void> saveCategory(
+      String categoryId, Map<String, dynamic> category) async {
     await put(boxCategories, categoryId, category);
   }
 
@@ -382,7 +407,8 @@ class HiveService {
 
   // --- Échéances ---
 
-  Future<void> saveEcheance(String echeanceId, Map<String, dynamic> echeance) async {
+  Future<void> saveEcheance(
+      String echeanceId, Map<String, dynamic> echeance) async {
     await put(boxEcheances, echeanceId, echeance);
   }
 

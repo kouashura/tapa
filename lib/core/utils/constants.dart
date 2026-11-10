@@ -2,16 +2,76 @@
 
 class AppConstants {
   static const List<Map<String, String>> pays = [
-    {'code': 'CI', 'nom': 'Côte d\'Ivoire', 'indicatif': '+225', 'flag': '🇨🇮', 'monnaie': 'FCFA'},
-    {'code': 'SN', 'nom': 'Sénégal', 'indicatif': '+221', 'flag': '🇸🇳', 'monnaie': 'FCFA'},
-    {'code': 'BF', 'nom': 'Burkina Faso', 'indicatif': '+226', 'flag': '🇧🇫', 'monnaie': 'FCFA'},
-    {'code': 'ML', 'nom': 'Mali', 'indicatif': '+223', 'flag': '🇲🇱', 'monnaie': 'FCFA'},
-    {'code': 'BJ', 'nom': 'Bénin', 'indicatif': '+229', 'flag': '🇧🇯', 'monnaie': 'FCFA'},
-    {'code': 'TG', 'nom': 'Togo', 'indicatif': '+228', 'flag': '🇹🇬', 'monnaie': 'FCFA'},
-    {'code': 'NG', 'nom': 'Nigeria', 'indicatif': '+234', 'flag': '🇳🇬', 'monnaie': 'NGN'},
-    {'code': 'GH', 'nom': 'Ghana', 'indicatif': '+233', 'flag': '🇬🇭', 'monnaie': 'GHS'},
-    {'code': 'FR', 'nom': 'France', 'indicatif': '+33', 'flag': '🇫🇷', 'monnaie': 'EUR'},
-    {'code': 'US', 'nom': 'États-Unis', 'indicatif': '+1', 'flag': '🇺🇸', 'monnaie': 'USD'},
+    {
+      'code': 'CI',
+      'nom': 'Côte d\'Ivoire',
+      'indicatif': '+225',
+      'flag': '🇨🇮',
+      'monnaie': 'FCFA'
+    },
+    {
+      'code': 'SN',
+      'nom': 'Sénégal',
+      'indicatif': '+221',
+      'flag': '🇸🇳',
+      'monnaie': 'FCFA'
+    },
+    {
+      'code': 'BF',
+      'nom': 'Burkina Faso',
+      'indicatif': '+226',
+      'flag': '🇧🇫',
+      'monnaie': 'FCFA'
+    },
+    {
+      'code': 'ML',
+      'nom': 'Mali',
+      'indicatif': '+223',
+      'flag': '🇲🇱',
+      'monnaie': 'FCFA'
+    },
+    {
+      'code': 'BJ',
+      'nom': 'Bénin',
+      'indicatif': '+229',
+      'flag': '🇧🇯',
+      'monnaie': 'FCFA'
+    },
+    {
+      'code': 'TG',
+      'nom': 'Togo',
+      'indicatif': '+228',
+      'flag': '🇹🇬',
+      'monnaie': 'FCFA'
+    },
+    {
+      'code': 'NG',
+      'nom': 'Nigeria',
+      'indicatif': '+234',
+      'flag': '🇳🇬',
+      'monnaie': 'NGN'
+    },
+    {
+      'code': 'GH',
+      'nom': 'Ghana',
+      'indicatif': '+233',
+      'flag': '🇬🇭',
+      'monnaie': 'GHS'
+    },
+    {
+      'code': 'FR',
+      'nom': 'France',
+      'indicatif': '+33',
+      'flag': '🇫🇷',
+      'monnaie': 'EUR'
+    },
+    {
+      'code': 'US',
+      'nom': 'États-Unis',
+      'indicatif': '+1',
+      'flag': '🇺🇸',
+      'monnaie': 'USD'
+    },
   ];
 
   static const List<Map<String, String>> monnaies = [

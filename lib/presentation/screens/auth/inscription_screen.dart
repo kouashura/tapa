@@ -45,7 +45,8 @@ class _Metrics {
 
 class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
   final TextEditingController _prenomCtrl = TextEditingController();
-  final TextEditingController _emailCtrl = TextEditingController(); // ✅ CHANGÉ : email au lieu de téléphone
+  final TextEditingController _emailCtrl =
+      TextEditingController(); // ✅ CHANGÉ : email au lieu de téléphone
   int _step = 0;
   String _monnaie = 'FCFA';
   final String _codePays = 'CI';
@@ -80,7 +81,8 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
 
   // ✅ AJOUT : Validation d'email
   bool _isValidEmail(String email) {
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     return emailRegex.hasMatch(email);
   }
 
@@ -99,14 +101,16 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
       final authState = ref.read(authStateProvider);
 
       if (!authState.isAuthenticated) {
-        Logger.warning('⚠️ Utilisateur non authentifié - Redirection vers verify-phone');
+        Logger.warning(
+            '⚠️ Utilisateur non authentifié - Redirection vers verify-phone');
         setState(() => _loading = false);
 
         if (mounted) {
           // ✅ CHANGÉ : Envoyer l'email au lieu du téléphone
           context.push('/verify-phone', extra: {
             'prenom': prenom,
-            'telephone': email, // L'email est envoyé comme "telephone" pour compatibilité
+            'telephone':
+                email, // L'email est envoyé comme "telephone" pour compatibilité
             'indicatif': '',
             'codePays': _codePays,
             'monnaie': _monnaie,
@@ -118,8 +122,7 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
       final authNotifier = ref.read(authStateProvider.notifier);
       await authNotifier.createUserProfile(
         prenom: prenom,
-        telephone: email, // L'email est utilisé comme identifiant
-        indicatif: '',
+        email: email,
         codePays: _codePays,
         monnaie: _monnaie,
       );
@@ -183,19 +186,19 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
                               FadeTransition(opacity: anim, child: child),
                           child: _step > 0
                               ? GestureDetector(
-                            key: const ValueKey('back'),
-                            onTap: () => setState(() => _step--),
-                            child: Container(
-                              margin: const EdgeInsets.only(right: 12),
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.08),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.arrow_back_ios_new,
-                                  color: TAPAColors.white, size: 16),
-                            ),
-                          )
+                                  key: const ValueKey('back'),
+                                  onTap: () => setState(() => _step--),
+                                  child: Container(
+                                    margin: const EdgeInsets.only(right: 12),
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.08),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.arrow_back_ios_new,
+                                        color: TAPAColors.white, size: 16),
+                                  ),
+                                )
                               : const SizedBox(key: ValueKey('nospace')),
                         ),
                         RichText(
@@ -250,7 +253,7 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
                   constraints: BoxConstraints(maxWidth: m.contentMaxWidth),
                   child: Padding(
                     padding:
-                    EdgeInsets.symmetric(horizontal: m.horizontalPadding),
+                        EdgeInsets.symmetric(horizontal: m.horizontalPadding),
                     child: Row(
                       children: List.generate(2, (i) {
                         return Expanded(
@@ -289,8 +292,8 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
                     child: ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: m.contentMaxWidth),
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(m.horizontalPadding, 28,
-                            m.horizontalPadding, 20),
+                        padding: EdgeInsets.fromLTRB(
+                            m.horizontalPadding, 28, m.horizontalPadding, 20),
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 280),
                           switchInCurve: Curves.easeOutCubic,
@@ -367,8 +370,7 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
           const SizedBox(height: 8),
           const Row(
             children: [
-              Icon(Icons.info_outline,
-                  size: 13, color: TAPAColors.textSecond),
+              Icon(Icons.info_outline, size: 13, color: TAPAColors.textSecond),
               SizedBox(width: 5),
               Expanded(
                 child: Text(
@@ -387,8 +389,8 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
             decoration: BoxDecoration(
               color: TAPAColors.goldLight,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                  color: TAPAColors.gold.withOpacity(0.2), width: 1),
+              border:
+                  Border.all(color: TAPAColors.gold.withOpacity(0.2), width: 1),
             ),
             child: Row(
               children: [
@@ -425,22 +427,22 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
               onPressed: _loading ? null : _nextStep,
               child: _loading
                   ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.4,
-                  valueColor:
-                  AlwaysStoppedAnimation<Color>(TAPAColors.gold),
-                ),
-              )
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.4,
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(TAPAColors.gold),
+                      ),
+                    )
                   : const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Continuer'),
-                  SizedBox(width: 8),
-                  Icon(Icons.arrow_forward_rounded, size: 18),
-                ],
-              ),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Continuer'),
+                        SizedBox(width: 8),
+                        Icon(Icons.arrow_forward_rounded, size: 18),
+                      ],
+                    ),
             ),
           ),
           const SizedBox(height: 8),
@@ -481,8 +483,8 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
                 onTap: () => setState(() => _monnaie = mon['symbole']!),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: sel ? TAPAColors.navy : TAPAColors.surface,
                     borderRadius: BorderRadius.circular(16),
@@ -492,12 +494,12 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
                     ),
                     boxShadow: sel
                         ? [
-                      BoxShadow(
-                        color: TAPAColors.navy.withOpacity(0.18),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ]
+                            BoxShadow(
+                              color: TAPAColors.navy.withOpacity(0.18),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
+                            ),
+                          ]
                         : null,
                   ),
                   child: Stack(
@@ -558,22 +560,22 @@ class _InscriptionScreenState extends ConsumerState<InscriptionScreen> {
             onPressed: _loading ? null : _nextStep,
             child: _loading
                 ? const SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.4,
-                valueColor:
-                AlwaysStoppedAnimation<Color>(TAPAColors.gold),
-              ),
-            )
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.4,
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(TAPAColors.gold),
+                    ),
+                  )
                 : const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Créer mon compte'),
-                SizedBox(width: 8),
-                Icon(Icons.check_circle_outline_rounded, size: 18),
-              ],
-            ),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Créer mon compte'),
+                      SizedBox(width: 8),
+                      Icon(Icons.check_circle_outline_rounded, size: 18),
+                    ],
+                  ),
           ),
         ),
       ],

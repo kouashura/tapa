@@ -6,6 +6,7 @@ import '../../data/models/models.dart';
 abstract class IWalletRepository {
   Stream<List<WalletModel>> getUserWallets(String uid);
   Future<List<WalletModel>> getWalletsOnce(String uid);
+  Future<WalletModel?> getWalletById(String walletId);
   Future<String> addWallet(WalletModel wallet);
   Future<void> updateWallet(WalletModel wallet);
   Future<void> deleteWallet(String walletId);

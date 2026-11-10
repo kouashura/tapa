@@ -55,13 +55,18 @@ class PaiementProService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true && data['url'] != null) {
+          Logger.success('✅ PaiementPro URL obtenue: ${data['url']}');
           return data['url'] as String;
         } else {
-          Logger.error('❌ PaiementPro: ${data['message'] ?? 'Erreur inconnue'}');
+          Logger.error(
+              '❌ PaiementPro API Error: ${data['message'] ?? data.toString()}');
           return null;
         }
+      } else {
+        Logger.error(
+            '❌ PaiementPro HTTP Error ${response.statusCode}: ${response.body}');
+        return null;
       }
-      return null;
     } catch (e) {
       Logger.error('❌ Erreur initialisation paiement: $e');
       return null;
@@ -114,8 +119,9 @@ class PaiementProService {
       Logger.success('✅ Page de paiement ouverte: $url');
       return true;
     } catch (e) {
-      Logger.error('❌ Erreur ouverture page de paiement: $e');
-      return false;
+      Logger.error('❌ Erreur launchUrl: $e');
+      // Propager l'erreur pour qu'elle soit visible dans le SnackBar
+      throw Exception('Erreur ouverture navigateur: $e');
     }
   }
 }

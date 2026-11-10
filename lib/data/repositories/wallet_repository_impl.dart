@@ -7,6 +7,7 @@ import '../models/models.dart';
 import '../datasources/remote/firebase/firebase_firestore_datasource.dart';
 import '../../core/errors/error_handler.dart';
 import '../../core/utils/logger.dart';
+import '../../core/utils/date_parser.dart';
 
 /// Implémentation du repository des portefeuilles
 class WalletRepositoryImpl implements IWalletRepository {
@@ -14,7 +15,8 @@ class WalletRepositoryImpl implements IWalletRepository {
 
   WalletRepositoryImpl({
     FirebaseFirestoreDatasource? firestoreDatasource,
-  }) : _firestoreDatasource = firestoreDatasource ?? FirebaseFirestoreDatasource();
+  }) : _firestoreDatasource =
+            firestoreDatasource ?? FirebaseFirestoreDatasource();
 
   @override
   Stream<List<WalletModel>> getUserWallets(String uid) {
@@ -30,8 +32,8 @@ class WalletRepositoryImpl implements IWalletRepository {
           solde: (data['solde'] as num?)?.toDouble() ?? 0,
           monnaie: data['monnaie'] ?? 'FCFA',
           description: data['description'] ?? '',
-          createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
-          updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
+          createdAt: parseFirestoreDateOrNull(data['createdAt']),
+          updatedAt: parseFirestoreDateOrNull(data['updatedAt']),
         );
       }).toList();
     });
@@ -44,6 +46,16 @@ class WalletRepositoryImpl implements IWalletRepository {
     } catch (e) {
       Logger.error('❌ Erreur récupération portefeuilles: $e');
       throw ErrorHandler().handleException(e);
+    }
+  }
+
+  @override
+  Future<WalletModel?> getWalletById(String walletId) async {
+    try {
+      return await _firestoreDatasource.getWalletById(walletId);
+    } catch (e) {
+      Logger.error('❌ Erreur récupération portefeuille par ID: $e');
+      return null;
     }
   }
 

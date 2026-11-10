@@ -111,12 +111,12 @@ class TransactionList extends StatelessWidget {
                   .entries
                   .map(
                     (e) => _transactionTile(
-                  e.value,
-                  e.key == displayedTransactions.length - 1,
-                  wallets,
-                  monnaie,
-                ),
-              )
+                      e.value,
+                      e.key == displayedTransactions.length - 1,
+                      wallets,
+                      monnaie,
+                    ),
+                  )
                   .toList(),
             ),
           ),
@@ -125,25 +125,25 @@ class TransactionList extends StatelessWidget {
   }
 
   Widget _transactionTile(
-      TransactionModel tx,
-      bool isLast,
-      List<WalletModel> wallets,
-      String monnaie,
-      ) {
+    TransactionModel tx,
+    bool isLast,
+    List<WalletModel> wallets,
+    String monnaie,
+  ) {
     final wallet = wallets.isNotEmpty
         ? wallets.first
         : WalletModel(
-      id: '',
-      uid: '',
-      nom: 'Inconnu',
-      emoji: '💰',
-      type: 'compte',
-      solde: 0,
-      monnaie: monnaie,
-      description: '',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+            id: '',
+            uid: '',
+            nom: 'Inconnu',
+            emoji: '💰',
+            type: 'compte',
+            solde: 0,
+            monnaie: monnaie,
+            description: '',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -151,8 +151,8 @@ class TransactionList extends StatelessWidget {
         border: isLast
             ? null
             : const Border(
-          bottom: BorderSide(color: TAPAColors.border, width: 0.5),
-        ),
+                bottom: BorderSide(color: TAPAColors.border, width: 0.5),
+              ),
       ),
       child: Row(
         children: [

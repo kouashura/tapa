@@ -83,8 +83,21 @@ class BudgetMensuel {
       depenses.fold(0.0, (sum, l) => sum + l.montantPrevu);
 
   String get moisLabel {
-    const ms = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    const ms = [
+      '',
+      'Janvier',
+      'Février',
+      'Mars',
+      'Avril',
+      'Mai',
+      'Juin',
+      'Juillet',
+      'Août',
+      'Septembre',
+      'Octobre',
+      'Novembre',
+      'Décembre'
+    ];
     return '${ms[mois]} $annee';
   }
 
@@ -102,7 +115,10 @@ class BudgetMensuel {
       id: map['id'] ?? '',
       mois: map['mois'] ?? 1,
       annee: map['annee'] ?? DateTime.now().year,
-      lignes: (map['lignes'] as List?)?.map((l) => BudgetLigne.fromMap(l)).toList() ?? [],
+      lignes: (map['lignes'] as List?)
+              ?.map((l) => BudgetLigne.fromMap(l))
+              .toList() ??
+          [],
     );
   }
 

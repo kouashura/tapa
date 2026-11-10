@@ -185,12 +185,10 @@ class GetTransactionsUseCase {
       }
 
       // Filtre par montant
-      if (filters.montantMin != null &&
-          tx.montant < filters.montantMin!) {
+      if (filters.montantMin != null && tx.montant < filters.montantMin!) {
         return false;
       }
-      if (filters.montantMax != null &&
-          tx.montant > filters.montantMax!) {
+      if (filters.montantMax != null && tx.montant > filters.montantMax!) {
         return false;
       }
 

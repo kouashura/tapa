@@ -240,8 +240,7 @@ class DettesNotifier extends StateNotifier<DettesState> {
   }
 
   void deleteDetteLocally(String detteId) {
-    final updatedDettes =
-        state.dettes.where((d) => d.id != detteId).toList();
+    final updatedDettes = state.dettes.where((d) => d.id != detteId).toList();
     _recalculerTotaux(updatedDettes);
   }
 

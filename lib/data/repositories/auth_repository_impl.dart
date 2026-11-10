@@ -17,7 +17,8 @@ class AuthRepositoryImpl implements IAuthRepository {
     FirebaseAuthDatasource? authDatasource,
     FirebaseFirestoreDatasource? firestoreDatasource,
   })  : _authDatasource = authDatasource ?? FirebaseAuthDatasource(),
-        _firestoreDatasource = firestoreDatasource ?? FirebaseFirestoreDatasource();
+        _firestoreDatasource =
+            firestoreDatasource ?? FirebaseFirestoreDatasource();
 
   // ============================================
   // AUTHENTIFICATION PAR TÉLÉPHONE
@@ -38,10 +39,10 @@ class AuthRepositoryImpl implements IAuthRepository {
   // ✅ NOUVELLE MÉTHODE AVEC CALLBACK
   @override
   Future<void> sendVerificationCodeWithCallback(
-      String phoneNumber, {
-        required void Function(String verificationId) onCodeSent,
-        void Function(String error)? onError,
-      }) async {
+    String phoneNumber, {
+    required void Function(String verificationId) onCodeSent,
+    void Function(String error)? onError,
+  }) async {
     try {
       Logger.info('📱 Envoi du code avec callback à: $phoneNumber');
 
@@ -65,7 +66,8 @@ class AuthRepositoryImpl implements IAuthRepository {
   }
 
   @override
-  Future<AppUser> verifyPhoneNumber(String verificationId, String smsCode) async {
+  Future<AppUser> verifyPhoneNumber(
+      String verificationId, String smsCode) async {
     try {
       Logger.info('🔍 Vérification du code SMS...');
 
@@ -84,7 +86,8 @@ class AuthRepositoryImpl implements IAuthRepository {
         );
       }
 
-      final user = await _authDatasource.verifyPhoneNumber(verificationId, smsCode);
+      final user =
+          await _authDatasource.verifyPhoneNumber(verificationId, smsCode);
 
       if (user == null) {
         throw const AuthFailure(
@@ -122,26 +125,24 @@ class AuthRepositoryImpl implements IAuthRepository {
   @override
   Future<AppUser> createUser({
     required String prenom,
-    required String telephone,
-    required String indicatif,
+    required String email,
     required String codePays,
     required String monnaie,
   }) async {
     try {
-      Logger.info('🔍 Création utilisateur: $prenom ($telephone)');
+      Logger.info('Creation utilisateur: $prenom ($email)');
 
       final user = await _authDatasource.createUser(
         prenom: prenom,
-        telephone: telephone,
-        indicatif: indicatif,
+        email: email,
         codePays: codePays,
         monnaie: monnaie,
       );
 
-      Logger.success('✅ Utilisateur créé: ${user.prenom} (${user.id})');
+      Logger.success('Utilisateur cree: ${user.prenom} (${user.id})');
       return user;
     } catch (e) {
-      Logger.error('❌ Erreur création utilisateur: $e');
+      Logger.error('Erreur creation utilisateur: $e');
       throw ErrorHandler().handleException(e);
     }
   }

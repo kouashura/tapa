@@ -3,11 +3,12 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/repositories/i_debt_repository.dart';
-import '../models/models.dart';  // ✅ Utiliser models.dart
+import '../models/models.dart'; // ✅ Utiliser models.dart
 import '../datasources/remote/firebase/firebase_firestore_datasource.dart';
 import '../../core/errors/failure.dart';
 import '../../core/errors/error_handler.dart';
 import '../../core/utils/logger.dart';
+import '../../core/utils/date_parser.dart';
 
 /// Implémentation du repository des dettes
 class DebtRepositoryImpl implements IDebtRepository {
@@ -15,7 +16,8 @@ class DebtRepositoryImpl implements IDebtRepository {
 
   DebtRepositoryImpl({
     FirebaseFirestoreDatasource? firestoreDatasource,
-  }) : _firestoreDatasource = firestoreDatasource ?? FirebaseFirestoreDatasource();
+  }) : _firestoreDatasource =
+            firestoreDatasource ?? FirebaseFirestoreDatasource();
 
   @override
   Stream<List<DetteModel>> getUserDettes(String uid) {
@@ -30,9 +32,9 @@ class DebtRepositoryImpl implements IDebtRepository {
           montantRembourse: (data['montantRembourse'] as num?)?.toDouble() ?? 0,
           modalite: data['modalite'] ?? '',
           periodesMois: data['periodesMois'] ?? 1,
-          dateDebut: (data['dateDebut'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          dateFin: (data['dateFin'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          dateCreation: (data['dateCreation'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          dateDebut: parseFirestoreDate(data['dateDebut']),
+          dateFin: parseFirestoreDate(data['dateFin']),
+          dateCreation: parseFirestoreDate(data['dateCreation']),
           remboursements: [],
         );
       }).toList();
@@ -42,7 +44,8 @@ class DebtRepositoryImpl implements IDebtRepository {
   @override
   Future<List<DetteModel>> getDettesOnce(String uid) async {
     try {
-      return await _firestoreDatasource.getDettes(uid);  // ✅ Retourne List<DetteModel>
+      return await _firestoreDatasource
+          .getDettes(uid); // ✅ Retourne List<DetteModel>
     } catch (e) {
       Logger.error('❌ Erreur récupération dettes: $e');
       throw ErrorHandler().handleException(e);
@@ -83,20 +86,51 @@ class DebtRepositoryImpl implements IDebtRepository {
   }
 
   @override
-  Future<void> addRemboursement(String detteId, RemboursementModel remboursement) async {
+  Future<void> addRemboursement(
+      String detteId, RemboursementModel remboursement) async {
     try {
-      final dettes = await _firestoreDatasource.getDettes(detteId);
-      if (dettes.isEmpty) {
+      // ✅ RÉCUPÉRER LA DETTE PAR SON ID (au lieu du uid)
+      final detteDoc = await FirebaseFirestore.instance
+          .collection('dettes')
+          .doc(detteId)
+          .get();
+      if (!detteDoc.exists) {
         throw const DatabaseFailure(
           message: 'Dette non trouvée.',
           code: 'DEBT_NOT_FOUND',
         );
       }
 
-      final dette = dettes.first;
+      final dette = DetteModel.fromMap(
+        {...detteDoc.data()!, 'id': detteDoc.id},
+        detteDoc.id,
+      );
 
-      final updatedRemboursements = List<RemboursementModel>.from(dette.remboursements)
-        ..add(remboursement);
+      // ✅ 1. Récupérer le portefeuille pour vérifier le solde
+      final walletDoc = await FirebaseFirestore.instance
+          .collection('wallets')
+          .doc(remboursement.walletId)
+          .get();
+
+      if (!walletDoc.exists) {
+        throw const DatabaseFailure(
+          message: 'Portefeuille non trouvé.',
+          code: 'WALLET_NOT_FOUND',
+        );
+      }
+
+      final walletSolde = (walletDoc.data()!['solde'] as num).toDouble();
+
+      if (walletSolde < remboursement.montant) {
+        throw const DatabaseFailure(
+          message: 'Solde insuffisant dans ce portefeuille.',
+          code: 'INSUFFICIENT_FUNDS',
+        );
+      }
+
+      final updatedRemboursements =
+          List<RemboursementModel>.from(dette.remboursements)
+            ..add(remboursement);
 
       final updatedDette = DetteModel(
         id: dette.id,
@@ -112,8 +146,20 @@ class DebtRepositoryImpl implements IDebtRepository {
         remboursements: updatedRemboursements,
       );
 
-      await _firestoreDatasource.saveDette(updatedDette);  // ✅ Utilise les données models
+      // ✅ 2. Sauvegarder la dette
+      await _firestoreDatasource.saveDette(updatedDette);
+
+      // ✅ 3. Déduire le montant du portefeuille
+      await FirebaseFirestore.instance
+          .collection('wallets')
+          .doc(remboursement.walletId)
+          .update({
+        'solde': FieldValue.increment(-remboursement.montant),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
       Logger.info('📝 Remboursement ajouté: ${remboursement.montant}');
+      Logger.info('💰 Portefeuille débité: ${remboursement.montant}');
     } catch (e) {
       Logger.error('❌ Erreur ajout remboursement: $e');
       throw ErrorHandler().handleException(e);

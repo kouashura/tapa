@@ -11,6 +11,8 @@ import '../../../data/repositories/auth_repository_impl.dart';
 import '../../../data/models/models.dart';
 import '../../../core/utils/logger.dart';
 import '../../../services/pin_security.dart';
+import '../../../data/datasources/local/hive_service.dart';
+import '../../../data/datasources/local/shared_preferences_service.dart';
 import 'auth_state.dart';
 import '../app_state.dart';
 
@@ -266,8 +268,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<AppUser?> createUser({
     required String prenom,
-    required String telephone,
-    required String indicatif,
+    required String email,
     required String codePays,
     required String monnaie,
   }) async {
@@ -277,8 +278,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       final user = await _authRepository.createUser(
         prenom: prenom,
-        telephone: telephone,
-        indicatif: indicatif,
+        email: email,
         codePays: codePays,
         monnaie: monnaie,
       );
@@ -286,12 +286,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = AuthState.authenticated(user);
       _appStateNotifier.setAuthenticatedUser(user);
 
-      Logger.success('✅ Compte créé: ${user.prenom}');
+      Logger.success('Compte cree: ${user.prenom}');
       return user;
     } catch (e) {
       state = AuthState.error(e.toString());
       _appStateNotifier.setError(e.toString());
-      Logger.error('❌ Erreur création compte: $e');
+      Logger.error('Erreur creation compte: $e');
       return null;
     } finally {
       _appStateNotifier.setLoading(false);
@@ -300,20 +300,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> createUserProfile({
     required String prenom,
-    required String telephone,
-    required String indicatif,
+    required String email,
     required String codePays,
     required String monnaie,
   }) async {
     final user = await createUser(
       prenom: prenom,
-      telephone: telephone,
-      indicatif: indicatif,
+      email: email,
       codePays: codePays,
       monnaie: monnaie,
     );
     if (user == null) {
-      throw Exception(state.error ?? 'Erreur lors de la création du compte.');
+      throw Exception(state.error ?? 'Erreur lors de la creation du compte.');
     }
   }
 
@@ -438,8 +436,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           prenom: prenom ?? currentUser.prenom,
           monnaie: monnaie ?? currentUser.monnaie,
           codePays: codePays ?? currentUser.codePays,
-          notificationsActivees: notificationsActivees ??
-              currentUser.notificationsActivees,
+          notificationsActivees:
+              notificationsActivees ?? currentUser.notificationsActivees,
           dernierActive: DateTime.now(),
         );
 
@@ -488,16 +486,34 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = AuthState.loading;
       _appStateNotifier.setLoading(true);
 
+      // 1. Deconnecter Firebase Auth
       await _authRepository.signOut();
 
+      // 2. Vider Hive (donnees locales)
+      try {
+        final hive = HiveService();
+        await hive.clearAll();
+      } catch (e) {
+        Logger.error('Erreur nettoyage Hive: $e');
+      }
+
+      // 3. Vider SharedPreferences (sauf PIN)
+      try {
+        final prefs = SharedPreferencesService();
+        await prefs.clearUserData();
+      } catch (e) {
+        Logger.error('Erreur nettoyage SharedPrefs: $e');
+      }
+
+      // 4. Reset AppState
       state = AuthState.initial;
       _appStateNotifier.setUnauthenticated();
 
-      Logger.info('🔓 Déconnecté');
+      Logger.info('🔓 Deconnecte + cache nettoye');
     } catch (e) {
       state = AuthState.error(e.toString());
       _appStateNotifier.setError(e.toString());
-      Logger.error('❌ Erreur déconnexion: $e');
+      Logger.error('❌ Erreur deconnexion: $e');
     } finally {
       _appStateNotifier.setLoading(false);
     }

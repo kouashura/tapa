@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 // lib/presentation/providers/providers.dart
 
 // ============================================
@@ -32,6 +34,8 @@ export 'souscriptions/souscriptions_provider.dart';
 // --- Tarifs Providers ---
 export 'tarifs/tarifs_provider.dart';
 
+// --- Budget Providers ---
+export 'budget/budget_provider.dart';
 
 // ============================================
 // PROVIDERS UTILITAIRES
@@ -129,36 +133,168 @@ final notificationsEnabledProvider = Provider<bool>((ref) {
 // PROVIDERS DE CATÉGORIES
 // ============================================
 
-/// Provider pour les catégories de dépenses
+// ═══════════════════════════════════════════════════════════════
+// CATÉGORIES PAR DÉFAUT (STATIQUES)
+// ═══════════════════════════════════════════════════════════════
+
+const List<Map<String, dynamic>> defaultExpenseCategories = [
+  {
+    'id': 'alimentation',
+    'label': 'Alimentation',
+    'emoji': '🛒',
+    'type': 'depense',
+    'isDefault': true
+  },
+  {
+    'id': 'transport',
+    'label': 'Transport',
+    'emoji': '🚗',
+    'type': 'depense',
+    'isDefault': true
+  },
+  {
+    'id': 'logement',
+    'label': 'Logement',
+    'emoji': '🏠',
+    'type': 'depense',
+    'isDefault': true
+  },
+  {
+    'id': 'sante',
+    'label': 'Santé',
+    'emoji': '🏥',
+    'type': 'depense',
+    'isDefault': true
+  },
+  {
+    'id': 'education',
+    'label': 'Éducation',
+    'emoji': '📚',
+    'type': 'depense',
+    'isDefault': true
+  },
+  {
+    'id': 'loisirs',
+    'label': 'Loisirs',
+    'emoji': '🎮',
+    'type': 'depense',
+    'isDefault': true
+  },
+  {
+    'id': 'habillement',
+    'label': 'Habillement',
+    'emoji': '👕',
+    'type': 'depense',
+    'isDefault': true
+  },
+  {
+    'id': 'services',
+    'label': 'Services',
+    'emoji': '🔧',
+    'type': 'depense',
+    'isDefault': true
+  },
+];
+
+const List<Map<String, dynamic>> defaultIncomeCategories = [
+  {
+    'id': 'salaire',
+    'label': 'Salaire',
+    'emoji': '💰',
+    'type': 'revenu',
+    'isDefault': true
+  },
+  {
+    'id': 'freelance',
+    'label': 'Freelance',
+    'emoji': '💻',
+    'type': 'revenu',
+    'isDefault': true
+  },
+  {
+    'id': 'investissement',
+    'label': 'Investissement',
+    'emoji': '📈',
+    'type': 'revenu',
+    'isDefault': true
+  },
+  {
+    'id': 'cadeau',
+    'label': 'Cadeau',
+    'emoji': '🎁',
+    'type': 'revenu',
+    'isDefault': true
+  },
+  {
+    'id': 'remboursement',
+    'label': 'Remboursement',
+    'emoji': '🔄',
+    'type': 'revenu',
+    'isDefault': true
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// PROVIDER DYNAMIQUE (FIRESTORE + DÉFAUT)
+// ═══════════════════════════════════════════════════════════════
+
+/// StreamProvider qui écoute Firestore et fusionne avec les catégories par défaut
+final dynamicCategoriesProvider =
+    StreamProvider<List<Map<String, dynamic>>>((ref) {
+  final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+  if (userId.isEmpty) {
+    return Stream.value(
+        [...defaultExpenseCategories, ...defaultIncomeCategories]);
+  }
+
+  return FirebaseFirestore.instance
+      .collection('categories')
+      .where('uid', isEqualTo: userId)
+      .snapshots()
+      .map((snapshot) {
+    final userCategories = snapshot.docs.map((doc) {
+      final data = doc.data();
+      data['id'] = doc.id;
+      return data;
+    }).toList();
+
+    // Fusionner avec les catégories par défaut
+    final List<Map<String, dynamic>> mergedExpenses =
+        List.from(defaultExpenseCategories);
+    final List<Map<String, dynamic>> mergedIncomes =
+        List.from(defaultIncomeCategories);
+
+    for (final cat in userCategories) {
+      final type = cat['type'] as String? ?? 'depense';
+      final label = (cat['label'] as String? ?? '').toLowerCase().trim();
+
+      final targetList = type == 'revenu' ? mergedIncomes : mergedExpenses;
+      final exists = targetList.any(
+          (c) => (c['label'] as String? ?? '').toLowerCase().trim() == label);
+
+      if (!exists) targetList.add(cat);
+    }
+
+    return [...mergedExpenses, ...mergedIncomes];
+  });
+});
+
+/// Provider pour les catégories de dépenses (dynamique)
 final expenseCategoriesProvider = Provider<List<Map<String, dynamic>>>((ref) {
-  return [
-    {'id': 'alimentation', 'label': 'Alimentation', 'emoji': '🛒', 'type': 'depense'},
-    {'id': 'transport', 'label': 'Transport', 'emoji': '🚗', 'type': 'depense'},
-    {'id': 'logement', 'label': 'Logement', 'emoji': '🏠', 'type': 'depense'},
-    {'id': 'sante', 'label': 'Santé', 'emoji': '🏥', 'type': 'depense'},
-    {'id': 'education', 'label': 'Éducation', 'emoji': '📚', 'type': 'depense'},
-    {'id': 'loisirs', 'label': 'Loisirs', 'emoji': '🎮', 'type': 'depense'},
-    {'id': 'habillement', 'label': 'Habillement', 'emoji': '👕', 'type': 'depense'},
-    {'id': 'services', 'label': 'Services', 'emoji': '🔧', 'type': 'depense'},
-    {'id': 'autre', 'label': 'Autre', 'emoji': '📌', 'type': 'depense'},
-  ];
+  final all = ref.watch(dynamicCategoriesProvider).valueOrNull ?? [];
+  return all
+      .where((c) => c['type'] == 'depense' || c['type'] == 'dépense')
+      .toList();
 });
 
-/// Provider pour les catégories de revenus
+/// Provider pour les catégories de revenus (dynamique)
 final incomeCategoriesProvider = Provider<List<Map<String, dynamic>>>((ref) {
-  return [
-    {'id': 'salaire', 'label': 'Salaire', 'emoji': '💰', 'type': 'revenu'},
-    {'id': 'freelance', 'label': 'Freelance', 'emoji': '💻', 'type': 'revenu'},
-    {'id': 'investissement', 'label': 'Investissement', 'emoji': '📈', 'type': 'revenu'},
-    {'id': 'cadeau', 'label': 'Cadeau', 'emoji': '🎁', 'type': 'revenu'},
-    {'id': 'remboursement', 'label': 'Remboursement', 'emoji': '🔄', 'type': 'revenu'},
-    {'id': 'autre_revenu', 'label': 'Autre', 'emoji': '📌', 'type': 'revenu'},
-  ];
+  final all = ref.watch(dynamicCategoriesProvider).valueOrNull ?? [];
+  return all.where((c) => c['type'] == 'revenu').toList();
 });
 
-/// Provider combiné pour toutes les catégories
+/// Provider combiné pour toutes les catégories (dynamique)
 final allCategoriesProvider = Provider<List<Map<String, dynamic>>>((ref) {
-  final expenseCats = ref.watch(expenseCategoriesProvider);
-  final incomeCats = ref.watch(incomeCategoriesProvider);
-  return [...expenseCats, ...incomeCats];
+  return ref.watch(dynamicCategoriesProvider).valueOrNull ?? [];
 });

@@ -86,7 +86,7 @@ class _TransferScreenState extends State<TransferScreen> {
 
     // ✅ Utiliser _wallets déjà chargé
     final source = _wallets.firstWhere(
-          (w) => w.id == _walletSourceId,
+      (w) => w.id == _walletSourceId,
       orElse: () => throw Exception('Portefeuille source non trouvé'),
     );
     final user = _db.getUser();
@@ -95,7 +95,8 @@ class _TransferScreenState extends State<TransferScreen> {
     if (source.solde < montant) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Solde insuffisant: ${Fmt.montant(source.solde, monnaie: monnaie)}'),
+          content: Text(
+              'Solde insuffisant: ${Fmt.montant(source.solde, monnaie: monnaie)}'),
           backgroundColor: TAPAColors.red,
         ),
       );
@@ -103,7 +104,7 @@ class _TransferScreenState extends State<TransferScreen> {
     }
 
     final dest = _wallets.firstWhere(
-          (w) => w.id == _walletDestId,
+      (w) => w.id == _walletDestId,
       orElse: () => throw Exception('Portefeuille destination non trouvé'),
     );
 
@@ -288,7 +289,8 @@ class _TransferScreenState extends State<TransferScreen> {
             items: wallets.map((wallet) {
               return DropdownMenuItem<String>(
                 value: wallet.id,
-                child: Text('${wallet.emoji ?? '💳'} ${wallet.nom ?? 'Portefeuille'} (${Fmt.montant(wallet.solde, monnaie: monnaie)})'),
+                child: Text(
+                    '${wallet.emoji ?? '💳'} ${wallet.nom ?? 'Portefeuille'} (${Fmt.montant(wallet.solde, monnaie: monnaie)})'),
               );
             }).toList(),
             onChanged: (v) => setState(() => _walletSourceId = v),
@@ -302,7 +304,8 @@ class _TransferScreenState extends State<TransferScreen> {
             items: wallets.where((w) => w.id != _walletSourceId).map((wallet) {
               return DropdownMenuItem<String>(
                 value: wallet.id,
-                child: Text('${wallet.emoji ?? '💳'} ${wallet.nom ?? 'Portefeuille'} (${Fmt.montant(wallet.solde, monnaie: monnaie)})'),
+                child: Text(
+                    '${wallet.emoji ?? '💳'} ${wallet.nom ?? 'Portefeuille'} (${Fmt.montant(wallet.solde, monnaie: monnaie)})'),
               );
             }).toList(),
             onChanged: (v) => setState(() => _walletDestId = v),

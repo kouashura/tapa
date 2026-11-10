@@ -73,8 +73,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       'emoji': '👋',
       'titre': 'Bienvenue sur TAPA Invest',
       'sousTitre': 'LE COACH FINANCIER DE CHAQUE AFRICAIN',
-      'description':
-      'Prenez le contrôle de votre argent et construisez '
+      'description': 'Prenez le contrôle de votre argent et construisez '
           'votre avenir financier pas à pas.',
       'couleur': 0xFF1A2B4A,
       'items': [
@@ -87,8 +86,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       'emoji': '📱',
       'titre': 'Tous vos portefeuilles\nen un seul endroit',
       'sousTitre': 'WAVE · ORANGE MONEY · MTN · MOOV · CASH · BANQUE',
-      'description':
-      'Centralisez tous vos comptes et suivez chaque FCFA '
+      'description': 'Centralisez tous vos comptes et suivez chaque FCFA '
           'peu importe où il se trouve.',
       'couleur': 0xFF14274E,
       'items': [
@@ -102,8 +100,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
       'emoji': '📈',
       'titre': 'Investissez et\nprotégez votre famille',
       'sousTitre': 'FCP ET ASSURANCE VIE SONAM VIE',
-      'description':
-      'Faites fructifier votre épargne et protégez '
+      'description': 'Faites fructifier votre épargne et protégez '
           'vos proches avec nos partenaires agréés.',
       'couleur': 0xFF0D1B2E,
       'items': [
@@ -341,30 +338,34 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                             // Points indicateurs
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(_slides.length, (i) =>
-                                  AnimatedContainer(
-                                    duration: const Duration(milliseconds: 350),
-                                    curve: Curves.easeOutCubic,
-                                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                                    width: _page == i ? 26 : 7,
-                                    height: 7,
-                                    decoration: BoxDecoration(
-                                      color: _page == i
-                                          ? TAPAColors.gold
-                                          : Colors.white.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(4),
-                                      boxShadow: _page == i
-                                          ? [
-                                        BoxShadow(
-                                          color: TAPAColors.gold
-                                              .withOpacity(0.5),
-                                          blurRadius: 8,
-                                          spreadRadius: 0.5,
+                              children: List.generate(
+                                  _slides.length,
+                                  (i) => AnimatedContainer(
+                                        duration:
+                                            const Duration(milliseconds: 350),
+                                        curve: Curves.easeOutCubic,
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 4),
+                                        width: _page == i ? 26 : 7,
+                                        height: 7,
+                                        decoration: BoxDecoration(
+                                          color: _page == i
+                                              ? TAPAColors.gold
+                                              : Colors.white.withOpacity(0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                          boxShadow: _page == i
+                                              ? [
+                                                  BoxShadow(
+                                                    color: TAPAColors.gold
+                                                        .withOpacity(0.5),
+                                                    blurRadius: 8,
+                                                    spreadRadius: 0.5,
+                                                  ),
+                                                ]
+                                              : null,
                                         ),
-                                      ]
-                                          : null,
-                                    ),
-                                  )),
+                                      )),
                             ),
                             SizedBox(height: m.gapLarge),
 
@@ -420,7 +421,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
         position: Tween<Offset>(
           begin: const Offset(0, 0.04),
           end: Offset.zero,
-        ).animate(CurvedAnimation(parent: _contentCtrl, curve: Curves.easeOutCubic)),
+        ).animate(
+            CurvedAnimation(parent: _contentCtrl, curve: Curves.easeOutCubic)),
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
@@ -485,7 +487,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                               padding: EdgeInsets.all(m.cardPadding),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.045),
-                                borderRadius: BorderRadius.circular(m.cardRadius),
+                                borderRadius:
+                                    BorderRadius.circular(m.cardRadius),
                                 border: Border.all(
                                   color: Colors.white.withOpacity(0.09),
                                   width: 1,
@@ -525,7 +528,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                                       color: TAPAColors.gold.withOpacity(0.12),
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(
-                                        color: TAPAColors.gold.withOpacity(0.25),
+                                        color:
+                                            TAPAColors.gold.withOpacity(0.25),
                                         width: 1,
                                       ),
                                     ),
@@ -562,7 +566,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                                   SizedBox(height: m.gapLarge * 0.9),
 
                                   // Items
-                                  ...(slide['items'] as List<Map<String, String>>)
+                                  ...(slide['items']
+                                          as List<Map<String, String>>)
                                       .asMap()
                                       .entries
                                       .map((entry) {
@@ -580,9 +585,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
                                         ),
                                         decoration: BoxDecoration(
                                           color: Colors.white.withOpacity(0.05),
-                                          borderRadius: BorderRadius.circular(14),
+                                          borderRadius:
+                                              BorderRadius.circular(14),
                                           border: Border.all(
-                                            color: Colors.white.withOpacity(0.08),
+                                            color:
+                                                Colors.white.withOpacity(0.08),
                                             width: 1,
                                           ),
                                         ),
@@ -710,40 +717,41 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
           child: Center(
             child: widget.isLoading
                 ? const SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.4,
-                valueColor: AlwaysStoppedAnimation<Color>(TAPAColors.navy),
-              ),
-            )
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.4,
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(TAPAColors.navy),
+                    ),
+                  )
                 : AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Row(
-                key: ValueKey(widget.isLastPage),
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.isLastPage
-                        ? 'Commencer maintenant'
-                        : 'Suivant',
-                    style: const TextStyle(
-                      color: TAPAColors.navy,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                    duration: const Duration(milliseconds: 200),
+                    child: Row(
+                      key: ValueKey(widget.isLastPage),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          widget.isLastPage
+                              ? 'Commencer maintenant'
+                              : 'Suivant',
+                          style: const TextStyle(
+                            color: TAPAColors.navy,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          widget.isLastPage
+                              ? Icons.check_circle_rounded
+                              : Icons.arrow_forward_rounded,
+                          color: TAPAColors.navy,
+                          size: 20,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    widget.isLastPage
-                        ? Icons.check_circle_rounded
-                        : Icons.arrow_forward_rounded,
-                    color: TAPAColors.navy,
-                    size: 20,
-                  ),
-                ],
-              ),
-            ),
           ),
         ),
       ),

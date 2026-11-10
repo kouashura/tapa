@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
-import '../../../core/theme/app_theme.dart';  // ✅ CHEMIN CORRIGÉ
+import '../../../core/theme/app_theme.dart'; // ✅ CHEMIN CORRIGÉ
 // ✅ CHEMIN CORRIGÉ
 import 'package:tapa_budget/presentation/providers/providers.dart';
 import '../../../services/firebase_service.dart';
@@ -90,7 +90,6 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
       }
 
       _showCoordonneesWhatsApp();
-
     } catch (e) {
       _showCoordonneesWhatsApp();
       Logger.error('❌ Erreur WhatsApp: $e');
@@ -140,7 +139,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF25D366).withOpacity(0.08),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF25D366).withOpacity(0.3)),
+                border:
+                    Border.all(color: const Color(0xFF25D366).withOpacity(0.3)),
               ),
               child: Column(
                 children: [
@@ -193,7 +193,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      Clipboard.setData(const ClipboardData(text: '+2250160254102'));
+                      Clipboard.setData(
+                          const ClipboardData(text: '+2250160254102'));
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('📋 Numéro copié !'),
@@ -214,7 +215,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () => _ouvrirWhatsApp(
-                      message: 'Bonjour TAPA Invest ! Je souhaite obtenir l\'accès à vie.',
+                      message:
+                          'Bonjour TAPA Invest ! Je souhaite obtenir l\'accès à vie.',
                     ),
                     icon: const Icon(Icons.open_in_browser, size: 16),
                     label: const Text('Ouvrir WhatsApp'),
@@ -737,7 +739,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 14, color: TAPAColors.textHint),
+            const Icon(Icons.arrow_forward_ios,
+                size: 14, color: TAPAColors.textHint),
           ],
         ),
       ),
@@ -760,18 +763,20 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
           color: TAPAColors.purple.withOpacity(0.08),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: hasRootKey ? TAPAColors.purple.withOpacity(0.3) : Colors.grey.withOpacity(0.3),
+            color: hasRootKey
+                ? TAPAColors.purple.withOpacity(0.3)
+                : Colors.grey.withOpacity(0.3),
             width: 1,
           ),
         ),
         child: TextButton.icon(
           onPressed: hasRootKey
               ? () {
-            if (_rootDevKey.isNotEmpty) {
-              _cleCtrl.text = _rootDevKey;
-              _activerAvecCle(_rootDevKey);
-            }
-          }
+                  if (_rootDevKey.isNotEmpty) {
+                    _cleCtrl.text = _rootDevKey;
+                    _activerAvecCle(_rootDevKey);
+                  }
+                }
               : null,
           icon: Icon(
             hasRootKey ? Icons.admin_panel_settings : Icons.lock_outline,
@@ -825,7 +830,9 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
             margin: const EdgeInsets.only(right: 12),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: hasRootKey ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+              color: hasRootKey
+                  ? Colors.green.withOpacity(0.2)
+                  : Colors.red.withOpacity(0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -851,7 +858,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
       ),
       body: _accesActive
           ? _buildActivatedState()
-          : _buildActivationForm(isSmall, isTablet, paddingSize, spacingSize, titleSize),
+          : _buildActivationForm(
+              isSmall, isTablet, paddingSize, spacingSize, titleSize),
     );
   }
 
@@ -914,12 +922,12 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
   }
 
   Widget _buildActivationForm(
-      bool isSmall,
-      bool isTablet,
-      double paddingSize,
-      double spacingSize,
-      double titleSize,
-      ) {
+    bool isSmall,
+    bool isTablet,
+    double paddingSize,
+    double spacingSize,
+    double titleSize,
+  ) {
     final hasRootKey = _rootDevKey.isNotEmpty;
 
     return SingleChildScrollView(
@@ -990,20 +998,22 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                     onPressed: _paiementLoading ? null : _showPaymentOptions,
                     icon: _paiementLoading
                         ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: TAPAColors.navy,
-                      ),
-                    )
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: TAPAColors.navy,
+                            ),
+                          )
                         : const Icon(
-                      Icons.payment,
-                      color: TAPAColors.navy,
-                      size: 18,
-                    ),
+                            Icons.payment,
+                            color: TAPAColors.navy,
+                            size: 18,
+                          ),
                     label: Text(
-                      _paiementLoading ? 'Traitement en cours...' : 'Payer maintenant — 5 000 FCFA',
+                      _paiementLoading
+                          ? 'Traitement en cours...'
+                          : 'Payer maintenant — 5 000 FCFA',
                       style: TextStyle(
                         color: TAPAColors.navy,
                         fontWeight: FontWeight.w700,
@@ -1104,20 +1114,20 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
                     ),
                     child: _loading
                         ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
                         : const Text(
-                      'Activer mon accès',
-                      style: TextStyle(
-                        color: TAPAColors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                            'Activer mon accès',
+                            style: TextStyle(
+                              color: TAPAColors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                   ),
                 ),
               ],
@@ -1141,7 +1151,8 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, color: Colors.orange, size: 16),
+                  const Icon(Icons.info_outline,
+                      color: Colors.orange, size: 16),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(

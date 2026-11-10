@@ -82,7 +82,8 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
           _grandBouton(
             context: context,
             titre: 'Fonds Communs de Placement',
-            sousTitre: 'Faites fructifier votre épargne\navec nos partenaires SGO agréés',
+            sousTitre:
+                'Faites fructifier votre épargne\navec nos partenaires SGO agréés',
             emoji: '📈',
             couleur: TAPAColors.navy,
             couleurBg: const Color(0xFFEEF2FF),
@@ -96,13 +97,43 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
           _grandBouton(
             context: context,
             titre: 'Assurance Vie',
-            sousTitre: 'Protégez votre famille et\nconstruisez votre avenir sereinement',
+            sousTitre:
+                'Protégez votre famille et\nconstruisez votre avenir sereinement',
             emoji: '🛡️',
             couleur: const Color(0xFF27AE60),
             couleurBg: const Color(0xFFEAF7EF),
             badge: 'SONAM VIE',
             badgeCouleur: const Color(0xFF27AE60),
             onTap: () => _navigateTo('/investir/assurance', 1),
+          ),
+          const SizedBox(height: 16),
+
+          // ✅ ÉPARGNE DE PRÉCAUTIONS (SONAM)
+          _grandBouton(
+            context: context,
+            titre: 'ÉPARGNE DE PRÉCAUTIONS',
+            sousTitre:
+                'Faites fructifier votre épargne\navec un taux garanti de 4%',
+            emoji: '💰',
+            couleur: TAPAColors.gold,
+            couleurBg: const Color(0xFFFFF8E1),
+            badge: 'SONAM VIE',
+            badgeCouleur: TAPAColors.gold,
+            onTap: () => _navigateTo('/investir/sonam', 1),
+          ),
+          const SizedBox(height: 16),
+
+          // ✅ Mes Contrats SONAM
+          _grandBouton(
+            context: context,
+            titre: 'Mes Contrats SONAM',
+            sousTitre: 'Consultez vos contrats\net effectuez vos paiements',
+            emoji: '📄',
+            couleur: TAPAColors.navy,
+            couleurBg: const Color(0xFFEEF2FF),
+            badge: 'SONAM VIE',
+            badgeCouleur: TAPAColors.navy,
+            onTap: () => _navigateTo('/investir/sonam/contrats', 1),
           ),
           const SizedBox(height: 24),
 
@@ -143,7 +174,7 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
                 Expanded(
                   child: Text(
                     'Les investissements sont soumis aux risques du marché. '
-                        'TAPA Invest facilite la mise en relation avec ses partenaires agréés.',
+                    'TAPA Invest facilite la mise en relation avec ses partenaires agréés.',
                     style: TextStyle(
                       fontSize: subtitleSize,
                       color: TAPAColors.textSecond,
@@ -398,20 +429,20 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
               decoration: BoxDecoration(
                 gradient: isActive
                     ? const LinearGradient(
-                  colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
+                        colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
                     : null,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: isActive
                     ? [
-                  BoxShadow(
-                    color: const Color(0xFF1A237E).withOpacity(0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
+                        BoxShadow(
+                          color: const Color(0xFF1A237E).withOpacity(0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
                     : null,
               ),
               child: Icon(
@@ -426,7 +457,8 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
               style: TextStyle(
                 fontSize: isActive ? 10 : 9,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive ? const Color(0xFF1A237E) : Colors.grey.shade500,
+                color:
+                    isActive ? const Color(0xFF1A237E) : Colors.grey.shade500,
                 letterSpacing: 0.1,
               ),
               maxLines: 1,

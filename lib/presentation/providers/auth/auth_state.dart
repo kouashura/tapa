@@ -1,6 +1,6 @@
 // lib/presentation/providers/auth/auth_state.dart
 
-import '../../../data/models/models.dart';  // ✅ Utiliser models.dart
+import '../../../data/models/models.dart'; // ✅ Utiliser models.dart
 
 /// État de l'authentification
 class AuthState {

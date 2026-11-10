@@ -104,7 +104,8 @@ class AppUser {
       codePays: codePays ?? this.codePays,
       hasAccessVie: hasAccessVie ?? this.hasAccessVie,
       onboardingVu: onboardingVu ?? this.onboardingVu,
-      notificationsActivees: notificationsActivees ?? this.notificationsActivees,
+      notificationsActivees:
+          notificationsActivees ?? this.notificationsActivees,
       createdAt: createdAt ?? this.createdAt,
       dernierActive: dernierActive ?? this.dernierActive,
       email: email ?? this.email,

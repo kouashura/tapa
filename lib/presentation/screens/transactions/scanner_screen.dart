@@ -243,52 +243,56 @@ class _ScannerScreenState extends State<ScannerScreen> {
                         ),
                         const SizedBox(height: 8),
                         ..._detectedItems.map((item) => Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: TAPAColors.surface,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: TAPAColors.border,
-                              width: 0.5,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      Fmt.montant(item['montant'], monnaie: monnaie),
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        color: TAPAColors.red,
-                                      ),
-                                    ),
-                                    if (item['description'] != null &&
-                                        item['description'].toString().isNotEmpty)
-                                      Text(
-                                        item['description'],
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: TAPAColors.textSecond,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: TAPAColors.surface,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: TAPAColors.border,
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          Fmt.montant(item['montant'],
+                                              monnaie: monnaie),
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            color: TAPAColors.red,
+                                          ),
                                         ),
-                                      ),
-                                  ],
-                                ),
+                                        if (item['description'] != null &&
+                                            item['description']
+                                                .toString()
+                                                .isNotEmpty)
+                                          Text(
+                                            item['description'],
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: TAPAColors.textSecond,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.add_circle_outline,
+                                      color: TAPAColors.green,
+                                    ),
+                                    onPressed: () => _createTransaction(item),
+                                  ),
+                                ],
                               ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.add_circle_outline,
-                                  color: TAPAColors.green,
-                                ),
-                                onPressed: () => _createTransaction(item),
-                              ),
-                            ],
-                          ),
-                        )),
+                            )),
                       ],
                     ],
                   ),

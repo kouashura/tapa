@@ -52,18 +52,24 @@ class _AdminTarifsScreenState extends ConsumerState<AdminTarifsScreen> {
   }
 
   void _initControllers(TarifConfigModel c) {
-    _basePremiumCtrl = TextEditingController(text: c.basePremium.toStringAsFixed(0));
-    _baseHautGammeCtrl = TextEditingController(text: c.baseHautGamme.toStringAsFixed(0));
-    _basePopulaireCtrl = TextEditingController(text: c.basePopulaire.toStringAsFixed(0));
-    _baseChinoiseCtrl = TextEditingController(text: c.baseChinoise.toStringAsFixed(0));
-    _baseDefautCtrl = TextEditingController(text: c.baseDefaut.toStringAsFixed(0));
+    _basePremiumCtrl =
+        TextEditingController(text: c.basePremium.toStringAsFixed(0));
+    _baseHautGammeCtrl =
+        TextEditingController(text: c.baseHautGamme.toStringAsFixed(0));
+    _basePopulaireCtrl =
+        TextEditingController(text: c.basePopulaire.toStringAsFixed(0));
+    _baseChinoiseCtrl =
+        TextEditingController(text: c.baseChinoise.toStringAsFixed(0));
+    _baseDefautCtrl =
+        TextEditingController(text: c.baseDefaut.toStringAsFixed(0));
 
     _coefAge0a1Ctrl = TextEditingController(text: c.coefAge0a1.toString());
     _coefAge1a3Ctrl = TextEditingController(text: c.coefAge1a3.toString());
     _coefAge3a5Ctrl = TextEditingController(text: c.coefAge3a5.toString());
     _coefAge5a10Ctrl = TextEditingController(text: c.coefAge5a10.toString());
     _coefAge10a15Ctrl = TextEditingController(text: c.coefAge10a15.toString());
-    _coefAge15PlusCtrl = TextEditingController(text: c.coefAge15Plus.toString());
+    _coefAge15PlusCtrl =
+        TextEditingController(text: c.coefAge15Plus.toString());
 
     _coefCv0a4Ctrl = TextEditingController(text: c.coefCv0a4.toString());
     _coefCv4a6Ctrl = TextEditingController(text: c.coefCv4a6.toString());
@@ -72,7 +78,8 @@ class _AdminTarifsScreenState extends ConsumerState<AdminTarifsScreen> {
     _coefCv10a13Ctrl = TextEditingController(text: c.coefCv10a13.toString());
     _coefCv13PlusCtrl = TextEditingController(text: c.coefCv13Plus.toString());
 
-    _primeMinCtrl = TextEditingController(text: c.primeMinimum.toStringAsFixed(0));
+    _primeMinCtrl =
+        TextEditingController(text: c.primeMinimum.toStringAsFixed(0));
   }
 
   Future<void> _loadConfig() async {
@@ -199,40 +206,51 @@ class _AdminTarifsScreenState extends ConsumerState<AdminTarifsScreen> {
               children: [
                 _banniere(),
                 const SizedBox(height: 20),
-
-                _sectionTitle('BASE PAR CATEGORIE DE MARQUE', Icons.directions_car),
-                _champ(_basePremiumCtrl, 'Marque Premium', 'Mercedes, BMW, Audi...'),
-                _champ(_baseHautGammeCtrl, 'Marque Haut de gamme', 'Toyota, Honda, Nissan...'),
-                _champ(_basePopulaireCtrl, 'Marque Populaire', 'Peugeot, Renault, Suzuki...'),
-                _champ(_baseChinoiseCtrl, 'Marque Chinoise', 'Chery, BYD, Geely...'),
+                _sectionTitle(
+                    'BASE PAR CATEGORIE DE MARQUE', Icons.directions_car),
+                _champ(_basePremiumCtrl, 'Marque Premium',
+                    'Mercedes, BMW, Audi...'),
+                _champ(_baseHautGammeCtrl, 'Marque Haut de gamme',
+                    'Toyota, Honda, Nissan...'),
+                _champ(_basePopulaireCtrl, 'Marque Populaire',
+                    'Peugeot, Renault, Suzuki...'),
+                _champ(_baseChinoiseCtrl, 'Marque Chinoise',
+                    'Chery, BYD, Geely...'),
                 _champ(_baseDefautCtrl, 'Marque par defaut', 'Inconnue'),
-
                 const SizedBox(height: 20),
                 _sectionTitle('COEFFICIENTS D AGE', Icons.calendar_today),
-                _champ(_coefAge0a1Ctrl, 'Vehicule 0-1 an', 'Neuf', decimal: true),
-                _champ(_coefAge1a3Ctrl, 'Vehicule 1-3 ans', 'Tres recent', decimal: true),
-                _champ(_coefAge3a5Ctrl, 'Vehicule 3-5 ans', 'Recent', decimal: true),
-                _champ(_coefAge5a10Ctrl, 'Vehicule 5-10 ans', 'Normal', decimal: true),
-                _champ(_coefAge10a15Ctrl, 'Vehicule 10-15 ans', 'Ancien', decimal: true),
-                _champ(_coefAge15PlusCtrl, 'Vehicule 15+ ans', 'Tres ancien', decimal: true),
-
+                _champ(_coefAge0a1Ctrl, 'Vehicule 0-1 an', 'Neuf',
+                    decimal: true),
+                _champ(_coefAge1a3Ctrl, 'Vehicule 1-3 ans', 'Tres recent',
+                    decimal: true),
+                _champ(_coefAge3a5Ctrl, 'Vehicule 3-5 ans', 'Recent',
+                    decimal: true),
+                _champ(_coefAge5a10Ctrl, 'Vehicule 5-10 ans', 'Normal',
+                    decimal: true),
+                _champ(_coefAge10a15Ctrl, 'Vehicule 10-15 ans', 'Ancien',
+                    decimal: true),
+                _champ(_coefAge15PlusCtrl, 'Vehicule 15+ ans', 'Tres ancien',
+                    decimal: true),
                 const SizedBox(height: 20),
                 _sectionTitle('COEFFICIENTS DE PUISSANCE', Icons.speed),
-                _champ(_coefCv0a4Ctrl, 'Puissance 0-4 CV', 'Petite citadine', decimal: true),
-                _champ(_coefCv4a6Ctrl, 'Puissance 4-6 CV', 'Compacte', decimal: true),
-                _champ(_coefCv6a8Ctrl, 'Puissance 6-8 CV', 'Berline', decimal: true),
-                _champ(_coefCv8a10Ctrl, 'Puissance 8-10 CV', 'SUV', decimal: true),
-                _champ(_coefCv10a13Ctrl, 'Puissance 10-13 CV', '4x4', decimal: true),
-                _champ(_coefCv13PlusCtrl, 'Puissance 13+ CV', 'Gros moteur', decimal: true),
-
+                _champ(_coefCv0a4Ctrl, 'Puissance 0-4 CV', 'Petite citadine',
+                    decimal: true),
+                _champ(_coefCv4a6Ctrl, 'Puissance 4-6 CV', 'Compacte',
+                    decimal: true),
+                _champ(_coefCv6a8Ctrl, 'Puissance 6-8 CV', 'Berline',
+                    decimal: true),
+                _champ(_coefCv8a10Ctrl, 'Puissance 8-10 CV', 'SUV',
+                    decimal: true),
+                _champ(_coefCv10a13Ctrl, 'Puissance 10-13 CV', '4x4',
+                    decimal: true),
+                _champ(_coefCv13PlusCtrl, 'Puissance 13+ CV', 'Gros moteur',
+                    decimal: true),
                 const SizedBox(height: 20),
                 _sectionTitle('PRIME MINIMUM', Icons.trending_down),
                 _champ(_primeMinCtrl, 'Prime minimum mensuelle', 'FCFA'),
-
                 const SizedBox(height: 24),
                 _apercu(),
                 const SizedBox(height: 24),
-
                 if (state.successMessage != null) ...[
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -243,7 +261,8 @@ class _AdminTarifsScreenState extends ConsumerState<AdminTarifsScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.check_circle, color: Color(0xFF27AE60), size: 20),
+                        const Icon(Icons.check_circle,
+                            color: Color(0xFF27AE60), size: 20),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -256,7 +275,6 @@ class _AdminTarifsScreenState extends ConsumerState<AdminTarifsScreen> {
                   ),
                   const SizedBox(height: 16),
                 ],
-
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -271,7 +289,8 @@ class _AdminTarifsScreenState extends ConsumerState<AdminTarifsScreen> {
                             ),
                           )
                         : const Icon(Icons.save),
-                    label: Text(state.isSaving ? 'Sauvegarde...' : 'Sauvegarder'),
+                    label:
+                        Text(state.isSaving ? 'Sauvegarde...' : 'Sauvegarder'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: TAPAColors.navy,
                       foregroundColor: TAPAColors.white,
@@ -415,7 +434,8 @@ class _AdminTarifsScreenState extends ConsumerState<AdminTarifsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Prime mensuelle', style: TextStyle(color: Colors.white70, fontSize: 13)),
+              const Text('Prime mensuelle',
+                  style: TextStyle(color: Colors.white70, fontSize: 13)),
               Text(
                 '${_format(prime)} FCFA',
                 style: const TextStyle(
@@ -430,7 +450,8 @@ class _AdminTarifsScreenState extends ConsumerState<AdminTarifsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Total 12 mois', style: TextStyle(color: Colors.white70, fontSize: 13)),
+              const Text('Total 12 mois',
+                  style: TextStyle(color: Colors.white70, fontSize: 13)),
               Text(
                 '${_format(total)} FCFA',
                 style: const TextStyle(

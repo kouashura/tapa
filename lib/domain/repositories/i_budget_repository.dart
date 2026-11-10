@@ -1,6 +1,6 @@
 // lib/domain/repositories/i_budget_repository.dart
 
-import '../../data/models/models.dart';  // ✅ Utiliser les modèles de données
+import '../../data/models/models.dart'; // ✅ Utiliser les modèles de données
 
 /// Interface du repository des budgets
 abstract class IBudgetRepository {

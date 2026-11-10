@@ -86,7 +86,8 @@ class RegisterUseCase {
 
       // Valider les paramètres
       if (params.prenom.isEmpty || params.prenom.length < 2) {
-        return RegisterResult.error('Le prénom doit contenir au moins 2 caractères.');
+        return RegisterResult.error(
+            'Le prénom doit contenir au moins 2 caractères.');
       }
 
       if (params.telephone.length < 8) {
@@ -105,13 +106,13 @@ class RegisterUseCase {
         // Créer le profil utilisateur
         final createdUser = await _authRepository.createUser(
           prenom: params.prenom,
-          telephone: params.fullPhoneNumber,
-          indicatif: params.indicatif,
+          email: params.telephone,
           codePays: params.codePays,
           monnaie: params.monnaie,
         );
 
-        Logger.success('🎉 Compte créé avec succès pour: ${createdUser.prenom}');
+        Logger.success(
+            '🎉 Compte créé avec succès pour: ${createdUser.prenom}');
         return RegisterResult.success(createdUser);
       }
 
@@ -129,7 +130,8 @@ class RegisterUseCase {
         return RegisterResult.error(failure.message);
       }
 
-      return RegisterResult.error('Erreur lors de l\'inscription. Veuillez réessayer.');
+      return RegisterResult.error(
+          'Erreur lors de l\'inscription. Veuillez réessayer.');
     }
   }
 }

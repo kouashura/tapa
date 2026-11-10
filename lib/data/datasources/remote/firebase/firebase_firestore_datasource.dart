@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../../../core/utils/logger.dart';
+import '../../../../core/utils/date_parser.dart';
 import '../../../../core/errors/error_handler.dart';
 import '../../../models/models.dart';
 
@@ -119,6 +120,32 @@ class FirebaseFirestoreDatasource {
   // ============================================
   // PORTEFEUILLES
   // ============================================
+
+  Future<WalletModel?> getWalletById(String walletId) async {
+    try {
+      final doc = await wallets.doc(walletId).get();
+      if (!doc.exists) {
+        Logger.warning('Portefeuille introuvable: $walletId');
+        return null;
+      }
+      final data = doc.data()!;
+      return WalletModel(
+        id: doc.id,
+        uid: data['uid'] ?? '',
+        nom: data['nom'] ?? '',
+        emoji: data['emoji'] ?? '💵',
+        type: data['type'] ?? 'autre',
+        solde: (data['solde'] as num?)?.toDouble() ?? 0,
+        monnaie: data['monnaie'] ?? 'FCFA',
+        description: data['description'] ?? '',
+        createdAt: parseFirestoreDateOrNull(data['createdAt']),
+        updatedAt: parseFirestoreDateOrNull(data['updatedAt']),
+      );
+    } catch (e) {
+      Logger.error('Erreur recuperation wallet par ID: $e');
+      return null;
+    }
+  }
 
   Future<List<WalletModel>> getWallets(String uid) async {
     try {
@@ -390,9 +417,7 @@ class FirebaseFirestoreDatasource {
 
   Future<List<SouscriptionModel>> getSouscriptions(String uid) async {
     try {
-      final query = await souscriptions
-          .where('userId', isEqualTo: uid)
-          .get();
+      final query = await souscriptions.where('userId', isEqualTo: uid).get();
       return query.docs
           .map((doc) => SouscriptionModel.fromMap(
                 {...doc.data(), 'id': doc.id},
@@ -405,7 +430,8 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> listenToSouscriptions(String uid) {
+  Stream<QuerySnapshot<Map<String, dynamic>>> listenToSouscriptions(
+      String uid) {
     return souscriptions.where('userId', isEqualTo: uid).snapshots();
   }
 
@@ -415,9 +441,8 @@ class FirebaseFirestoreDatasource {
 
   Future<List<SouscriptionModel>> getAllSouscriptions() async {
     try {
-      final query = await souscriptions
-          .orderBy('dateCreation', descending: true)
-          .get();
+      final query =
+          await souscriptions.orderBy('dateCreation', descending: true).get();
       return query.docs
           .map((doc) => SouscriptionModel.fromMap(
                 {...doc.data(), 'id': doc.id},
@@ -431,9 +456,7 @@ class FirebaseFirestoreDatasource {
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> listenToAllSouscriptions() {
-    return souscriptions
-        .orderBy('dateCreation', descending: true)
-        .snapshots();
+    return souscriptions.orderBy('dateCreation', descending: true).snapshots();
   }
 
   Future<void> updateSouscriptionStatut(String reference, String statut) async {
@@ -457,9 +480,8 @@ class FirebaseFirestoreDatasource {
 
   Future<BudgetMensuel?> getBudget(String uid, int mois, int annee) async {
     try {
-      final doc = await budgets
-          .doc('${uid}_${_budgetDocId(mois, annee)}')
-          .get();
+      final doc =
+          await budgets.doc('${uid}_${_budgetDocId(mois, annee)}').get();
       if (!doc.exists) return null;
       return BudgetMensuel.fromMap({...doc.data()!, 'id': doc.id});
     } catch (e) {
@@ -559,10 +581,9 @@ class FirebaseFirestoreDatasource {
       final data = epargne.toMap();
       data['uid'] = _auth.currentUser?.uid ?? '';
 
-      await epargneProgrammee
-          .doc(docId)
-          .set(data, SetOptions(merge: true));
-      Logger.info('📝 Épargne programmée sauvegardée: ${epargne.titre} (id: $docId)');
+      await epargneProgrammee.doc(docId).set(data, SetOptions(merge: true));
+      Logger.info(
+          '📝 Épargne programmée sauvegardée: ${epargne.titre} (id: $docId)');
     } catch (e) {
       Logger.error('❌ Erreur sauvegarde épargne programmée: $e');
       throw ErrorHandler().handleException(e);
@@ -615,7 +636,8 @@ class FirebaseFirestoreDatasource {
     }
   }
 
-  Future<double> getTotalDepensesReelles(String uid, int mois, int annee) async {
+  Future<double> getTotalDepensesReelles(
+      String uid, int mois, int annee) async {
     final debut = DateTime(annee, mois, 1);
     final fin = DateTime(annee, mois + 1, 1);
 
@@ -697,10 +719,7 @@ class FirebaseFirestoreDatasource {
   // ============================================
 
   Stream<QuerySnapshot<Map<String, dynamic>>> listenToWallets(String uid) {
-    return wallets
-        .where('uid', isEqualTo: uid)
-        .orderBy('createdAt', descending: false)
-        .snapshots();
+    return wallets.where('uid', isEqualTo: uid).snapshots();
   }
 
   Stream<QuerySnapshot<Map<String, dynamic>>> listenToTransactions(

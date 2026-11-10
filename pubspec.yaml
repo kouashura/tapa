@@ -1,7 +1,7 @@
 name: tapa_budget
 description: TAPA Invest - Votre coach financier intelligent
 publish_to: 'none'
-version: 1.0.1+2
+version: 1.0.3+30
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -49,7 +49,6 @@ dependencies:
   pdf: ^3.10.9
 
   image_picker: ^1.1.2
-  speech_to_text: ^6.6.0
   camera: ^0.10.5+9
   permission_handler: ^11.3.1
 
@@ -61,7 +60,9 @@ dependencies:
 
   pinput: ^6.0.2
   dart_style: ^2.3.7
-  flutter_custom_tabs: ^2.4.1
+  flutter_custom_tabs: 2.2.0
+  emailjs: ^4.0.0
+  speech_to_text: ^7.4.0
 
 dev_dependencies:
   flutter_test:
@@ -87,3 +88,7 @@ flutter_launcher_icons:
   adaptive_icon_background: "#0D2B4E"
   adaptive_icon_foreground: "assets/logos/logo_tapa_invest.png"
   remove_alpha_ios: true
+
+# Forcer une version compatible de speech_to_text
+dependency_overrides:
+  speech_to_text: 7.3.0

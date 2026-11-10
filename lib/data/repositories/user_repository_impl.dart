@@ -13,7 +13,8 @@ class UserRepositoryImpl implements IUserRepository {
 
   UserRepositoryImpl({
     FirebaseFirestoreDatasource? firestoreDatasource,
-  }) : _firestoreDatasource = firestoreDatasource ?? FirebaseFirestoreDatasource();
+  }) : _firestoreDatasource =
+            firestoreDatasource ?? FirebaseFirestoreDatasource();
 
   // ============================================
   // RÉCUPÉRATION UTILISATEUR

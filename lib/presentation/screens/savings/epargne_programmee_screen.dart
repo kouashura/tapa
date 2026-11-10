@@ -7,16 +7,18 @@ import '../../../core/theme/app_theme.dart';
 import '../../../data/models/models.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../services/link_service.dart';
-import 'package:tapa_budget/presentation/providers/providers.dart';  // ✅ IMPORT AJOUTÉ
+import 'package:tapa_budget/presentation/providers/providers.dart'; // ✅ IMPORT AJOUTÉ
 
 class EpargneProgrammeeScreen extends ConsumerStatefulWidget {
   const EpargneProgrammeeScreen({super.key});
 
   @override
-  ConsumerState<EpargneProgrammeeScreen> createState() => _EpargneProgrammeeScreenState();
+  ConsumerState<EpargneProgrammeeScreen> createState() =>
+      _EpargneProgrammeeScreenState();
 }
 
-class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScreen> {
+class _EpargneProgrammeeScreenState
+    extends ConsumerState<EpargneProgrammeeScreen> {
   int _selectedIndex = 2;
   final List<EpargneProgrammeeModel> _epargnes = [];
 
@@ -60,8 +62,8 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
         title: const Text('Confirmer le dépôt'),
         content: Text(
           'Effectuer un dépôt de '
-              '${Fmt.montant(ep.montantParDepot, monnaie: monnaie)} '
-              'pour "${ep.titre}" ?',
+          '${Fmt.montant(ep.montantParDepot, monnaie: monnaie)} '
+          'pour "${ep.titre}" ?',
         ),
         actions: [
           TextButton(
@@ -120,7 +122,7 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
           children: [
             const Text(
               'Ce compte est verrouillé. Envoyez un WhatsApp à TAPA Invest '
-                  'pour recevoir votre code de déverrouillage.',
+              'pour recevoir votre code de déverrouillage.',
               style: TextStyle(fontSize: 13),
             ),
             const SizedBox(height: 16),
@@ -241,48 +243,48 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
       ),
       body: _epargnes.isEmpty
           ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('💰', style: TextStyle(fontSize: 48)),
-            const SizedBox(height: 16),
-            const Text(
-              'Aucune épargne programmée',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: TAPAColors.navy,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('💰', style: TextStyle(fontSize: 48)),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Aucune épargne programmée',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: TAPAColors.navy,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Créez votre première épargne\nprogrammée et atteignez vos objectifs !',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: TAPAColors.textSecond),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      await context.push('/epargne-programmee/creer');
+                      _charger();
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Créer une épargne'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: TAPAColors.navy,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Créez votre première épargne\nprogrammée et atteignez vos objectifs !',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: TAPAColors.textSecond),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () async {
-                await context.push('/epargne-programmee/creer');
-                _charger();
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Créer une épargne'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: TAPAColors.navy,
-              ),
-            ),
-          ],
-        ),
-      )
+            )
           : ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _epargnes.length,
-        itemBuilder: (ctx, i) {
-          final ep = _epargnes[i];
-          return _carteEpargne(ep, monnaie);
-        },
-      ),
+              padding: const EdgeInsets.all(16),
+              itemCount: _epargnes.length,
+              itemBuilder: (ctx, i) {
+                final ep = _epargnes[i];
+                return _carteEpargne(ep, monnaie);
+              },
+            ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
@@ -291,8 +293,8 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
     final couleur = ep.termine
         ? TAPAColors.green
         : ep.verrouille
-        ? TAPAColors.red
-        : TAPAColors.navy;
+            ? TAPAColors.red
+            : TAPAColors.navy;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -329,9 +331,11 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
                           ),
                           const SizedBox(width: 8),
                           if (ep.verrouille)
-                            const Icon(Icons.lock, size: 16, color: TAPAColors.red),
+                            const Icon(Icons.lock,
+                                size: 16, color: TAPAColors.red),
                           if (ep.termine)
-                            const Icon(Icons.check_circle, size: 16, color: TAPAColors.green),
+                            const Icon(Icons.check_circle,
+                                size: 16, color: TAPAColors.green),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -346,7 +350,8 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: TAPAColors.textHint, size: 20),
+                  icon: const Icon(Icons.delete_outline,
+                      color: TAPAColors.textHint, size: 20),
                   onPressed: () => _supprimer(ep),
                 ),
               ],
@@ -445,7 +450,8 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
                         ep.verrouille ? 'Déverrouiller' : 'Faire un dépôt',
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: ep.verrouille ? TAPAColors.red : TAPAColors.navy,
+                        backgroundColor:
+                            ep.verrouille ? TAPAColors.red : TAPAColors.navy,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
@@ -608,20 +614,20 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
               decoration: BoxDecoration(
                 gradient: isActive
                     ? const LinearGradient(
-                  colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
+                        colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
                     : null,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: isActive
                     ? [
-                  BoxShadow(
-                    color: const Color(0xFF1A237E).withOpacity(0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
+                        BoxShadow(
+                          color: const Color(0xFF1A237E).withOpacity(0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
                     : null,
               ),
               child: Icon(
@@ -636,7 +642,8 @@ class _EpargneProgrammeeScreenState extends ConsumerState<EpargneProgrammeeScree
               style: TextStyle(
                 fontSize: isActive ? 10 : 9,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive ? const Color(0xFF1A237E) : Colors.grey.shade500,
+                color:
+                    isActive ? const Color(0xFF1A237E) : Colors.grey.shade500,
                 letterSpacing: 0.1,
               ),
               maxLines: 1,

@@ -34,7 +34,6 @@ void main() async {
     final prefs = SharedPreferencesService();
     await prefs.init();
     Logger.success('✅ SharedPreferencesService initialisé');
-
   } catch (e) {
     Logger.error('❌ Erreur SharedPreferencesService: $e');
   }
@@ -46,7 +45,6 @@ void main() async {
     final hive = HiveService();
     await hive.init();
     Logger.success('✅ HiveService initialisé');
-
   } catch (e) {
     Logger.error('❌ Erreur HiveService: $e');
   }
@@ -67,7 +65,6 @@ void main() async {
     // Initialiser FirebaseService
     await FirebaseService().init();
     Logger.info('✅ FirebaseService initialisé');
-
   } catch (e) {
     Logger.error('❌ Erreur Firebase: $e');
   }

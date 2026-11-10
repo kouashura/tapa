@@ -1,5 +1,7 @@
 // lib/presentation/providers/wallet/wallet_provider.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../domain/usecases/savings/transfer_to_goal_usecase.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/models.dart';
 import '../../../domain/repositories/i_wallet_repository.dart';
@@ -40,7 +42,8 @@ final updateWalletUseCaseProvider = Provider<UpdateWalletUseCase>((ref) {
 });
 
 /// Provider du Use Case pour mettre à jour le solde
-final updateWalletBalanceUseCaseProvider = Provider<UpdateWalletBalanceUseCase>((ref) {
+final updateWalletBalanceUseCaseProvider =
+    Provider<UpdateWalletBalanceUseCase>((ref) {
   return UpdateWalletBalanceUseCase(ref.watch(walletRepositoryProvider));
 });
 
@@ -54,7 +57,8 @@ final deleteWalletUseCaseProvider = Provider<DeleteWalletUseCase>((ref) {
 // ============================================
 
 /// Liste des portefeuilles en temps réel
-final walletListProvider = StreamProvider.family<List<WalletModel>, String>((ref, uid) {
+final walletListProvider =
+    StreamProvider.family<List<WalletModel>, String>((ref, uid) {
   final useCase = ref.watch(watchWalletsUseCaseProvider);
   return useCase.execute(uid);
 });
@@ -64,77 +68,86 @@ final walletListProvider = StreamProvider.family<List<WalletModel>, String>((ref
 // ============================================
 
 /// Provider pour créer un portefeuille
-final createWalletProvider = FutureProvider.family<CreateWalletResult, CreateWalletParams>(
+final createWalletProvider =
+    FutureProvider.family<CreateWalletResult, CreateWalletParams>(
   (ref, params) async {
     final useCase = ref.watch(createWalletUseCaseProvider);
     final result = await useCase.execute(params);
-    
+
     if (result.success) {
       Logger.success('✅ Portefeuille créé: ${result.wallet?.nom}');
       ref.read(walletStateProvider.notifier).addWalletLocally(result.wallet!);
     } else {
       Logger.error('❌ Erreur création portefeuille: ${result.message}');
     }
-    
+
     return result;
   },
 );
 
 /// Provider pour récupérer les portefeuilles (une seule fois)
-final getWalletsProvider = FutureProvider.family<GetWalletsResult, String>((ref, uid) async {
+final getWalletsProvider =
+    FutureProvider.family<GetWalletsResult, String>((ref, uid) async {
   final useCase = ref.watch(getWalletsUseCaseProvider);
   return await useCase.execute(uid);
 });
 
 /// Provider pour mettre à jour un portefeuille
-final updateWalletProvider = FutureProvider.family<UpdateWalletResult, UpdateWalletParams>(
+final updateWalletProvider =
+    FutureProvider.family<UpdateWalletResult, UpdateWalletParams>(
   (ref, params) async {
     final useCase = ref.watch(updateWalletUseCaseProvider);
     final result = await useCase.execute(params);
-    
+
     if (result.success) {
       Logger.success('✅ Portefeuille mis à jour: ${result.wallet?.nom}');
-      ref.read(walletStateProvider.notifier).updateWalletLocally(result.wallet!);
+      ref
+          .read(walletStateProvider.notifier)
+          .updateWalletLocally(result.wallet!);
     } else {
       Logger.error('❌ Erreur mise à jour portefeuille: ${result.message}');
     }
-    
+
     return result;
   },
 );
 
 /// Provider pour mettre à jour le solde
-final updateWalletBalanceProvider = FutureProvider.family<UpdateWalletResult, UpdateBalanceParams>(
+final updateWalletBalanceProvider =
+    FutureProvider.family<UpdateWalletResult, UpdateBalanceParams>(
   (ref, params) async {
     final useCase = ref.watch(updateWalletBalanceUseCaseProvider);
     final result = await useCase.execute(
       walletId: params.walletId,
       newBalance: params.newBalance,
     );
-    
+
     if (result.success) {
       Logger.success('💰 Solde mis à jour: ${params.newBalance}');
-      ref.read(walletStateProvider.notifier).updateWalletLocally(result.wallet!);
+      ref
+          .read(walletStateProvider.notifier)
+          .updateWalletLocally(result.wallet!);
     } else {
       Logger.error('❌ Erreur mise à jour solde: ${result.message}');
     }
-    
+
     return result;
   },
 );
 
 /// Provider pour supprimer un portefeuille
-final deleteWalletProvider = FutureProvider.family<DeleteWalletResult, String>((ref, walletId) async {
+final deleteWalletProvider =
+    FutureProvider.family<DeleteWalletResult, String>((ref, walletId) async {
   final useCase = ref.watch(deleteWalletUseCaseProvider);
   final result = await useCase.execute(walletId);
-  
+
   if (result.success) {
     Logger.success('🗑️ Portefeuille supprimé: $walletId');
     ref.read(walletStateProvider.notifier).deleteWalletLocally(walletId);
   } else {
     Logger.error('❌ Erreur suppression portefeuille: ${result.message}');
   }
-  
+
   return result;
 });
 
@@ -143,7 +156,8 @@ final deleteWalletProvider = FutureProvider.family<DeleteWalletResult, String>((
 // ============================================
 
 /// Provider pour l'état des portefeuilles
-final walletStateProvider = StateNotifierProvider<WalletNotifier, WalletState>((ref) {
+final walletStateProvider =
+    StateNotifierProvider<WalletNotifier, WalletState>((ref) {
   return WalletNotifier(ref);
 });
 
@@ -194,10 +208,10 @@ class WalletNotifier extends StateNotifier<WalletState> {
     if (uid.isEmpty) return;
 
     state = state.copyWith(isLoading: true);
-    
+
     try {
       final result = await _ref.read(getWalletsProvider(uid).future);
-      
+
       if (result.success) {
         state = state.copyWith(
           wallets: result.wallets,
@@ -235,12 +249,12 @@ class WalletNotifier extends StateNotifier<WalletState> {
     final updatedWallets = state.wallets.map((w) {
       return w.id == updatedWallet.id ? updatedWallet : w;
     }).toList();
-    
+
     double newTotal = 0;
     for (final w in updatedWallets) {
       newTotal += w.solde;
     }
-    
+
     state = state.copyWith(
       wallets: updatedWallets,
       totalBalance: newTotal,
@@ -248,13 +262,14 @@ class WalletNotifier extends StateNotifier<WalletState> {
   }
 
   void deleteWalletLocally(String walletId) {
-    final updatedWallets = state.wallets.where((w) => w.id != walletId).toList();
-    
+    final updatedWallets =
+        state.wallets.where((w) => w.id != walletId).toList();
+
     double newTotal = 0;
     for (final w in updatedWallets) {
       newTotal += w.solde;
     }
-    
+
     state = state.copyWith(
       wallets: updatedWallets,
       totalBalance: newTotal,
@@ -303,7 +318,8 @@ final walletsLoadedProvider = Provider<bool>((ref) {
   return !state.isLoading && state.wallets.isNotEmpty;
 });
 
-final walletByIdProvider = Provider.family<WalletModel?, String>((ref, walletId) {
+final walletByIdProvider =
+    Provider.family<WalletModel?, String>((ref, walletId) {
   final state = ref.watch(walletStateProvider);
   try {
     return state.wallets.firstWhere((w) => w.id == walletId);
@@ -311,3 +327,28 @@ final walletByIdProvider = Provider.family<WalletModel?, String>((ref, walletId)
     return null;
   }
 });
+
+// ═══════════════════════════════════════════════════════════════
+// PROVIDER DE VIREMENT VERS OBJECTIF D'ÉPARGNE
+// ═══════════════════════════════════════════════════════════════
+
+final transferToGoalProvider =
+    FutureProvider.family<TransferToGoalResult, Map<String, dynamic>>(
+  (ref, params) async {
+    final useCase = TransferToGoalUseCase(FirebaseFirestore.instance);
+    final result = await useCase.execute(
+      walletId: params['walletId'] as String,
+      goalId: params['goalId'] as String,
+      userId: params['userId'] as String,
+      montant: params['montant'] as double,
+    );
+
+    if (result.success) {
+      // Rafraîchir les données
+      ref.invalidate(walletStateProvider);
+      ref.invalidate(walletListProvider(params['userId'] as String));
+    }
+
+    return result;
+  },
+);

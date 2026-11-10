@@ -26,9 +26,10 @@ class _MigrationPageState extends State<MigrationPage> {
 
     try {
       // Lire le fichier JSON depuis assets
-      final String jsonString = await rootBundle.loadString('assets/data/utilisateurs.json');
+      final String jsonString =
+          await rootBundle.loadString('assets/data/utilisateurs.json');
       final List<dynamic> users = jsonDecode(jsonString);
-      
+
       _total = users.length;
       setState(() => _status = 'Migration de $_total utilisateurs...');
 
@@ -43,7 +44,10 @@ class _MigrationPageState extends State<MigrationPage> {
 
           final cleanTelephone = telephone.replaceAll(' ', '').trim();
 
-          await FirebaseFirestore.instance.collection('users').doc(cleanTelephone).set({
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(cleanTelephone)
+              .set({
             'uuid': user['uuid'] ?? '',
             'prenom': user['prenom'] ?? '',
             'telephone': cleanTelephone,
@@ -54,7 +58,8 @@ class _MigrationPageState extends State<MigrationPage> {
             'hasAccesVie': user['has_acces_vie'] == 1,
             'cleActivee': user['cle_activee'],
             'dateInscription': user['date_inscription'],
-            'derniereActivite': user['derniere_activite'] ?? DateTime.now().toIso8601String(),
+            'derniereActivite':
+                user['derniere_activite'] ?? DateTime.now().toIso8601String(),
             'onboardingVu': user['onboarding_vu'] == 1,
             'notificationsActivees': user['notifications_activees'] == 1,
             'createdAt': FieldValue.serverTimestamp(),
@@ -66,22 +71,22 @@ class _MigrationPageState extends State<MigrationPage> {
             _progress = count;
             _status = 'Importé ${user['prenom']} ($count/$_total)';
           });
-          
+
           print('✅ ${user['prenom']} - $cleanTelephone');
-          
         } catch (e) {
           print('❌ Erreur pour ${user['prenom']}: $e');
         }
       }
 
       setState(() {
-        _status = '✅ Migration terminée ! $count utilisateurs importés sur $_total.';
+        _status =
+            '✅ Migration terminée ! $count utilisateurs importés sur $_total.';
         _isMigrating = false;
       });
-
     } catch (e) {
       setState(() {
-        _status = '❌ Erreur: $e. Vérifiez que le fichier assets/data/utilisateurs.json existe.';
+        _status =
+            '❌ Erreur: $e. Vérifiez que le fichier assets/data/utilisateurs.json existe.';
         _isMigrating = false;
       });
       print('❌ Erreur: $e');
@@ -114,7 +119,8 @@ class _MigrationPageState extends State<MigrationPage> {
                 value: _progress / _total,
                 minHeight: 10,
                 backgroundColor: Colors.grey[300],
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1A237E)),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(Color(0xFF1A237E)),
               ),
               const SizedBox(height: 10),
               Text('$_progress / $_total'),
@@ -123,7 +129,8 @@ class _MigrationPageState extends State<MigrationPage> {
             ElevatedButton(
               onPressed: _isMigrating ? null : _migrate,
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                 backgroundColor: const Color(0xFF1A237E),
                 foregroundColor: Colors.white,
               ),

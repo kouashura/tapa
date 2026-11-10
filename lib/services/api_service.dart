@@ -3,7 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../data/models/models.dart';  // ✅ CORRIGÉ
+import '../data/models/models.dart'; // ✅ CORRIGÉ
 import '../core/utils/logger.dart';
 
 class FirebaseService {
@@ -140,9 +140,39 @@ class FirebaseService {
 
   Future<void> _initDefaultWallets(String userId) async {
     final defaultWallets = [
-      {'uid': userId, 'nom': 'Compte Principal', 'type': 'compte', 'emoji': '🏦', 'solde': 0.0, 'monnaie': 'FCFA', 'description': 'Compte principal', 'createdAt': FieldValue.serverTimestamp(), 'updatedAt': FieldValue.serverTimestamp()},
-      {'uid': userId, 'nom': 'Wave', 'type': 'mobile', 'emoji': '📱', 'solde': 0.0, 'monnaie': 'FCFA', 'description': 'Portefeuille Wave', 'createdAt': FieldValue.serverTimestamp(), 'updatedAt': FieldValue.serverTimestamp()},
-      {'uid': userId, 'nom': 'Espèces', 'type': 'especes', 'emoji': '💵', 'solde': 0.0, 'monnaie': 'FCFA', 'description': 'Espèces', 'createdAt': FieldValue.serverTimestamp(), 'updatedAt': FieldValue.serverTimestamp()},
+      {
+        'uid': userId,
+        'nom': 'Compte Principal',
+        'type': 'compte',
+        'emoji': '🏦',
+        'solde': 0.0,
+        'monnaie': 'FCFA',
+        'description': 'Compte principal',
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp()
+      },
+      {
+        'uid': userId,
+        'nom': 'Wave',
+        'type': 'mobile',
+        'emoji': '📱',
+        'solde': 0.0,
+        'monnaie': 'FCFA',
+        'description': 'Portefeuille Wave',
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp()
+      },
+      {
+        'uid': userId,
+        'nom': 'Espèces',
+        'type': 'especes',
+        'emoji': '💵',
+        'solde': 0.0,
+        'monnaie': 'FCFA',
+        'description': 'Espèces',
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp()
+      },
     ];
     final batch = _firestore.batch();
     for (final wallet in defaultWallets) {
@@ -194,7 +224,8 @@ class FirebaseService {
     });
   }
 
-  Future<void> updateTransaction(TransactionModel oldTx, TransactionModel newTx) async {}
+  Future<void> updateTransaction(
+      TransactionModel oldTx, TransactionModel newTx) async {}
   Future<void> deleteTransaction(TransactionModel transaction) async {}
 
   // ============================================
@@ -203,12 +234,27 @@ class FirebaseService {
 
   Future<void> _initDefaultCategories(String userId) async {
     final categories = [
-      {'id': 'nourriture', 'label': 'Alimentation', 'emoji': '🍽️', 'type': 'depense'},
-      {'id': 'transport', 'label': 'Transport', 'emoji': '🚗', 'type': 'depense'},
+      {
+        'id': 'nourriture',
+        'label': 'Alimentation',
+        'emoji': '🍽️',
+        'type': 'depense'
+      },
+      {
+        'id': 'transport',
+        'label': 'Transport',
+        'emoji': '🚗',
+        'type': 'depense'
+      },
       {'id': 'facture', 'label': 'Facture', 'emoji': '📄', 'type': 'depense'},
       {'id': 'logement', 'label': 'Logement', 'emoji': '🏠', 'type': 'depense'},
       {'id': 'sante', 'label': 'Santé', 'emoji': '🏥', 'type': 'depense'},
-      {'id': 'education', 'label': 'Éducation', 'emoji': '📚', 'type': 'depense'},
+      {
+        'id': 'education',
+        'label': 'Éducation',
+        'emoji': '📚',
+        'type': 'depense'
+      },
       {'id': 'loisirs', 'label': 'Loisirs', 'emoji': '🎮', 'type': 'depense'},
       {'id': 'salaire', 'label': 'Salaire', 'emoji': '💰', 'type': 'revenu'},
     ];
@@ -240,10 +286,12 @@ class FirebaseService {
           .collection('categories')
           .where('uid', isEqualTo: userId)
           .get();
-      _categories = snap.docs.map((d) => {
-        'id': d.id,
-        ...d.data(),
-      }).toList();
+      _categories = snap.docs
+          .map((d) => {
+                'id': d.id,
+                ...d.data(),
+              })
+          .toList();
       Logger.info('📂 Catégories chargées: ${_categories.length}');
     } catch (e) {
       Logger.error('❌ Erreur chargement catégories: $e');
@@ -262,7 +310,8 @@ class FirebaseService {
       throw Exception('Utilisateur non authentifié');
     }
 
-    final id = category['id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString();
+    final id = category['id'] as String? ??
+        DateTime.now().millisecondsSinceEpoch.toString();
     final label = category['label'] as String? ?? 'Autre';
     final emoji = category['emoji'] as String? ?? '📌';
     final type = category['type'] as String? ?? 'depense';
@@ -270,10 +319,7 @@ class FirebaseService {
     Logger.info('📝 Ajout catégorie: $label ($type)');
 
     try {
-      await _firestore
-          .collection('categories')
-          .doc(id)
-          .set({
+      await _firestore.collection('categories').doc(id).set({
         'uid': userId,
         'categorieId': id,
         'label': label,
@@ -298,10 +344,7 @@ class FirebaseService {
     }
 
     try {
-      await _firestore
-          .collection('categories')
-          .doc(categoryId)
-          .delete();
+      await _firestore.collection('categories').doc(categoryId).delete();
 
       Logger.info('🗑️ Catégorie supprimée: $categoryId');
       await _loadCategories();
@@ -426,7 +469,8 @@ class FirebaseService {
   Future<double> getTotalRevenusReels(int mois, int annee) =>
       _sommeTransactions(mois, annee, 'revenu');
 
-  Future<double> getDepensesReellesByCategorie(String categorieId, int mois, int annee) async {
+  Future<double> getDepensesReellesByCategorie(
+      String categorieId, int mois, int annee) async {
     final userId = _currentUserId;
     if (userId == null) return 0.0;
     final debut = DateTime(annee, mois, 1);
@@ -450,21 +494,26 @@ class FirebaseService {
   // ============================================
 
   bool get onboardingVu => _prefs?.getBool('onboarding_vu') ?? false;
-  Future<void> marquerOnboardingVu() async => await _prefs?.setBool('onboarding_vu', true);
+  Future<void> marquerOnboardingVu() async =>
+      await _prefs?.setBool('onboarding_vu', true);
 
   // ============================================
   // NOTIFICATIONS
   // ============================================
 
-  bool get notificationsActivees => _prefs?.getBool('notifications_activees') ?? true;
-  Future<void> setNotifications(bool value) async => await _prefs?.setBool('notifications_activees', value);
+  bool get notificationsActivees =>
+      _prefs?.getBool('notifications_activees') ?? true;
+  Future<void> setNotifications(bool value) async =>
+      await _prefs?.setBool('notifications_activees', value);
 
   // ============================================
   // ACCÈS VIE
   // ============================================
 
-  bool verifierCle(String cle) => RegExp(r'^TB-2026-[A-Z0-9]{8}$').hasMatch(cle);
-  Future<void> activerAccesAVie(String cle) async => await _prefs?.setBool('acces_vie', true);
+  bool verifierCle(String cle) =>
+      RegExp(r'^TB-2026-[A-Z0-9]{8}$').hasMatch(cle);
+  Future<void> activerAccesAVie(String cle) async =>
+      await _prefs?.setBool('acces_vie', true);
   bool get aAccesAVie => _prefs?.getBool('acces_vie') ?? false;
   bool get essaiGratuitExpire => false;
   int get joursRestantsEssai => 7;
@@ -474,11 +523,11 @@ class FirebaseService {
   // ============================================
 
   Future<Map<String, dynamic>> getStatistics() async => {
-    'total_revenus': 0.0,
-    'total_depenses': 0.0,
-    'solde': 0.0,
-    'nombre_transactions': 0
-  };
+        'total_revenus': 0.0,
+        'total_depenses': 0.0,
+        'solde': 0.0,
+        'nombre_transactions': 0
+      };
 
   // ============================================
   // NETTOYAGE

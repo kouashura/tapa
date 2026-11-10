@@ -3,18 +3,16 @@ import 'dart:convert';
 class CryptoService {
   static const String _key = 'TAPA_BUDGET_2026_CI';
 
-  static String genererHash(String walletId, double montant,
-      String categorieId, String type, DateTime date) {
+  static String genererHash(String walletId, double montant, String categorieId,
+      String type, DateTime date) {
     final data = '$walletId|$montant|$categorieId|$type'
         '|${date.toIso8601String()}|$_key';
     return _hash(data);
   }
 
-  static bool verifierHash(String hash, String walletId,
-      double montant, String categorieId,
-      String type, DateTime date) {
-    return hash ==
-        genererHash(walletId, montant, categorieId, type, date);
+  static bool verifierHash(String hash, String walletId, double montant,
+      String categorieId, String type, DateTime date) {
+    return hash == genererHash(walletId, montant, categorieId, type, date);
   }
 
   static String _hash(String input) {
@@ -41,11 +39,8 @@ class CryptoService {
     return '$p1$p2$p3';
   }
 
-  static Map<String, dynamic> analyserCoherence(
-      double totalRevenus,
-      double totalDepenses,
-      int nbTransactions,
-      int nbMois) {
+  static Map<String, dynamic> analyserCoherence(double totalRevenus,
+      double totalDepenses, int nbTransactions, int nbMois) {
     int score = 100;
     final alertes = <String>[];
 
@@ -61,7 +56,8 @@ class CryptoService {
       final ratio = totalDepenses / totalRevenus;
       if (ratio > 10) {
         score -= 40;
-        alertes.add('Dépenses 10x supérieures aux revenus. Incohérence détectée.');
+        alertes
+            .add('Dépenses 10x supérieures aux revenus. Incohérence détectée.');
       } else if (ratio > 5) {
         score -= 20;
         alertes.add('Dépenses tres elevees par rapport aux revenus.');
@@ -71,8 +67,7 @@ class CryptoService {
       }
     }
 
-    final revMensuel =
-    nbMois > 0 ? totalRevenus / nbMois : totalRevenus;
+    final revMensuel = nbMois > 0 ? totalRevenus / nbMois : totalRevenus;
     if (revMensuel > 10000000) {
       score -= 25;
       alertes.add('Revenus mensuels tres eleves. Verification recommandee.');

@@ -60,7 +60,9 @@ class _WalletListState extends State<WalletList> {
 
     final walletsFiltres = _categorieSelectionnee == 'Tous'
         ? widget.wallets
-        : widget.wallets.where((w) => _categorieDe(w) == _categorieSelectionnee).toList();
+        : widget.wallets
+            .where((w) => _categorieDe(w) == _categorieSelectionnee)
+            .toList();
 
     final Map<String, int> comptesParOnglet = {
       for (final o in onglets)
@@ -120,31 +122,31 @@ class _WalletListState extends State<WalletList> {
           height: 72,
           child: walletsFiltres.isEmpty
               ? const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Center(
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Aucun portefeuille',
-                  style: TextStyle(
-                    color: TAPAColors.textSecond,
-                    fontSize: 13,
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Center(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Aucun portefeuille',
+                        style: TextStyle(
+                          color: TAPAColors.textSecond,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: walletsFiltres.length,
+                  itemBuilder: (ctx, i) => _walletCard(
+                    walletsFiltres[i],
+                    widget.monnaie,
+                    cardWidth,
+                    isSmall,
                   ),
                 ),
-              ),
-            ),
-          )
-              : ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: walletsFiltres.length,
-            itemBuilder: (ctx, i) => _walletCard(
-              walletsFiltres[i],
-              widget.monnaie,
-              cardWidth,
-              isSmall,
-            ),
-          ),
         ),
       ],
     );
@@ -163,10 +165,10 @@ class _WalletListState extends State<WalletList> {
           decoration: BoxDecoration(
             gradient: selected
                 ? const LinearGradient(
-              colors: [TAPAColors.navy, Color(0xFF1A2B4A)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )
+                    colors: [TAPAColors.navy, Color(0xFF1A2B4A)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
                 : null,
             color: selected ? null : TAPAColors.surface,
             borderRadius: BorderRadius.circular(20),
@@ -176,12 +178,12 @@ class _WalletListState extends State<WalletList> {
             ),
             boxShadow: selected
                 ? [
-              BoxShadow(
-                color: TAPAColors.navy.withOpacity(0.28),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ]
+                    BoxShadow(
+                      color: TAPAColors.navy.withOpacity(0.28),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
                 : [],
           ),
           child: Row(
@@ -216,7 +218,8 @@ class _WalletListState extends State<WalletList> {
                 const SizedBox(width: 6),
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
-                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   decoration: BoxDecoration(
                     color: selected
                         ? Colors.white.withOpacity(0.14)
@@ -278,7 +281,8 @@ class _WalletListState extends State<WalletList> {
     }
   }
 
-  Widget _walletCard(WalletModel w, String monnaie, double cardWidth, bool isSmall) {
+  Widget _walletCard(
+      WalletModel w, String monnaie, double cardWidth, bool isSmall) {
     final bool isMtn = w.nom.toLowerCase().contains('mtn');
     final bool isOrange = w.nom.toLowerCase().contains('orange');
 
@@ -292,26 +296,26 @@ class _WalletListState extends State<WalletList> {
           color: isMtn
               ? const Color(0xFFFFCC00).withOpacity(0.15)
               : isOrange
-              ? const Color(0xFFFF7900).withOpacity(0.15)
-              : TAPAColors.surface,
+                  ? const Color(0xFFFF7900).withOpacity(0.15)
+                  : TAPAColors.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: w.estPresqueVide
                 ? TAPAColors.red
                 : isMtn
-                ? const Color(0xFFFFCC00).withOpacity(0.5)
-                : isOrange
-                ? const Color(0xFFFF7900).withOpacity(0.5)
-                : TAPAColors.border,
+                    ? const Color(0xFFFFCC00).withOpacity(0.5)
+                    : isOrange
+                        ? const Color(0xFFFF7900).withOpacity(0.5)
+                        : TAPAColors.border,
             width: w.estPresqueVide ? 1.5 : (isMtn || isOrange ? 1.5 : 0.5),
           ),
           boxShadow: [
             BoxShadow(
               color: (isMtn
-                  ? const Color(0xFFFFCC00)
-                  : isOrange
-                  ? const Color(0xFFFF7900)
-                  : TAPAColors.navy)
+                      ? const Color(0xFFFFCC00)
+                      : isOrange
+                          ? const Color(0xFFFF7900)
+                          : TAPAColors.navy)
                   .withOpacity(isMtn || isOrange ? 0.12 : 0.04),
               blurRadius: 8,
               offset: const Offset(0, 3),
@@ -327,33 +331,33 @@ class _WalletListState extends State<WalletList> {
                 color: isMtn
                     ? const Color(0xFFFFCC00)
                     : isOrange
-                    ? const Color(0xFFFF7900)
-                    : TAPAColors.goldLight,
+                        ? const Color(0xFFFF7900)
+                        : TAPAColors.goldLight,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Center(
                 child: isMtn
                     ? const Text(
-                  'MTN',
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF003366),
-                  ),
-                )
+                        'MTN',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF003366),
+                        ),
+                      )
                     : isOrange
-                    ? const Text(
-                  'OR',
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                )
-                    : Text(
-                  w.emoji,
-                  style: TextStyle(fontSize: isSmall ? 14 : 17),
-                ),
+                        ? const Text(
+                            'OR',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            w.emoji,
+                            style: TextStyle(fontSize: isSmall ? 14 : 17),
+                          ),
               ),
             ),
             const SizedBox(width: 8),
@@ -385,10 +389,10 @@ class _WalletListState extends State<WalletList> {
                       color: w.estPresqueVide
                           ? TAPAColors.red
                           : isMtn
-                          ? const Color(0xFF003366)
-                          : isOrange
-                          ? const Color(0xFFCC5500)
-                          : TAPAColors.navy,
+                              ? const Color(0xFF003366)
+                              : isOrange
+                                  ? const Color(0xFFCC5500)
+                                  : TAPAColors.navy,
                     ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
@@ -399,7 +403,8 @@ class _WalletListState extends State<WalletList> {
             if (w.estPresqueVide)
               const Icon(Icons.warning_rounded, size: 12, color: TAPAColors.red)
             else
-              const Icon(Icons.edit_outlined, size: 11, color: TAPAColors.textHint),
+              const Icon(Icons.edit_outlined,
+                  size: 11, color: TAPAColors.textHint),
           ],
         ),
       ),
@@ -442,7 +447,8 @@ class _WalletListState extends State<WalletList> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
-                      child: Text(w.emoji, style: const TextStyle(fontSize: 20)),
+                      child:
+                          Text(w.emoji, style: const TextStyle(fontSize: 20)),
                     ),
                   ),
                   const SizedBox(width: 12),

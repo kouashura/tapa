@@ -3,11 +3,11 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' show TZDateTime, local;
 import '../core/utils/logger.dart';
-import '../data/models/models.dart';  // ✅ Import correct
+import '../data/models/models.dart'; // ✅ Import correct
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notifs =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
 
   static Future<void> init() async {
     try {
@@ -16,7 +16,7 @@ class NotificationService {
       await _notifs.initialize(settings);
       await _notifs
           .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
+              AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
       Logger.info('✅ NotificationService initialisé');
     } catch (e) {
@@ -148,7 +148,7 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
         uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
 
       await _notifs.zonedSchedule(
@@ -169,7 +169,7 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.time,
         uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
     } catch (e) {
       Logger.warning('⚠️ Erreur rappels quotidiens: $e');
@@ -208,7 +208,7 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
       Logger.info('✅ Échéance programmée: ${e.titre}');
     } catch (e) {
@@ -253,10 +253,11 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
 
-      Logger.info('✅ Rappel essai programmé pour le ${dateRappel.day}/${dateRappel.month}/${dateRappel.year}');
+      Logger.info(
+          '✅ Rappel essai programmé pour le ${dateRappel.day}/${dateRappel.month}/${dateRappel.year}');
     } catch (e) {
       Logger.error('❌ Erreur programmation rappel essai: $e');
     }
@@ -293,10 +294,11 @@ class NotificationService {
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
+            UILocalNotificationDateInterpretation.absoluteTime,
       );
 
-      Logger.info('✅ Notification de fin d\'essai programmée pour le ${dateFinEssai.day}/${dateFinEssai.month}/${dateFinEssai.year}');
+      Logger.info(
+          '✅ Notification de fin d\'essai programmée pour le ${dateFinEssai.day}/${dateFinEssai.month}/${dateFinEssai.year}');
     } catch (e) {
       Logger.error('❌ Erreur programmation fin essai: $e');
     }

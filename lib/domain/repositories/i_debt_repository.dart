@@ -9,5 +9,6 @@ abstract class IDebtRepository {
   Future<void> addDette(DetteModel dette);
   Future<void> updateDette(DetteModel dette);
   Future<void> deleteDette(String detteId);
-  Future<void> addRemboursement(String detteId, RemboursementModel remboursement);
+  Future<void> addRemboursement(
+      String detteId, RemboursementModel remboursement);
 }

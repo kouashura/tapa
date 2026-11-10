@@ -79,7 +79,8 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   String _genererCodeActivation() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     final random = Random.secure();
-    final code = List.generate(8, (_) => chars[random.nextInt(chars.length)]).join();
+    final code =
+        List.generate(8, (_) => chars[random.nextInt(chars.length)]).join();
     return 'TB-2026-$code';
   }
 
@@ -246,8 +247,8 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
                   onChanged: _isLoading
                       ? null
                       : (value) {
-                    setState(() => _agreeTerms = value ?? false);
-                  },
+                          setState(() => _agreeTerms = value ?? false);
+                        },
                   activeColor: TAPAColors.gold,
                   checkColor: TAPAColors.navy,
                 ),
@@ -395,7 +396,9 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? provider.color.withOpacity(0.10) : TAPAColors.surface,
+          color: isSelected
+              ? provider.color.withOpacity(0.10)
+              : TAPAColors.surface,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isSelected ? provider.color : Colors.grey.shade200,
@@ -403,19 +406,19 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
           ),
           boxShadow: isSelected
               ? [
-            BoxShadow(
-              color: provider.color.withOpacity(0.22),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
-          ]
+                  BoxShadow(
+                    color: provider.color.withOpacity(0.22),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  ),
+                ]
               : [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         child: Stack(
           children: [
@@ -499,7 +502,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
   Widget _buildPaymentSummary(String monnaie, int amount) {
     final selectedProvider = _providers.firstWhere(
-          (p) => p.id == _selectedProvider,
+      (p) => p.id == _selectedProvider,
     );
 
     return Container(
@@ -513,7 +516,8 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
         children: [
           _summaryRow('Article', 'Accès à vie TAPA Invest'),
           _summaryRow('Opérateur', selectedProvider.name),
-          _summaryRow('Numéro', _phoneNumber.isEmpty ? 'Non renseigné' : _phoneNumber),
+          _summaryRow(
+              'Numéro', _phoneNumber.isEmpty ? 'Non renseigné' : _phoneNumber),
           const Divider(height: 16),
           _summaryRow(
             'Total',
@@ -567,31 +571,32 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
           elevation: canPay ? 4 : 0,
-          shadowColor: canPay ? TAPAColors.gold.withOpacity(0.3) : Colors.transparent,
+          shadowColor:
+              canPay ? TAPAColors.gold.withOpacity(0.3) : Colors.transparent,
         ),
         child: _isLoading
             ? const SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(
-            strokeWidth: 2.5,
-            color: TAPAColors.navy,
-          ),
-        )
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: TAPAColors.navy,
+                ),
+              )
             : Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.lock_outline_rounded, size: 20),
-            const SizedBox(width: 12),
-            Text(
-              'Payer $amount $monnaie',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.lock_outline_rounded, size: 20),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Payer $amount $monnaie',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -655,7 +660,7 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
 
     try {
       final selectedProvider = _providers.firstWhere(
-            (p) => p.id == _selectedProvider,
+        (p) => p.id == _selectedProvider,
       );
 
       Logger.info('💳 Paiement initié:');
@@ -696,11 +701,11 @@ class _PaymentScreenState extends ConsumerState<PaymentScreen> {
   }
 
   void _showSuccessDialog(
-      PaymentProvider provider,
-      String activationCode,
-      int amount,
-      String monnaie,
-      ) {
+    PaymentProvider provider,
+    String activationCode,
+    int amount,
+    String monnaie,
+  ) {
     showDialog(
       context: context,
       barrierDismissible: false,

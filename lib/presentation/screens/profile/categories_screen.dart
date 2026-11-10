@@ -2,9 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tapa_budget/presentation/providers/providers.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../services/db_service_mysql.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/utils/logger.dart';
 
 class CategoriesScreen extends ConsumerStatefulWidget {
@@ -16,19 +19,21 @@ class CategoriesScreen extends ConsumerStatefulWidget {
 
 class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
     with SingleTickerProviderStateMixin {
-
   late TabController _tabController;
   final TextEditingController _nomCtrl = TextEditingController();
   final TextEditingController _emojiCtrl = TextEditingController();
   final DBService _db = DBService();
   List<Map<String, dynamic>> _categories = [];
-  bool _loading = true;
+
+  // ✅ Catégories par défaut injectées dans le code
+  // (identiques à celles utilisées dans add_transaction_screen)
+  // Les catégories par défaut viennent maintenant de providers.dart
+  static const List<Map<String, dynamic>> _defaultCategories = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _chargerCategories();
   }
 
   @override
@@ -39,23 +44,11 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
     super.dispose();
   }
 
-  Future<void> _chargerCategories() async {
-    setState(() => _loading = true);
-    try {
-      _categories = _db.getCategories();
-      Logger.info('📂 Catégories chargées: ${_categories.length}');
-    } catch (e) {
-      Logger.error('❌ Erreur chargement catégories: $e');
-    } finally {
-      setState(() => _loading = false);
-    }
-  }
-
   List<Map<String, dynamic>> get _filteredCategories {
     final type = _tabController.index == 0 ? 'depense' : 'revenu';
-    return _categories.where((c) =>
-    c['type'] == type || c['type'] == 'dépense'
-    ).toList();
+    return _categories
+        .where((c) => c['type'] == type || c['type'] == 'dépense')
+        .toList();
   }
 
   void _showAjoutDialog() {
@@ -102,7 +95,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _tabController.index == 0 ? 'Catégorie de dépense' : 'Catégorie de revenu',
+                  _tabController.index == 0
+                      ? 'Catégorie de dépense'
+                      : 'Catégorie de revenu',
                   style: const TextStyle(
                     fontSize: 13,
                     color: TAPAColors.textSecond,
@@ -216,15 +211,15 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
       return;
     }
 
-    final emoji = _emojiCtrl.text.trim().isEmpty ? '📌' : _emojiCtrl.text.trim();
+    final emoji =
+        _emojiCtrl.text.trim().isEmpty ? '📌' : _emojiCtrl.text.trim();
     final type = _tabController.index == 0 ? 'depense' : 'revenu';
 
     // ✅ CORRECTION: Vérifier mounted avant d'utiliser context
     if (!mounted) return;
 
     final existe = _categories.any((c) =>
-    c['label']?.toLowerCase() == nom.toLowerCase() && c['type'] == type
-    );
+        c['label']?.toLowerCase() == nom.toLowerCase() && c['type'] == type);
 
     if (existe) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -237,17 +232,22 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
     }
 
     try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) throw Exception('Utilisateur non connecté');
+
       final nouvelleCategorie = {
-        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'uid': userId,
         'label': nom,
         'emoji': emoji,
         'type': type,
         'isDefault': false,
+        'createdAt': FieldValue.serverTimestamp(),
       };
 
       Logger.info('📝 Ajout catégorie: $nouvelleCategorie');
-      await _db.addCategory(nouvelleCategorie);
-      await _chargerCategories();
+      await FirebaseFirestore.instance
+          .collection('categories')
+          .add(nouvelleCategorie);
 
       // ✅ CORRECTION: Vérifier mounted après chaque await
       if (!mounted) return;
@@ -267,7 +267,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
       Logger.error('❌ Erreur ajout catégorie: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('❌ Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
+          content:
+              Text('❌ Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
           backgroundColor: TAPAColors.red,
         ),
       );
@@ -301,8 +302,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
 
     if (confirm == true) {
       try {
-        await _db.deleteCategory(id);
-        await _chargerCategories();
+        await FirebaseFirestore.instance
+            .collection('categories')
+            .doc(id)
+            .delete();
 
         // ✅ CORRECTION: Vérifier mounted avant d'utiliser context
         if (!mounted) return;
@@ -319,7 +322,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
         Logger.error('❌ Erreur suppression catégorie: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
+            content:
+                Text('Erreur: ${e.toString().replaceAll('Exception: ', '')}'),
             backgroundColor: TAPAColors.red,
           ),
         );
@@ -329,6 +333,17 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Lire les catégories en temps réel
+    final dynamicCatsAsync = ref.watch(dynamicCategoriesProvider);
+
+    // ✅ Gérer le chargement avec un fallback : si le stream met trop de temps
+    // ou est en erreur, on affiche les catégories par défaut.
+    final allCats = dynamicCatsAsync.valueOrNull ?? [];
+    _categories = allCats;
+
+    // On ne bloque plus sur isLoading : on affiche toujours l'UI
+    // avec les données disponibles (par défaut ou Firestore).
+
     final cats = _filteredCategories;
 
     return Scaffold(
@@ -359,11 +374,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
           onTap: (_) => setState(() {}),
         ),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : cats.isEmpty
-          ? _buildEmptyState()
-          : _buildCategoryList(cats),
+      body: cats.isEmpty ? _buildEmptyState() : _buildCategoryList(cats),
     );
   }
 
@@ -422,7 +433,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen>
             color: TAPAColors.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isDefault ? TAPAColors.gold.withOpacity(0.3) : TAPAColors.border,
+              color: isDefault
+                  ? TAPAColors.gold.withOpacity(0.3)
+                  : TAPAColors.border,
               width: isDefault ? 1.5 : 0.5,
             ),
           ),

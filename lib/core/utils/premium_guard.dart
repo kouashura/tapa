@@ -11,7 +11,8 @@ class PremiumGuard {
     return db.aAccesAVie || !db.essaiGratuitExpire;
   }
 
-  static void verifier(BuildContext context, {
+  static void verifier(
+    BuildContext context, {
     required VoidCallback onAcces,
   }) {
     if (isPremium()) {
@@ -62,7 +63,7 @@ class PremiumGuard {
             const SizedBox(height: 8),
             const Text(
               'Cette fonctionnalité est réservée aux\n'
-                  'membres premium TAPA Invest.',
+              'membres premium TAPA Invest.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: TAPAColors.textSecond,

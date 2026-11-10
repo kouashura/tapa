@@ -30,8 +30,8 @@ class NetworkFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'NETWORK_ERROR',
-  );
+          code: code ?? 'NETWORK_ERROR',
+        );
 }
 
 /// Erreurs d'authentification (Firebase, OTP, etc.)
@@ -41,8 +41,8 @@ class AuthFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'AUTH_ERROR',
-  );
+          code: code ?? 'AUTH_ERROR',
+        );
 }
 
 /// Erreurs de validation (formulaires, données invalides)
@@ -52,8 +52,8 @@ class ValidationFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'VALIDATION_ERROR',
-  );
+          code: code ?? 'VALIDATION_ERROR',
+        );
 }
 
 /// Erreurs de base de données (Firestore, Hive, etc.)
@@ -63,8 +63,8 @@ class DatabaseFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'DATABASE_ERROR',
-  );
+          code: code ?? 'DATABASE_ERROR',
+        );
 }
 
 /// Erreurs de cache (SharedPreferences, Hive)
@@ -74,8 +74,8 @@ class CacheFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'CACHE_ERROR',
-  );
+          code: code ?? 'CACHE_ERROR',
+        );
 }
 
 /// Erreurs de paiement (Wave, Orange Money, etc.)
@@ -85,8 +85,8 @@ class PaymentFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'PAYMENT_ERROR',
-  );
+          code: code ?? 'PAYMENT_ERROR',
+        );
 }
 
 /// Erreurs de permissions (caméra, microphone, etc.)
@@ -96,8 +96,8 @@ class PermissionFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'PERMISSION_ERROR',
-  );
+          code: code ?? 'PERMISSION_ERROR',
+        );
 }
 
 /// Erreurs de serveur / API (HTTP 500, etc.)
@@ -107,8 +107,8 @@ class ServerFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'SERVER_ERROR',
-  );
+          code: code ?? 'SERVER_ERROR',
+        );
 }
 
 /// Erreurs inattendues (catch-all)
@@ -118,8 +118,8 @@ class UnexpectedFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'UNEXPECTED_ERROR',
-  );
+          code: code ?? 'UNEXPECTED_ERROR',
+        );
 }
 
 /// Erreurs de PIN (verrouillage, incorrect, etc.)
@@ -129,8 +129,8 @@ class PinFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'PIN_ERROR',
-  );
+          code: code ?? 'PIN_ERROR',
+        );
 }
 
 /// Erreurs de session (expirée, invalide)
@@ -140,8 +140,8 @@ class SessionFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'SESSION_ERROR',
-  );
+          code: code ?? 'SESSION_ERROR',
+        );
 }
 
 /// Erreurs de notifications
@@ -151,8 +151,8 @@ class NotificationFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'NOTIFICATION_ERROR',
-  );
+          code: code ?? 'NOTIFICATION_ERROR',
+        );
 }
 
 /// Erreurs de PDF / génération de documents
@@ -162,8 +162,8 @@ class PdfFailure extends Failure {
     String? code,
     super.originalError,
   }) : super(
-    code: code ?? 'PDF_ERROR',
-  );
+          code: code ?? 'PDF_ERROR',
+        );
 }
 
 // ============================================
@@ -180,7 +180,9 @@ extension FailureExtension on Failure {
       case AuthFailure:
         return 'Erreur d\'authentification. Veuillez vous reconnecter.';
       case ValidationFailure:
-        return message.isNotEmpty ? message : 'Données invalides. Vérifiez les champs.';
+        return message.isNotEmpty
+            ? message
+            : 'Données invalides. Vérifiez les champs.';
       case DatabaseFailure:
         return 'Erreur de base de données. Réessayez plus tard.';
       case CacheFailure:
@@ -200,7 +202,9 @@ extension FailureExtension on Failure {
       case PdfFailure:
         return 'Erreur de génération PDF. Réessayez.';
       default:
-        return message.isNotEmpty ? message : 'Une erreur est survenue. Réessayez.';
+        return message.isNotEmpty
+            ? message
+            : 'Une erreur est survenue. Réessayez.';
     }
   }
 

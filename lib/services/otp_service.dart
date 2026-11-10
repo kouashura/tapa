@@ -23,8 +23,8 @@ class OTPService {
     _telephoneEnCours = telephone;
 
     // Formatter le numero
-    String tel = telephone.replaceAll(' ', '')
-        .replaceAll('-', '').replaceAll('+', '');
+    String tel =
+        telephone.replaceAll(' ', '').replaceAll('-', '').replaceAll('+', '');
     if (tel.startsWith('0') && tel.length == 10) {
       tel = '225${tel.substring(1)}';
     } else if (!tel.startsWith('225')) {
@@ -35,19 +35,16 @@ class OTPService {
     print('ENVOI SMS A: $tel');
 
     try {
-      final response = await http.post(
-          Uri.parse(_apiUrl),
-          headers: {
-            'apiKey': _apiKey,
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json',
-          },
-          body: {
-            'username': _username,
-            'to': tel,
-            'message': 'Votre code TAPA Invest : $code. '
-                'Valable 10 minutes.',
-          });
+      final response = await http.post(Uri.parse(_apiUrl), headers: {
+        'apiKey': _apiKey,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+      }, body: {
+        'username': _username,
+        'to': tel,
+        'message': 'Votre code TAPA Invest : $code. '
+            'Valable 10 minutes.',
+      });
 
       print('AT STATUS: ${response.statusCode}');
       print('AT BODY: ${response.body}');

@@ -58,11 +58,13 @@ class SecureHttpService {
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          Logger.debug('✅ ${response.statusCode} ${response.requestOptions.uri}');
+          Logger.debug(
+              '✅ ${response.statusCode} ${response.requestOptions.uri}');
           return handler.next(response);
         },
         onError: (error, handler) {
-          Logger.error('❌ ${error.response?.statusCode} ${error.requestOptions.uri}');
+          Logger.error(
+              '❌ ${error.response?.statusCode} ${error.requestOptions.uri}');
           return handler.next(error);
         },
       ));
@@ -94,10 +96,10 @@ class SecureHttpService {
   // ============================================
 
   Future<Response> get(
-      String url, {
-        Map<String, String>? headers,
-        Map<String, dynamic>? queryParameters,
-      }) async {
+    String url, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+  }) async {
     await _ensureInitialized();
     return _dio.get(
       url,
@@ -107,10 +109,10 @@ class SecureHttpService {
   }
 
   Future<Response> post(
-      String url, {
-        Map<String, String>? headers,
-        dynamic data,
-      }) async {
+    String url, {
+    Map<String, String>? headers,
+    dynamic data,
+  }) async {
     await _ensureInitialized();
     return _dio.post(
       url,
@@ -120,10 +122,10 @@ class SecureHttpService {
   }
 
   Future<Response> put(
-      String url, {
-        Map<String, String>? headers,
-        dynamic data,
-      }) async {
+    String url, {
+    Map<String, String>? headers,
+    dynamic data,
+  }) async {
     await _ensureInitialized();
     return _dio.put(
       url,
@@ -133,9 +135,9 @@ class SecureHttpService {
   }
 
   Future<Response> delete(
-      String url, {
-        Map<String, String>? headers,
-      }) async {
+    String url, {
+    Map<String, String>? headers,
+  }) async {
     await _ensureInitialized();
     return _dio.delete(
       url,

@@ -66,7 +66,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        _showSnackBar('Erreur: ${e.toString().replaceAll('Exception: ', '')}', isError: true);
+        _showSnackBar('Erreur: ${e.toString().replaceAll('Exception: ', '')}',
+            isError: true);
       }
       Logger.error('❌ Erreur mise à jour profil: $e');
     } finally {
@@ -111,20 +112,20 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             onPressed: _isLoading ? null : _save,
             child: _isLoading
                 ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: TAPAColors.gold,
-              ),
-            )
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: TAPAColors.gold,
+                    ),
+                  )
                 : const Text(
-              'Sauver',
-              style: TextStyle(
-                color: TAPAColors.gold,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+                    'Sauver',
+                    style: TextStyle(
+                      color: TAPAColors.gold,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -220,12 +221,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             decoration: const InputDecoration(
               labelText: 'Mon pays',
             ),
-            items: AppConstants.pays.map((p) =>
-                DropdownMenuItem<String>(
-                  value: p['code'] as String,
-                  child: Text('${p['flag']} ${p['nom']}'),
-                ),
-            ).toList(),
+            items: AppConstants.pays
+                .map(
+                  (p) => DropdownMenuItem<String>(
+                    value: p['code'] as String,
+                    child: Text('${p['flag']} ${p['nom']}'),
+                  ),
+                )
+                .toList(),
             onChanged: (v) {
               if (v == null) return;
               final p = AppConstants.pays.firstWhere((p) => p['code'] == v);
@@ -288,17 +291,17 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
               child: _isLoading
                   ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: TAPAColors.gold,
-                ),
-              )
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: TAPAColors.gold,
+                      ),
+                    )
                   : const Text(
-                'Enregistrer les modifications',
-                style: TextStyle(color: TAPAColors.white),
-              ),
+                      'Enregistrer les modifications',
+                      style: TextStyle(color: TAPAColors.white),
+                    ),
             ),
           ),
           const SizedBox(height: 20),

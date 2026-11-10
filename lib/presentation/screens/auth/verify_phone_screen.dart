@@ -36,7 +36,7 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
 
   final List<TextEditingController> _codeControllers = List.generate(
     6,
-        (index) => TextEditingController(),
+    (index) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
 
@@ -103,8 +103,7 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
 
       await authNotifier.createUserProfile(
         prenom: widget.prenom,
-        telephone: widget.telephone,
-        indicatif: widget.indicatif,
+        email: widget.telephone,
         codePays: widget.codePays,
         monnaie: widget.monnaie,
       );
@@ -123,7 +122,8 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
       Logger.error('❌ Erreur création profil: $e');
       if (mounted) {
         setState(() {
-          _errorMessage = 'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
+          _errorMessage =
+              'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
         });
       }
     }
@@ -171,7 +171,8 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
+          _errorMessage =
+              'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
         });
         _showSnackBar('❌ Erreur envoi email', isError: true);
       }
@@ -215,7 +216,8 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
       if (mounted) {
         setState(() {
           _codeExpired = true;
-          _errorMessage = '⏰ Le code a expiré. Veuillez renvoyer un nouveau code.';
+          _errorMessage =
+              '⏰ Le code a expiré. Veuillez renvoyer un nouveau code.';
         });
         _showSnackBar('⏰ Le code a expiré', isError: true);
       }
@@ -269,7 +271,8 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
     // ✅ VALIDATION 2: Le code n'est pas expiré
     if (_codeExpired) {
       setState(() {
-        _errorMessage = '⏰ Le code a expiré. Veuillez renvoyer un nouveau code.';
+        _errorMessage =
+            '⏰ Le code a expiré. Veuillez renvoyer un nouveau code.';
         _isLoading = false;
       });
       return;
@@ -278,7 +281,8 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
     // ✅ VALIDATION 3: Pas trop de tentatives
     if (hasMaxAttempts) {
       setState(() {
-        _errorMessage = '❌ Trop de tentatives. Veuillez renvoyer un nouveau code.';
+        _errorMessage =
+            '❌ Trop de tentatives. Veuillez renvoyer un nouveau code.';
         _isLoading = false;
       });
       return;
@@ -316,13 +320,15 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
         // ❌ CODE INVALIDE
         setState(() {
           _isLoading = false;
-          _errorMessage = '❌ Code invalide. Vérifiez votre email et réessayez. ($_attempts/5)';
+          _errorMessage =
+              '❌ Code invalide. Vérifiez votre email et réessayez. ($_attempts/5)';
         });
 
         _clearCodeFields();
 
         if (hasMaxAttempts) {
-          _showSnackBar('❌ Trop de tentatives. Renvoyez un nouveau code.', isError: true);
+          _showSnackBar('❌ Trop de tentatives. Renvoyez un nouveau code.',
+              isError: true);
         } else {
           _showSnackBar('❌ Code invalide. Réessayez.', isError: true);
         }
@@ -337,7 +343,8 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
       Logger.error('❌ Erreur vérification: $e');
 
       _clearCodeFields();
-      _showSnackBar('❌ Erreur: ${e.toString().replaceAll('Exception: ', '')}', isError: true);
+      _showSnackBar('❌ Erreur: ${e.toString().replaceAll('Exception: ', '')}',
+          isError: true);
     }
   }
 
@@ -345,12 +352,15 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
   // SNACKBAR
   // ============================================
 
-  void _showSnackBar(String message, {bool isSuccess = false, bool isError = false}) {
+  void _showSnackBar(String message,
+      {bool isSuccess = false, bool isError = false}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isSuccess ? TAPAColors.green : (isError ? TAPAColors.red : TAPAColors.gold),
+        backgroundColor: isSuccess
+            ? TAPAColors.green
+            : (isError ? TAPAColors.red : TAPAColors.gold),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -470,7 +480,8 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
               ),
               const SizedBox(height: 4),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 decoration: BoxDecoration(
                   color: TAPAColors.gold.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -510,9 +521,9 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                     SizedBox(height: 8),
                     Text(
                       '1️⃣ Ouvrez votre boîte mail\n'
-                          '2️⃣ Récupérez le code à 6 chiffres\n'
-                          '3️⃣ Entrez-le ci-dessous\n'
-                          '4️⃣ Votre compte sera automatiquement vérifié',
+                      '2️⃣ Récupérez le code à 6 chiffres\n'
+                      '3️⃣ Entrez-le ci-dessous\n'
+                      '4️⃣ Votre compte sera automatiquement vérifié',
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
@@ -554,13 +565,17 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
                       maxLength: 1,
-                      enabled: !_isLoading && !_codeExpired && !hasMaxAttempts && _emailSent,
+                      enabled: !_isLoading &&
+                          !_codeExpired &&
+                          !hasMaxAttempts &&
+                          _emailSent,
                       decoration: InputDecoration(
                         counterText: '',
                         filled: true,
-                        fillColor: (!_emailSent || _codeExpired || hasMaxAttempts)
-                            ? Colors.white.withOpacity(0.05)
-                            : Colors.white10,
+                        fillColor:
+                            (!_emailSent || _codeExpired || hasMaxAttempts)
+                                ? Colors.white.withOpacity(0.05)
+                                : Colors.white10,
                         contentPadding: EdgeInsets.zero,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -568,7 +583,8 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: TAPAColors.gold, width: 2),
+                          borderSide: const BorderSide(
+                              color: TAPAColors.gold, width: 2),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -594,12 +610,14 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline, color: TAPAColors.red, size: 16),
+                      const Icon(Icons.error_outline,
+                          color: TAPAColors.red, size: 16),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           _errorMessage,
-                          style: const TextStyle(color: TAPAColors.red, fontSize: 13),
+                          style: const TextStyle(
+                              color: TAPAColors.red, fontSize: 13),
                         ),
                       ),
                     ],
@@ -617,12 +635,14 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline, color: TAPAColors.red, size: 16),
+                      const Icon(Icons.error_outline,
+                          color: TAPAColors.red, size: 16),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           authState.error!,
-                          style: const TextStyle(color: TAPAColors.red, fontSize: 13),
+                          style: const TextStyle(
+                              color: TAPAColors.red, fontSize: 13),
                         ),
                       ),
                     ],
@@ -633,7 +653,8 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
               if (showExpired)
                 Container(
                   padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.orange.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(10),
@@ -641,7 +662,8 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.timer_outlined, color: Colors.orange, size: 16),
+                      Icon(Icons.timer_outlined,
+                          color: Colors.orange, size: 16),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -678,12 +700,14 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.hourglass_empty, color: TAPAColors.gold, size: 16),
+                      Icon(Icons.hourglass_empty,
+                          color: TAPAColors.gold, size: 16),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           '⏳ Envoi du code en cours...',
-                          style: TextStyle(color: TAPAColors.gold, fontSize: 13),
+                          style:
+                              TextStyle(color: TAPAColors.gold, fontSize: 13),
                         ),
                       ),
                     ],
@@ -697,16 +721,19 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                   decoration: BoxDecoration(
                     color: TAPAColors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: TAPAColors.green.withOpacity(0.2)),
+                    border:
+                        Border.all(color: TAPAColors.green.withOpacity(0.2)),
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.check_circle, color: TAPAColors.green, size: 16),
+                      Icon(Icons.check_circle,
+                          color: TAPAColors.green, size: 16),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           '✅ Code envoyé ! Vérifiez votre boîte mail',
-                          style: TextStyle(color: TAPAColors.green, fontSize: 13),
+                          style:
+                              TextStyle(color: TAPAColors.green, fontSize: 13),
                         ),
                       ),
                     ],
@@ -720,12 +747,15 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                 const CircularProgressIndicator(color: TAPAColors.gold)
               else if (canResendNow)
                 TextButton(
-                  onPressed: _isLoading ? null : () {
-                    _sendVerificationEmail();
-                    _startCountdown();
-                  },
+                  onPressed: _isLoading
+                      ? null
+                      : () {
+                          _sendVerificationEmail();
+                          _startCountdown();
+                        },
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                     backgroundColor: TAPAColors.gold.withOpacity(0.1),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
@@ -743,7 +773,8 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                 )
               else
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(
                     color: Colors.white10,
                     borderRadius: BorderRadius.circular(30),
@@ -795,7 +826,7 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
                   padding: const EdgeInsets.only(top: 16),
                   child: Text(
                     '🔧 Debug: consultez les logs ou Firestore '
-                        '(email_verifications/${widget.telephone}) pour voir le code.',
+                    '(email_verifications/${widget.telephone}) pour voir le code.',
                     style: const TextStyle(
                       color: Colors.white24,
                       fontSize: 10,

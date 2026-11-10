@@ -1,7 +1,7 @@
 // lib/presentation/providers/app_state.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/models/models.dart';  // ✅ Utiliser models.dart
+import '../../data/models/models.dart'; // ✅ Utiliser models.dart
 
 /// État global de l'application
 class AppState {
@@ -168,7 +168,8 @@ class AppState {
 // ============================================
 
 /// Provider de l'état global de l'application
-final appStateProvider = StateNotifierProvider<AppStateNotifier, AppState>((ref) {
+final appStateProvider =
+    StateNotifierProvider<AppStateNotifier, AppState>((ref) {
   return AppStateNotifier();
 });
 

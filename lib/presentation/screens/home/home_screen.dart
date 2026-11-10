@@ -145,19 +145,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             builder: (context, constraints) {
               final m = _Metrics(constraints);
 
+              // ✅ 1. Solde total = Somme de tous les portefeuilles
+              final soldeTotalWallets = wallets.fold(
+                0.0,
+                (sum, w) => sum + w.solde,
+              );
+
+              // Totaux des transactions pour l'affichage informatif
               final totalRevenus = transactions
                   .where((t) => t.isRevenu)
                   .fold(0.0, (s, t) => s + t.montant);
               final totalDepenses = transactions
                   .where((t) => t.isDepense)
                   .fold(0.0, (s, t) => s + t.montant);
-              final total = totalRevenus - totalDepenses;
 
               final categoriesPresentes = _categoriesConnues
                   .where((c) => wallets.any((w) => _categorieDe(w) == c))
                   .toList();
               final aDesAutres =
-              wallets.any((w) => _categorieDe(w) == 'Autres');
+                  wallets.any((w) => _categorieDe(w) == 'Autres');
               final onglets = [
                 'Tous',
                 ...categoriesPresentes,
@@ -171,8 +177,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               final walletsFiltres = _categorieSelectionnee == 'Tous'
                   ? wallets
                   : wallets
-                  .where((w) => _categorieDe(w) == _categorieSelectionnee)
-                  .toList();
+                      .where((w) => _categorieDe(w) == _categorieSelectionnee)
+                      .toList();
 
               final comptesParOnglet = <String, int>{
                 for (final o in onglets)
@@ -191,7 +197,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     parent: BouncingScrollPhysics(),
                   ),
                   slivers: [
-                    // Barre du haut épinglée (hauteur fixe, contenu simple)
+                    // Barre du haut épinglée
                     SliverAppBar(
                       pinned: true,
                       elevation: 0,
@@ -205,7 +211,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         _buildCoachButton(context),
                         _roundIconButton(
                           Icons.notifications_outlined,
-                              () {
+                          () {
                             // TODO: Ouvrir les notifications
                           },
                         ),
@@ -218,11 +224,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: Center(
                         child: ConstrainedBox(
                           constraints:
-                          BoxConstraints(maxWidth: m.contentMaxWidth),
+                              BoxConstraints(maxWidth: m.contentMaxWidth),
                           child: _headerSolde(
                             prenom: prenom,
                             monnaie: monnaie,
-                            total: total,
+                            total: soldeTotalWallets, // ✅ Solde des wallets
                             revenus: totalRevenus,
                             depenses: totalDepenses,
                             isSmall: m.isSmall,
@@ -247,11 +253,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                             child: Padding(
                               padding:
-                              const EdgeInsets.fromLTRB(16, 20, 16, 32),
+                                  const EdgeInsets.fromLTRB(16, 20, 16, 32),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  _quickActions(),
+                                  _quickActions(), // ✅ Boutons mis à jour
                                   const SizedBox(height: 24),
 
                                   _sectionTitle('Mes portefeuilles'),
@@ -273,7 +279,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   _sectionTitle(
                                     'Transactions récentes',
                                     actionLabel: 'Voir tout',
-                                    onAction: () => context.go('/history'),
+                                    onAction: () => context.push('/history'),
                                   ),
                                   const SizedBox(height: 12),
                                   _listeTransactions(recentes, monnaie),
@@ -583,7 +589,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   // ============================================
-  // ACTIONS RAPIDES (remplacent les 3 boutons flottants)
+  // ACTIONS RAPIDES & MENU D'AJOUT
   // ============================================
 
   Widget _quickActions() {
@@ -591,34 +597,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       children: [
         Expanded(
           child: _actionTile(
+            icon: Icons.trending_up_rounded,
+            label: 'Investir',
+            onTap: () => context.push('/investir'),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _actionTile(
+            icon: Icons.shield_outlined,
+            label: 'Assurance',
+            onTap: () => _pushAndRefresh('/investir/assurance'),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _actionTile(
+            icon: Icons.savings_outlined,
+            label: 'Enveloppe',
+            onTap: () => _pushAndRefresh('/savings'),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _actionTile(
             icon: Icons.add_rounded,
             label: 'Ajouter',
             highlighted: true,
-            onTap: () => _pushAndRefresh('/add-transaction'),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _actionTile(
-            icon: Icons.document_scanner_outlined,
-            label: 'Scanner',
-            onTap: () => _pushAndRefresh('/scanner'),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _actionTile(
-            icon: Icons.mic_none_rounded,
-            label: 'Vocal',
-            onTap: () => _pushAndRefresh('/voice-transaction'),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _actionTile(
-            icon: Icons.swap_horiz_rounded,
-            label: 'Transférer',
-            onTap: () => _pushAndRefresh('/transfer'),
+            onTap: () => _showAddMenu(context), // ✅ Ouvre le menu
           ),
         ),
       ],
@@ -678,6 +684,151 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAddMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: TAPAColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 20),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: TAPAColors.border,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const Text(
+                  'Que souhaitez-vous faire ?',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: TAPAColors.navy,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _addMenuOption(
+                  ctx,
+                  icon: Icons.edit_note_rounded,
+                  title: 'Nouvelle transaction',
+                  subtitle: 'Saisir un revenu ou une dépense',
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _pushAndRefresh('/add-transaction');
+                  },
+                ),
+                const SizedBox(height: 12),
+                _addMenuOption(
+                  ctx,
+                  icon: Icons.document_scanner_outlined,
+                  title: 'Scanner un reçu',
+                  subtitle: 'Extraction automatique par IA',
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _pushAndRefresh('/scanner');
+                  },
+                ),
+                const SizedBox(height: 12),
+                _addMenuOption(
+                  ctx,
+                  icon: Icons.mic_none_rounded,
+                  title: 'Saisie vocale',
+                  subtitle: 'Dicter votre transaction',
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _pushAndRefresh('/voice-transaction');
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text(
+                    'Annuler',
+                    style: TextStyle(
+                      color: TAPAColors.textSecond,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _addMenuOption(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: TAPAColors.background,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: TAPAColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: TAPAColors.navy.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: TAPAColors.navy, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: TAPAColors.navy,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: TAPAColors.textSecond,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded,
+                size: 16, color: TAPAColors.textHint),
           ],
         ),
       ),
@@ -810,12 +961,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             boxShadow: selected
                 ? [
-              BoxShadow(
-                color: TAPAColors.navy.withOpacity(0.25),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ]
+                    BoxShadow(
+                      color: TAPAColors.navy.withOpacity(0.25),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
                 : null,
           ),
           child: Row(
@@ -850,7 +1001,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 const SizedBox(width: 6),
                 Container(
                   padding:
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: selected
                         ? Colors.white.withOpacity(0.15)
@@ -924,10 +1075,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isOrange = nom.contains('orange');
     final isWave = nom.contains('wave');
     final Color? brand =
-    isMtn ? _mtn : (isOrange ? _orange : (isWave ? _wave : null));
+        isMtn ? _mtn : (isOrange ? _orange : (isWave ? _wave : null));
     final hasBrand = brand != null;
 
-    final badgeText = isMtn ? 'MTN' : (isOrange ? 'OR' : (isWave ? 'WV' : null));
+    final badgeText =
+        isMtn ? 'MTN' : (isOrange ? 'OR' : (isWave ? 'WV' : null));
     final badgeTextColor = isMtn ? const Color(0xFF003366) : Colors.white;
 
     return GestureDetector(
@@ -969,13 +1121,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Center(
                     child: badgeText != null
                         ? Text(
-                      badgeText,
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w900,
-                        color: badgeTextColor,
-                      ),
-                    )
+                            badgeText,
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: badgeTextColor,
+                            ),
+                          )
                         : Text(w.emoji, style: const TextStyle(fontSize: 18)),
                   ),
                 ),
@@ -1011,9 +1163,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
-                      color: w.estPresqueVide
-                          ? TAPAColors.red
-                          : TAPAColors.navy,
+                      color:
+                          w.estPresqueVide ? TAPAColors.red : TAPAColors.navy,
                     ),
                   ),
                 ),
@@ -1141,9 +1292,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final now = DateTime.now();
     final transactionsMois = txs
         .where((tx) =>
-    tx.dateTransaction.month == now.month &&
-        tx.dateTransaction.year == now.year &&
-        tx.isDepense)
+            tx.dateTransaction.month == now.month &&
+            tx.dateTransaction.year == now.year &&
+            tx.isDepense)
         .toList();
 
     if (transactionsMois.isEmpty) return const SizedBox();
@@ -1154,7 +1305,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
     final total = par.values.fold(0.0, (s, v) => s + v);
     final top = (par.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value)))
+          ..sort((a, b) => b.value.compareTo(a.value)))
         .take(4)
         .toList();
     final List<Color> colors = [
@@ -1227,7 +1378,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            // Barre répartie : une seule ligne résume la répartition
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: SizedBox(
@@ -1250,7 +1400,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               final pct = total > 0 ? e.value.value / total : 0.0;
               final color = colors[e.key % colors.length];
               return Padding(
-                padding: EdgeInsets.only(bottom: e.key == top.length - 1 ? 0 : 12),
+                padding:
+                    EdgeInsets.only(bottom: e.key == top.length - 1 ? 0 : 12),
                 child: Row(
                   children: [
                     Container(
@@ -1391,8 +1542,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         border: isLast
             ? null
             : const Border(
-          bottom: BorderSide(color: TAPAColors.border, width: 0.5),
-        ),
+                bottom: BorderSide(color: TAPAColors.border, width: 0.5),
+              ),
       ),
       child: Row(
         children: [
@@ -1491,20 +1642,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 route: '/home',
               ),
               _buildNavItem(
-                icon: Icons.shield_outlined,
-                activeIcon: Icons.shield,
-                label: 'Assurance',
-                index: 1,
-                route: '/investir/assurance',
-              ),
-              _buildNavItem(
-                icon: Icons.account_balance_wallet_outlined,
-                activeIcon: Icons.account_balance_wallet,
-                label: 'Enveloppe',
-                index: 2,
-                route: '/savings',
-              ),
-              _buildNavItem(
                 icon: Icons.pie_chart_outline,
                 activeIcon: Icons.pie_chart,
                 label: 'Budget',
@@ -1555,20 +1692,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               decoration: BoxDecoration(
                 gradient: isActive
                     ? const LinearGradient(
-                  colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
+                        colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
                     : null,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: isActive
                     ? [
-                  BoxShadow(
-                    color: const Color(0xFF1A237E).withOpacity(0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
+                        BoxShadow(
+                          color: const Color(0xFF1A237E).withOpacity(0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
                     : null,
               ),
               child: Icon(

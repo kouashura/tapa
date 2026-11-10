@@ -53,13 +53,19 @@ class ScoreService {
     // 1. SCORE REVENUS (20 pts)
     int scoreRevenus = 0;
     if (totalRev > 0) scoreRevenus += 8;
-    final revMois = revenus.where((t) =>
-    t.dateTransaction.month == now.month && t.dateTransaction.year == now.year).toList();
+    final revMois = revenus
+        .where((t) =>
+            t.dateTransaction.month == now.month &&
+            t.dateTransaction.year == now.year)
+        .toList();
     if (revMois.isNotEmpty) scoreRevenus += 6;
     final moisDernier = now.month == 1 ? 12 : now.month - 1;
     final anneeDerniere = now.month == 1 ? now.year - 1 : now.year;
-    final revDernier = revenus.where((t) =>
-    t.dateTransaction.month == moisDernier && t.dateTransaction.year == anneeDerniere).toList();
+    final revDernier = revenus
+        .where((t) =>
+            t.dateTransaction.month == moisDernier &&
+            t.dateTransaction.year == anneeDerniere)
+        .toList();
     if (revDernier.isNotEmpty) scoreRevenus += 6;
 
     // 2. SCORE DEPENSES (20 pts)
@@ -76,11 +82,11 @@ class ScoreService {
     // 3. SCORE EPARGNE (20 pts)
     int scoreEpargne = 0;
     if (epargnes.isNotEmpty) scoreEpargne += 8;
-    final epargnesActives = epargnes.where(
-            (e) => e.montantActuel < e.montantCible).toList();
+    final epargnesActives =
+        epargnes.where((e) => e.montantActuel < e.montantCible).toList();
     if (epargnesActives.isNotEmpty) scoreEpargne += 6;
-    final epargnesAtteintes = epargnes.where(
-            (e) => e.montantActuel >= e.montantCible).toList();
+    final epargnesAtteintes =
+        epargnes.where((e) => e.montantActuel >= e.montantCible).toList();
     if (epargnesAtteintes.isNotEmpty) scoreEpargne += 6;
 
     // 4. SCORE DETTES (20 pts)
@@ -88,7 +94,9 @@ class ScoreService {
     if (dettes.isNotEmpty) {
       scoreDettes = 10;
       final dettesSoldees = dettes.where((d) => d.montantRestant <= 0).toList();
-      final dettesEnAttente = dettes.where((d) => d.montantRestant > 0 && d.remboursements.isEmpty).toList();
+      final dettesEnAttente = dettes
+          .where((d) => d.montantRestant > 0 && d.remboursements.isEmpty)
+          .toList();
       if (dettesSoldees.isNotEmpty) scoreDettes += 6;
       if (dettesEnAttente.isEmpty) scoreDettes += 4;
       if (dettesEnAttente.isNotEmpty) scoreDettes -= 2;
@@ -100,21 +108,25 @@ class ScoreService {
     if (txs.length >= 5) scoreRegularite += 5;
     if (txs.length >= 15) scoreRegularite += 5;
     if (txs.length >= 30) scoreRegularite += 5;
-    final txsMois = txs.where((t) =>
-    t.dateTransaction.month == now.month && t.dateTransaction.year == now.year).toList();
+    final txsMois = txs
+        .where((t) =>
+            t.dateTransaction.month == now.month &&
+            t.dateTransaction.year == now.year)
+        .toList();
     if (txsMois.length >= 3) scoreRegularite += 5;
 
     // COHERENCE
     final moisDebut = txs.isNotEmpty
-        ? txs.map((t) => t.dateTransaction).reduce((a, b) => a.isBefore(b) ? a : b)
+        ? txs
+            .map((t) => t.dateTransaction)
+            .reduce((a, b) => a.isBefore(b) ? a : b)
         : now;
-    final nbMois = ((now.difference(moisDebut).inDays) / 30)
-        .ceil().clamp(1, 120);
-    final coherence = CryptoService.analyserCoherence(
-        totalRev, totalDep, txs.length, nbMois);
+    final nbMois =
+        ((now.difference(moisDebut).inDays) / 30).ceil().clamp(1, 120);
+    final coherence =
+        CryptoService.analyserCoherence(totalRev, totalDep, txs.length, nbMois);
     final scoreCoherence = coherence['score'] as int;
-    final alertesCoherence = List<String>.from(
-        coherence['alertes'] as List);
+    final alertesCoherence = List<String>.from(coherence['alertes'] as List);
     final estFiable = coherence['fiable'] as bool;
 
     // HASH VERIFICATION
@@ -130,18 +142,33 @@ class ScoreService {
       penalite = 20;
     } else if (scoreCoherence < 80) penalite = 10;
 
-    final total = (scoreRevenus + scoreDepenses +
-        scoreEpargne + scoreDettes + scoreRegularite - penalite)
+    final total = (scoreRevenus +
+            scoreDepenses +
+            scoreEpargne +
+            scoreDettes +
+            scoreRegularite -
+            penalite)
         .clamp(0, 100);
 
     // NIVEAU
     String niveau;
     String emoji;
-    if (total >= 80) { niveau = 'Excellent'; emoji = '🟢'; }
-    else if (total >= 60) { niveau = 'Bon'; emoji = '🔵'; }
-    else if (total >= 40) { niveau = 'Moyen'; emoji = '🟡'; }
-    else if (total >= 20) { niveau = 'Faible'; emoji = '🟠'; }
-    else { niveau = 'Insuffisant'; emoji = '🔴'; }
+    if (total >= 80) {
+      niveau = 'Excellent';
+      emoji = '🟢';
+    } else if (total >= 60) {
+      niveau = 'Bon';
+      emoji = '🔵';
+    } else if (total >= 40) {
+      niveau = 'Moyen';
+      emoji = '🟡';
+    } else if (total >= 20) {
+      niveau = 'Faible';
+      emoji = '🟠';
+    } else {
+      niveau = 'Insuffisant';
+      emoji = '🔴';
+    }
 
     // CONSEILS
     final conseils = <String>[];
@@ -169,7 +196,8 @@ class ScoreService {
     }
     if (dettes.isEmpty) {
       pointsForts.add('Aucune dette. Tres bien !');
-    } else if (dettes.any((d) => d.montantRestant > 0 && d.remboursements.isEmpty)) {
+    } else if (dettes
+        .any((d) => d.montantRestant > 0 && d.remboursements.isEmpty)) {
       conseils.add('Remboursez vos dettes en attente rapidement.');
     } else {
       pointsForts.add('Vous gerez bien vos dettes.');

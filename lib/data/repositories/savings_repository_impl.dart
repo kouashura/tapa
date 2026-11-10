@@ -8,6 +8,7 @@ import '../datasources/remote/firebase/firebase_firestore_datasource.dart';
 import '../../core/errors/failure.dart';
 import '../../core/errors/error_handler.dart';
 import '../../core/utils/logger.dart';
+import '../../core/utils/date_parser.dart';
 
 /// Implémentation du repository des épargnes
 class SavingsRepositoryImpl implements ISavingsRepository {
@@ -15,7 +16,8 @@ class SavingsRepositoryImpl implements ISavingsRepository {
 
   SavingsRepositoryImpl({
     FirebaseFirestoreDatasource? firestoreDatasource,
-  }) : _firestoreDatasource = firestoreDatasource ?? FirebaseFirestoreDatasource();
+  }) : _firestoreDatasource =
+            firestoreDatasource ?? FirebaseFirestoreDatasource();
 
   // ============================================
   // OBJECTIFS D'ÉPARGNE
@@ -32,11 +34,11 @@ class SavingsRepositoryImpl implements ISavingsRepository {
           nom: data['nom'] ?? '',
           montantCible: (data['montantCible'] as num?)?.toDouble() ?? 0,
           montantActuel: (data['montantActuel'] as num?)?.toDouble() ?? 0,
-          dateLimite: (data['dateLimite'] as Timestamp?)?.toDate(),
+          dateLimite: parseFirestoreDateOrNull(data['dateLimite']),
           walletId: data['walletId'] ?? '',
           estAtteint: data['estAtteint'] ?? false,
-          createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          createdAt: parseFirestoreDate(data['createdAt']),
+          updatedAt: parseFirestoreDate(data['updatedAt']),
         );
       }).toList();
     });
@@ -142,7 +144,8 @@ class SavingsRepositoryImpl implements ISavingsRepository {
   @override
   Future<void> effectuerDepot(String epargneId, double montant) async {
     try {
-      final epargnes = await _firestoreDatasource.getEpargneProgrammee(epargneId);
+      final epargnes =
+          await _firestoreDatasource.getEpargneProgrammee(epargneId);
       if (epargnes.isEmpty) {
         throw const DatabaseFailure(
           message: 'Épargne programmée non trouvée.',

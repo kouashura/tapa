@@ -73,7 +73,11 @@
             <array>
                 <string>tapa-budget</string>
             </array>
-        </dict>
+            <key>NSMicrophoneUsageDescription</key>
+    <string>Cette application a besoin du microphone pour la saisie vocale.</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Cette application a besoin de la reconnaissance vocale pour transcrire vos transactions.</string>
+</dict>
     </array>
 
     <!-- ============================================
@@ -109,5 +113,9 @@
     <key>NSUserNotificationUsageDescription</key>
     <string>TAPA Invest vous envoie des rappels pour vos échéances et notifications</string>
 
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Cette application a besoin du microphone pour la saisie vocale.</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Cette application a besoin de la reconnaissance vocale pour transcrire vos transactions.</string>
 </dict>
 </plist>

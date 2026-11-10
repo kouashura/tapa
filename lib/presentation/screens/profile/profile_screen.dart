@@ -1,6 +1,7 @@
 // lib/screens/profile/profile_screen.dart
 
 import 'package:flutter/material.dart';
+import '../admin/admin_withdraw_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
@@ -32,11 +33,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         content: const SingleChildScrollView(
           child: Text(
             'Toutes tes données seront effacées :\n'
-                '- Portefeuilles et soldes\n'
-                '- Transactions\n'
-                '- Objectifs épargne\n'
-                '- Ton profil\n\n'
-                'Cette action est irréversible.',
+            '- Portefeuilles et soldes\n'
+            '- Transactions\n'
+            '- Objectifs épargne\n'
+            '- Ton profil\n\n'
+            'Cette action est irréversible.',
           ),
         ),
         actions: [
@@ -69,7 +70,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         content: const Text(
           'Tes données restent sauvegardées.\n'
-              'Tu pourras te reconnecter avec ton PIN.',
+          'Tu pourras te reconnecter avec ton PIN.',
         ),
         actions: [
           TextButton(
@@ -103,8 +104,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
-    Logger.info('DEBUG User: id=${user?.id}, email="${user?.email}", phone="${user?.phoneNumber}"');
-    Logger.info('DEBUG EstAdmin? ${user?.id == 'YkqBGtNLqWVYR3GuVDYqvmmqY1I2'}');
+    Logger.info(
+        'DEBUG User: id=${user?.id}, email="${user?.email}", phone="${user?.phoneNumber}"');
+    Logger.info(
+        'DEBUG EstAdmin? ${user?.id == 'YkqBGtNLqWVYR3GuVDYqvmmqY1I2'}');
     final prenom = ref.watch(userPrenomProvider);
     final monnaie = ref.watch(userMonnaieProvider);
 
@@ -128,20 +131,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             _sectionTitle('DÉCOUVRIR'),
             _group([
               _menuItem(
-                icon: Icons.trending_up_rounded,
-                iconColor: const Color(0xFF7B1FA2),
-                bgColor: const Color(0xFFF3E8FB),
-                title: 'Investir',
-                subtitle: 'Place ton épargne dans des fonds partenaires',
-                onTap: () => _navigateTo('/investir', 1),
-              ),
-              _menuItem(
                 icon: Icons.alarm_outlined,
                 iconColor: const Color(0xFFE67E22),
                 bgColor: const Color(0xFFFEF9E7),
                 title: 'Mes échéances',
                 subtitle: 'Rappels automatiques pour tes échéances',
                 onTap: () => context.push('/echeances'),
+              ),
+            ]),
+
+            // ---- Section Admin ----
+            _sectionTitle('ADMINISTRATION'),
+            _group([
+              _menuItem(
+                icon: Icons.admin_panel_settings,
+                iconColor: TAPAColors.red,
+                bgColor: Colors.red.shade50,
+                title: 'Demandes de retrait',
+                subtitle: 'Gérer les retraits en attente',
+                onTap: () => context.push('/admin/withdraws'),
               ),
             ]),
 
@@ -226,6 +234,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onTap: () => LinkService.ouvrirWhatsApp(),
               ),
               _menuItem(
+                icon: Icons.language,
+                iconColor: TAPAColors.navy,
+                bgColor: const Color(0xFFE3F2FD),
+                title: 'Notre site web',
+                subtitle: 'www.mytapa-ci.com',
+                onTap: () =>
+                    LinkService.ouvrirSiteWeb('https://www.mytapa-ci.com'),
+              ),
+              _menuItem(
                 icon: Icons.receipt_long_outlined,
                 iconColor: TAPAColors.gold,
                 bgColor: const Color(0xFFFFF8E1),
@@ -251,11 +268,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             // ---- Section Admin (visible admin uniquement) ----
             if (user != null &&
                 (user.id == 'YkqBGtNLqWVYR3GuVDYqvmmqY1I2' ||
-                 user.id == 'S6yXw1W7vEhRh8cL5glKTldvRm13' ||
-                 user.email == 'kouassishura2025@gmail.com' ||
-                 user.email == 'infosservices2015@gmail.com' ||
-                 user.phoneNumber == 'kouassishura2025@gmail.com' ||
-                 user.phoneNumber == 'infosservices2015@gmail.com')) ...[
+                    user.id == 'S6yXw1W7vEhRh8cL5glKTldvRm13' ||
+                    user.email == 'kouassishura2025@gmail.com' ||
+                    user.email == 'infosservices2015@gmail.com' ||
+                    user.phoneNumber == 'kouassishura2025@gmail.com' ||
+                    user.phoneNumber == 'infosservices2015@gmail.com')) ...[
               _sectionTitle('ADMIN', color: TAPAColors.gold),
               _group([
                 _menuItem(
@@ -296,8 +313,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: Text(
                 'TAPA Invest v1.0.0\nInvestir. Simplement. Grandir.',
                 textAlign: TextAlign.center,
-                style:
-                TextStyle(fontSize: 11, color: Colors.grey, height: 1.6),
+                style: TextStyle(fontSize: 11, color: Colors.grey, height: 1.6),
               ),
             ),
             const SizedBox(height: 24),
@@ -398,8 +414,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 runSpacing: 8,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                     decoration: BoxDecoration(
                       color: TAPAColors.gold.withOpacity(0.18),
                       borderRadius: BorderRadius.circular(20),
@@ -429,8 +445,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
@@ -684,20 +700,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               decoration: BoxDecoration(
                 gradient: isActive
                     ? const LinearGradient(
-                  colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
+                        colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
                     : null,
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: isActive
                     ? [
-                  BoxShadow(
-                    color: const Color(0xFF1A237E).withOpacity(0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
+                        BoxShadow(
+                          color: const Color(0xFF1A237E).withOpacity(0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
                     : null,
               ),
               child: Icon(
@@ -712,9 +728,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive
-                    ? const Color(0xFF1A237E)
-                    : Colors.grey.shade500,
+                color:
+                    isActive ? const Color(0xFF1A237E) : Colors.grey.shade500,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

@@ -92,8 +92,11 @@ class AddTransactionResult {
     TransactionModel transaction, {
     double? nouveauSolde,
   }) {
-    final typeLabel = transaction.isRevenu ? 'revenu' :
-                      transaction.isTransfert ? 'transfert' : 'dépense';
+    final typeLabel = transaction.isRevenu
+        ? 'revenu'
+        : transaction.isTransfert
+            ? 'transfert'
+            : 'dépense';
     return AddTransactionResult(
       transaction: transaction,
       success: true,
@@ -137,12 +140,11 @@ class AddTransactionUseCase {
       // Vérifier le solde du portefeuille pour une dépense
       if (params.type == TransactionTypeParam.depense ||
           params.type == TransactionTypeParam.transfert) {
-        final wallets = await _walletRepository.getWalletsOnce(params.walletId);
-        if (wallets.isEmpty) {
+        final wallet = await _walletRepository.getWalletById(params.walletId);
+        if (wallet == null) {
           return AddTransactionResult.error('Portefeuille non trouvé.');
         }
 
-        final wallet = wallets.first;
         if (wallet.solde < params.montant) {
           return AddTransactionResult.error(
             'Solde insuffisant. Solde actuel: ${wallet.solde} FCFA',
@@ -150,9 +152,12 @@ class AddTransactionUseCase {
         }
       }
 
+      // Générer un ID unique
+      final transactionId = DateTime.now().millisecondsSinceEpoch.toString();
+
       // Créer la transaction
       final transaction = TransactionModel(
-        id: '', // Sera généré par le repository
+        id: transactionId,
         uid: params.uid,
         walletId: params.walletId,
         montant: params.montant,
@@ -169,10 +174,11 @@ class AddTransactionUseCase {
       await _transactionRepository.addTransaction(transaction);
 
       // Récupérer le solde mis à jour
-      final updatedWallets = await _walletRepository.getWalletsOnce(params.walletId);
+      final updatedWallet =
+          await _walletRepository.getWalletById(params.walletId);
       double nouveauSolde = 0;
-      if (updatedWallets.isNotEmpty) {
-        nouveauSolde = updatedWallets.first.solde;
+      if (updatedWallet != null) {
+        nouveauSolde = updatedWallet.solde;
       }
 
       Logger.success('✅ Transaction enregistrée');

@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import 'package:tapa_budget/presentation/providers/providers.dart';
 import '../../../data/models/models.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../domain/usecases/savings/transfer_to_goal_usecase.dart';
 
 class SavingsScreen extends ConsumerStatefulWidget {
   const SavingsScreen({super.key});
@@ -99,7 +100,7 @@ class _SavingsScreenState extends ConsumerState<SavingsScreen> {
           final epargnes = epargnesAsync.valueOrNull ?? [];
           final totalEpargne = goals.fold<double>(
             0.0,
-                (sum, g) => sum + g.montantActuel,
+            (sum, g) => sum + g.montantActuel,
           );
 
           return RefreshIndicator(
@@ -139,6 +140,213 @@ class _SavingsScreenState extends ConsumerState<SavingsScreen> {
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
+  }
+
+  Future<void> _ajouterFonds(SavingsGoalModel goal, String monnaie) async {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+
+    // ✅ CHARGER les portefeuilles AVANT d'ouvrir le modal
+    try {
+      await ref.read(walletStateProvider.notifier).loadWallets(user.id);
+    } catch (e) {
+      print('Erreur chargement wallets: $e');
+    }
+
+    if (!mounted) return;
+
+    final wallets = ref.read(walletStateProvider).wallets;
+    if (wallets.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Créez d\'abord un portefeuille pour y prendre de l\'argent.'),
+          backgroundColor: TAPAColors.red,
+        ),
+      );
+      return;
+    }
+
+    WalletModel? selectedWallet = wallets.first;
+    final montantController = TextEditingController();
+
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: TAPAColors.surface,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: TAPAColors.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const Text(
+                  'Ajouter des fonds',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: TAPAColors.navy),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Objectif : ${goal.nom}',
+                  style: const TextStyle(
+                      fontSize: 14, color: TAPAColors.textSecond),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Prendre l\'argent depuis :',
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: TAPAColors.navy),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<WalletModel>(
+                  value: selectedWallet,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: TAPAColors.background,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  items: wallets.map((w) {
+                    return DropdownMenuItem(
+                      value: w,
+                      child: Text(
+                          '${w.emoji} ${w.nom} (${Fmt.montant(w.solde, monnaie: monnaie)})'),
+                    );
+                  }).toList(),
+                  onChanged: (w) => setModalState(() => selectedWallet = w),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: montantController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Montant à épargner',
+                    hintText: 'Ex: 5000',
+                    suffixText: monnaie,
+                    filled: true,
+                    fillColor: TAPAColors.background,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final montant =
+                          double.tryParse(montantController.text) ?? 0;
+                      if (montant <= 0) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          const SnackBar(
+                              content: Text('Saisissez un montant valide'),
+                              backgroundColor: TAPAColors.red),
+                        );
+                        return;
+                      }
+                      if (montant > selectedWallet!.solde) {
+                        ScaffoldMessenger.of(ctx).showSnackBar(
+                          const SnackBar(
+                              content: Text(
+                                  'Solde insuffisant dans ce portefeuille'),
+                              backgroundColor: TAPAColors.red),
+                        );
+                        return;
+                      }
+                      Navigator.pop(ctx, {
+                        'montant': montant,
+                        'walletId': selectedWallet!.id,
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: TAPAColors.gold,
+                      foregroundColor: TAPAColors.navy,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('Confirmer le virement',
+                        style: TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (result == null) return;
+
+    try {
+      final montant = result['montant'] as double;
+      final walletId = result['walletId'] as String;
+      final userId = ref.read(currentUserProvider)?.id ?? '';
+
+      final virementResult = await ref.read(transferToGoalProvider({
+        'walletId': walletId,
+        'goalId': goal.id,
+        'userId': userId,
+        'montant': montant,
+      }).future);
+
+      if (virementResult.success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                '✅ ${Fmt.montant(montant, monnaie: monnaie)} virés vers "${goal.nom}"'),
+            backgroundColor: TAPAColors.green,
+          ),
+        );
+        ref.invalidate(userSavingsGoalsProvider(userId));
+        ref.invalidate(walletListProvider(userId));
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                '❌ ${virementResult.message ?? "Erreur lors du virement"}'),
+            backgroundColor: TAPAColors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Erreur: $e'),
+            backgroundColor: TAPAColors.red,
+          ),
+        );
+      }
+    }
   }
 
   // ───────────────────────── Carte principale ─────────────────────────
@@ -345,7 +553,8 @@ class _SavingsScreenState extends ConsumerState<SavingsScreen> {
     );
   }
 
-  BoxDecoration _cardDecoration({Color? borderColor, double borderWidth = 0.8}) {
+  BoxDecoration _cardDecoration(
+      {Color? borderColor, double borderWidth = 0.8}) {
     return BoxDecoration(
       color: TAPAColors.surface,
       borderRadius: BorderRadius.circular(18),
@@ -364,6 +573,66 @@ class _SavingsScreenState extends ConsumerState<SavingsScreen> {
   }
 
   // ───────────────────────── Objectif d'épargne ─────────────────────────
+
+  void _modifierGoal(SavingsGoalModel goal) {
+    // On navigue vers l'écran d'ajout en passant l'objectif existant
+    // Il faudra adapter l'écran AddGoalScreen pour accepter un objectif à modifier
+    context.push('/add-goal', extra: goal);
+  }
+
+  Future<void> _supprimerGoal(SavingsGoalModel goal) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Supprimer l\'objectif ?'),
+        content: Text(
+            'Voulez-vous vraiment supprimer l\'objectif "${goal.nom}" ? Cette action est irréversible.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child:
+                const Text('Supprimer', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      final user = ref.read(currentUserProvider);
+      if (user == null) return;
+
+      // Appel au provider pour supprimer l'objectif
+      await ref.read(deleteSavingsGoalProvider(goal.id).future);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Objectif supprimé avec succès.'),
+            backgroundColor: TAPAColors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
 
   Widget _goalCard(SavingsGoalModel goal, String monnaie) {
     final progress = goal.montantCible > 0
@@ -467,6 +736,48 @@ class _SavingsScreenState extends ConsumerState<SavingsScreen> {
               ],
             ),
           ),
+          IconButton(
+            icon:
+                const Icon(Icons.add_circle, color: TAPAColors.gold, size: 26),
+            onPressed: () => _ajouterFonds(goal, monnaie),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert,
+                color: TAPAColors.textSecond, size: 20),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onSelected: (value) {
+              if (value == 'edit') {
+                _modifierGoal(goal);
+              } else if (value == 'delete') {
+                _supprimerGoal(goal);
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit, size: 18, color: TAPAColors.navy),
+                    SizedBox(width: 8),
+                    Text('Modifier'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, size: 18, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Supprimer', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -547,7 +858,7 @@ class _SavingsScreenState extends ConsumerState<SavingsScreen> {
               const SizedBox(width: 8),
               Container(
                 padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: accent.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -557,9 +868,7 @@ class _SavingsScreenState extends ConsumerState<SavingsScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
-                    color: epargne.termine
-                        ? TAPAColors.green
-                        : TAPAColors.navy,
+                    color: epargne.termine ? TAPAColors.green : TAPAColors.navy,
                   ),
                 ),
               ),
@@ -653,8 +962,7 @@ class _SavingsScreenState extends ConsumerState<SavingsScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: TAPAColors.navy,
               foregroundColor: TAPAColors.white,
-              padding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -761,20 +1069,20 @@ class _SavingsScreenState extends ConsumerState<SavingsScreen> {
               decoration: BoxDecoration(
                 gradient: isActive
                     ? const LinearGradient(
-                  colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
+                        colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
                     : null,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: isActive
                     ? [
-                  BoxShadow(
-                    color: const Color(0xFF1A237E).withOpacity(0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
+                        BoxShadow(
+                          color: const Color(0xFF1A237E).withOpacity(0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
                     : null,
               ),
               child: Icon(

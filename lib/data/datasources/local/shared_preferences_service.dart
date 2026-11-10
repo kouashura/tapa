@@ -10,7 +10,7 @@ import '../../../core/errors/error_handler.dart';
 /// Gère les données simples (String, bool, int, double, List, Map)
 class SharedPreferencesService {
   static final SharedPreferencesService _instance =
-  SharedPreferencesService._internal();
+      SharedPreferencesService._internal();
 
   factory SharedPreferencesService() => _instance;
 
@@ -63,11 +63,31 @@ class SharedPreferencesService {
   }
 
   /// Supprime toutes les données
+  Future<void> clearUserData() async {
+    _ensureInitialized();
+    try {
+      final keys = _prefs!.getKeys().toList();
+      for (final key in keys) {
+        // Garder le PIN et l'onboarding
+        if (key == 'pin_hash' ||
+            key == 'pin_salt' ||
+            key == 'onboarding_done') {
+          continue;
+        }
+        await _prefs!.remove(key);
+      }
+      Logger.success('🗑️ SharedPreferences: donnees utilisateur nettoyees');
+    } catch (e) {
+      Logger.error('❌ Erreur clearUserData: $e');
+    }
+  }
+
   Future<void> clear() async {
     _ensureInitialized();
     try {
       await _prefs!.clear();
-      Logger.warning('⚠️ Toutes les données SharedPreferences ont été effacées');
+      Logger.warning(
+          '⚠️ Toutes les données SharedPreferences ont été effacées');
     } catch (e) {
       Logger.error('❌ Erreur clear SharedPreferences: $e');
       throw ErrorHandler().handleException(e);
@@ -211,7 +231,8 @@ class SharedPreferencesService {
     _ensureInitialized();
     try {
       await _prefs!.setStringList(key, value);
-      Logger.debug('📝 StringList sauvegardée: $key (${value.length} éléments)');
+      Logger.debug(
+          '📝 StringList sauvegardée: $key (${value.length} éléments)');
     } catch (e) {
       Logger.error('❌ Erreur sauvegarde StringList $key: $e');
       throw ErrorHandler().handleException(e);
@@ -230,7 +251,8 @@ class SharedPreferencesService {
   }
 
   /// Récupère une liste de String avec valeur par défaut
-  List<String> getStringListOrDefault(String key, {List<String> defaultValue = const []}) {
+  List<String> getStringListOrDefault(String key,
+      {List<String> defaultValue = const []}) {
     return getStringList(key) ?? defaultValue;
   }
 
@@ -265,7 +287,8 @@ class SharedPreferencesService {
   }
 
   /// Récupère une Map avec valeur par défaut
-  Map<String, dynamic> getMapOrDefault(String key, {Map<String, dynamic> defaultValue = const {}}) {
+  Map<String, dynamic> getMapOrDefault(String key,
+      {Map<String, dynamic> defaultValue = const {}}) {
     return getMap(key) ?? defaultValue;
   }
 
@@ -303,9 +326,9 @@ class SharedPreferencesService {
 
   /// Récupère une liste de Maps avec valeur par défaut
   List<Map<String, dynamic>> getMapListOrDefault(
-      String key, {
-        List<Map<String, dynamic>> defaultValue = const [],
-      }) {
+    String key, {
+    List<Map<String, dynamic>> defaultValue = const [],
+  }) {
     return getMapList(key) ?? defaultValue;
   }
 
@@ -314,7 +337,8 @@ class SharedPreferencesService {
   // ============================================
 
   /// Sauvegarde un objet sérialisé en JSON
-  Future<void> setObject<T>(String key, T value, Map<String, dynamic> Function(T) toJson) async {
+  Future<void> setObject<T>(
+      String key, T value, Map<String, dynamic> Function(T) toJson) async {
     _ensureInitialized();
     try {
       final json = jsonEncode(toJson(value));
@@ -349,27 +373,34 @@ class SharedPreferencesService {
   Future<void> saveUserId(String userId) => setString('user_id', userId);
   String? getUserId() => getString('user_id');
 
-  Future<void> saveUserPrenom(String prenom) => setString('user_prenom', prenom);
+  Future<void> saveUserPrenom(String prenom) =>
+      setString('user_prenom', prenom);
   String? getUserPrenom() => getString('user_prenom');
 
-  Future<void> saveUserTelephone(String telephone) => setString('user_telephone', telephone);
+  Future<void> saveUserTelephone(String telephone) =>
+      setString('user_telephone', telephone);
   String? getUserTelephone() => getString('user_telephone');
 
-  Future<void> saveUserMonnaie(String monnaie) => setString('user_monnaie', monnaie);
+  Future<void> saveUserMonnaie(String monnaie) =>
+      setString('user_monnaie', monnaie);
   String? getUserMonnaie() => getString('user_monnaie');
 
   // --- PIN ---
 
-  Future<void> savePinHash(String userId, String hash) => setString('pin_hash_$userId', hash);
+  Future<void> savePinHash(String userId, String hash) =>
+      setString('pin_hash_$userId', hash);
   String? getPinHash(String userId) => getString('pin_hash_$userId');
 
-  Future<void> savePinSalt(String userId, String salt) => setString('pin_salt_$userId', salt);
+  Future<void> savePinSalt(String userId, String salt) =>
+      setString('pin_salt_$userId', salt);
   String? getPinSalt(String userId) => getString('pin_salt_$userId');
 
-  Future<void> savePinAttempts(String userId, int attempts) => setInt('pin_attempts_$userId', attempts);
+  Future<void> savePinAttempts(String userId, int attempts) =>
+      setInt('pin_attempts_$userId', attempts);
   int getPinAttempts(String userId) => getIntOrDefault('pin_attempts_$userId');
 
-  Future<void> savePinLockTime(String userId, int lockTime) => setInt('pin_lock_time_$userId', lockTime);
+  Future<void> savePinLockTime(String userId, int lockTime) =>
+      setInt('pin_lock_time_$userId', lockTime);
   int getPinLockTime(String userId) => getIntOrDefault('pin_lock_time_$userId');
 
   // --- Onboarding ---
@@ -379,8 +410,10 @@ class SharedPreferencesService {
 
   // --- Notifications ---
 
-  Future<void> saveNotificationsActivees(bool value) => setBool('notifications_activees', value);
-  bool getNotificationsActivees() => getBoolOrDefault('notifications_activees', defaultValue: true);
+  Future<void> saveNotificationsActivees(bool value) =>
+      setBool('notifications_activees', value);
+  bool getNotificationsActivees() =>
+      getBoolOrDefault('notifications_activees', defaultValue: true);
 
   // --- Accès vie ---
 
@@ -390,12 +423,14 @@ class SharedPreferencesService {
   Future<void> saveCleActivee(String cle) => setString('cle_activee', cle);
   String? getCleActivee() => getString('cle_activee');
 
-  Future<void> saveDateActivation(String date) => setString('date_activation', date);
+  Future<void> saveDateActivation(String date) =>
+      setString('date_activation', date);
   String? getDateActivation() => getString('date_activation');
 
   // --- Date inscription ---
 
-  Future<void> saveDateInscription(String date) => setString('date_inscription', date);
+  Future<void> saveDateInscription(String date) =>
+      setString('date_inscription', date);
   String? getDateInscription() => getString('date_inscription');
 
   // ============================================
@@ -405,7 +440,8 @@ class SharedPreferencesService {
   void _ensureInitialized() {
     if (!_isInitialized) {
       throw const CacheFailure(
-        message: 'SharedPreferencesService non initialisé. Appelez init() d\'abord.',
+        message:
+            'SharedPreferencesService non initialisé. Appelez init() d\'abord.',
         code: 'NOT_INITIALIZED',
       );
     }
@@ -424,7 +460,9 @@ class SharedPreferencesService {
     Logger.info('📊 SharedPreferences Summary: ${keys.length} clés');
     for (final key in keys) {
       final value = _prefs!.get(key);
-      final valueStr = value is String ? value.substring(0, value.length > 50 ? 50 : value.length) : value.toString();
+      final valueStr = value is String
+          ? value.substring(0, value.length > 50 ? 50 : value.length)
+          : value.toString();
       Logger.debug('  - $key: $valueStr');
     }
   }

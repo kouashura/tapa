@@ -54,19 +54,39 @@ class TarifAssuranceAuto {
   static int _baseMarque(String marque, TarifConfigModel cfg) {
     final m = marque.toUpperCase().trim();
 
-    if (_matchesAny(m, ['MERCEDES', 'BMW', 'AUDI', 'LEXUS', 'PORSCHE', 'JAGUAR', 'VOLVO'])) {
+    if (_matchesAny(m,
+        ['MERCEDES', 'BMW', 'AUDI', 'LEXUS', 'PORSCHE', 'JAGUAR', 'VOLVO'])) {
       return cfg.basePremium.toInt();
     }
 
-    if (_matchesAny(m, ['TOYOTA', 'HONDA', 'NISSAN', 'MAZDA', 'VOLKSWAGEN', 'FORD', 'HYUNDAI', 'KIA'])) {
+    if (_matchesAny(m, [
+      'TOYOTA',
+      'HONDA',
+      'NISSAN',
+      'MAZDA',
+      'VOLKSWAGEN',
+      'FORD',
+      'HYUNDAI',
+      'KIA'
+    ])) {
       return cfg.baseHautGamme.toInt();
     }
 
-    if (_matchesAny(m, ['PEUGEOT', 'RENAULT', 'CITROEN', 'SUZUKI', 'DACIA', 'FIAT', 'OPEL', 'CHEVROLET'])) {
+    if (_matchesAny(m, [
+      'PEUGEOT',
+      'RENAULT',
+      'CITROEN',
+      'SUZUKI',
+      'DACIA',
+      'FIAT',
+      'OPEL',
+      'CHEVROLET'
+    ])) {
       return cfg.basePopulaire.toInt();
     }
 
-    if (_matchesAny(m, ['CHERY', 'BYD', 'GEELY', 'MG', 'DFSK', 'JAC', 'LIFAN'])) {
+    if (_matchesAny(
+        m, ['CHERY', 'BYD', 'GEELY', 'MG', 'DFSK', 'JAC', 'LIFAN'])) {
       return cfg.baseChinoise.toInt();
     }
 

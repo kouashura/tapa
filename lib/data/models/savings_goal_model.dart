@@ -26,17 +26,15 @@ class SavingsGoalModel {
     required this.updatedAt,
   });
 
-  double get progression => montantCible > 0
-      ? (montantActuel / montantCible).clamp(0.0, 1.0)
-      : 0.0;
+  double get progression =>
+      montantCible > 0 ? (montantActuel / montantCible).clamp(0.0, 1.0) : 0.0;
 
   double get progressionPct => progression * 100;
 
   double get resteAEpargner =>
       (montantCible - montantActuel).clamp(0.0, double.infinity);
 
-  int get joursRestants =>
-      dateLimite?.difference(DateTime.now()).inDays ?? 0;
+  int get joursRestants => dateLimite?.difference(DateTime.now()).inDays ?? 0;
 
   Map<String, dynamic> toMap() {
     return {

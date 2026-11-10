@@ -43,18 +43,22 @@ class AssuranceDetailScreen extends StatelessWidget {
                       style: const TextStyle(fontSize: 40)),
                   const SizedBox(height: 8),
                   Text(produit['nom'] as String,
-                      style: TextStyle(fontSize: 18,
-                          fontWeight: FontWeight.w800, color: couleur)),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: couleur)),
                   Text(produit['description'] as String,
-                      style: const TextStyle(fontSize: 13,
-                          color: TAPAColors.textSecond),
+                      style: const TextStyle(
+                          fontSize: 13, color: TAPAColors.textSecond),
                       textAlign: TextAlign.center),
                 ])),
             const SizedBox(height: 20),
 
             // Informations clés
-            _infoCard('Garantie', produit['garantie'] as String, Icons.shield_outlined),
-            _infoCard('Durée', produit['duree'] as String, Icons.timer_outlined),
+            _infoCard('Garantie', produit['garantie'] as String,
+                Icons.shield_outlined),
+            _infoCard(
+                'Durée', produit['duree'] as String, Icons.timer_outlined),
             _infoCard(
               'Prime mensuelle',
               '${Fmt.montant((produit['primeMin'] as int).toDouble(), monnaie: monnaie)} - ${Fmt.montant((produit['primeMax'] as int).toDouble(), monnaie: monnaie)}',
@@ -76,13 +80,12 @@ class AssuranceDetailScreen extends StatelessWidget {
                         color: TAPAColors.goldLight,
                         borderRadius: BorderRadius.circular(8)),
                     child: Row(children: [
-                      Icon(Icons.check_circle,
-                          color: couleur, size: 18),
+                      Icon(Icons.check_circle, color: couleur, size: 18),
                       const SizedBox(width: 10),
-                      Expanded(child: Text(avantage,
-                          style: const TextStyle(
-                              fontSize: 13,
-                              color: TAPAColors.navy))),
+                      Expanded(
+                          child: Text(avantage,
+                              style: const TextStyle(
+                                  fontSize: 13, color: TAPAColors.navy))),
                     ]))),
             const SizedBox(height: 20),
 
@@ -118,21 +121,24 @@ class AssuranceDetailScreen extends StatelessWidget {
             border: Border.all(color: TAPAColors.border, width: 0.5)),
         child: Row(children: [
           Container(
-              width: 40, height: 40,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                   color: TAPAColors.goldLight,
                   borderRadius: BorderRadius.circular(10)),
               child: Icon(icon, color: TAPAColors.gold, size: 20)),
           const SizedBox(width: 12),
-          Expanded(child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 Text(label,
                     style: const TextStyle(
                         fontSize: 11, color: TAPAColors.textSecond)),
                 Text(value,
                     style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
                         color: TAPAColors.navy)),
               ])),
         ]));

@@ -73,7 +73,8 @@ class UpdateTransactionUseCase {
   UpdateTransactionUseCase(this._transactionRepository);
 
   /// Exécute la mise à jour d'une transaction
-  Future<UpdateTransactionResult> execute(UpdateTransactionParams params) async {
+  Future<UpdateTransactionResult> execute(
+      UpdateTransactionParams params) async {
     try {
       Logger.info('📝 Mise à jour de la transaction: ${params.id}');
 
@@ -82,7 +83,8 @@ class UpdateTransactionUseCase {
       }
 
       if (!params.hasChanges) {
-        return UpdateTransactionResult.error('Aucune modification à appliquer.');
+        return UpdateTransactionResult.error(
+            'Aucune modification à appliquer.');
       }
 
       // Récupérer la transaction existante
@@ -104,10 +106,13 @@ class UpdateTransactionUseCase {
         montant: params.montant ?? existingTransaction.montant,
         type: existingTransaction.type,
         categorieId: params.categorieId ?? existingTransaction.categorieId,
-        categorieLabel: params.categorieLabel ?? existingTransaction.categorieLabel,
-        categorieEmoji: params.categorieEmoji ?? existingTransaction.categorieEmoji,
+        categorieLabel:
+            params.categorieLabel ?? existingTransaction.categorieLabel,
+        categorieEmoji:
+            params.categorieEmoji ?? existingTransaction.categorieEmoji,
         note: params.note ?? existingTransaction.note,
-        dateTransaction: params.dateTransaction ?? existingTransaction.dateTransaction,
+        dateTransaction:
+            params.dateTransaction ?? existingTransaction.dateTransaction,
         createdAt: existingTransaction.createdAt,
       );
 

@@ -1,5 +1,6 @@
 // lib/services/firebase_service.dart
 
+import '../core/utils/date_parser.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -48,7 +49,8 @@ class FirebaseService {
     } else {
       _currentUserId = _prefs?.getString('user_id');
       if (_currentUserId != null) {
-        Logger.info('✅ FirebaseService - Utilisateur restauré: $_currentUserId');
+        Logger.info(
+            '✅ FirebaseService - Utilisateur restauré: $_currentUserId');
       } else {
         Logger.info('ℹ️ FirebaseService - Aucun utilisateur');
       }
@@ -81,7 +83,8 @@ class FirebaseService {
       if (user != null) {
         _currentUserId = user.uid;
         _prefs?.setString('user_id', user.uid);
-        Logger.info('🔍 getCurrentUserId - Récupéré depuis Firebase Auth: ${user.uid}');
+        Logger.info(
+            '🔍 getCurrentUserId - Récupéré depuis Firebase Auth: ${user.uid}');
       }
     }
     return _currentUserId;
@@ -121,7 +124,8 @@ class FirebaseService {
         try {
           // ⚠️ Lecture synchrone impossible avec Firestore
           // On va utiliser la version asynchrone via isEssaiGratuitExpire()
-          Logger.warning('⚠️ Date d\'inscription non trouvée localement, utilisez la version asynchrone');
+          Logger.warning(
+              '⚠️ Date d\'inscription non trouvée localement, utilisez la version asynchrone');
           return false; // ✅ FALLBACK SÉCURISÉ
         } catch (e) {
           Logger.error('❌ Erreur récupération date: $e');
@@ -137,7 +141,8 @@ class FirebaseService {
       final now = DateTime.now();
       final diff = now.difference(date);
       final isExpired = diff.inDays > DUREE_ESSAI_JOURS;
-      Logger.info('📅 Date inscription: $date, Jours écoulés: ${diff.inDays}, Expiré: $isExpired');
+      Logger.info(
+          '📅 Date inscription: $date, Jours écoulés: ${diff.inDays}, Expiré: $isExpired');
       return isExpired;
     } catch (e) {
       Logger.error('❌ Erreur lecture date inscription: $e');
@@ -175,7 +180,8 @@ class FirebaseService {
               dateInscription = data['dateInscription'] as String?;
               if (dateInscription != null) {
                 await _prefs?.setString('date_inscription', dateInscription);
-                Logger.info('📅 Date chargée depuis Firestore: $dateInscription');
+                Logger.info(
+                    '📅 Date chargée depuis Firestore: $dateInscription');
               }
             }
           }
@@ -197,7 +203,8 @@ class FirebaseService {
       final now = DateTime.now();
       final diff = now.difference(date);
       final isExpired = diff.inDays > DUREE_ESSAI_JOURS;
-      Logger.info('📅 Date inscription: $date, Jours écoulés: ${diff.inDays}, Expiré: $isExpired');
+      Logger.info(
+          '📅 Date inscription: $date, Jours écoulés: ${diff.inDays}, Expiré: $isExpired');
       return isExpired;
     } catch (e) {
       Logger.error('❌ Erreur lecture date inscription: $e');
@@ -220,7 +227,8 @@ class FirebaseService {
           'dateInscription': dateStr,
           'updatedAt': FieldValue.serverTimestamp(),
         });
-        Logger.info('📅 Date d\'inscription sauvegardée dans Firestore: $dateStr');
+        Logger.info(
+            '📅 Date d\'inscription sauvegardée dans Firestore: $dateStr');
       } catch (e) {
         Logger.error('❌ Erreur sauvegarde date dans Firestore: $e');
       }
@@ -267,7 +275,8 @@ class FirebaseService {
 
     await _prefs?.setBool('acces_vie', true);
     await _prefs?.setString('cle_activee', cle);
-    await _prefs?.setString('date_activation', DateTime.now().toIso8601String());
+    await _prefs?.setString(
+        'date_activation', DateTime.now().toIso8601String());
 
     if (isRoot) {
       await _prefs?.setString('acces_type', 'root');
@@ -332,7 +341,7 @@ class FirebaseService {
         'hasAccessVie': user.hasAccessVie,
         'onboardingVu': user.onboardingVu,
         'notificationsActivees': user.notificationsActivees,
-        'dateInscription': now.toIso8601String(),  // ✅ SAUVEGARDE ICI
+        'dateInscription': now.toIso8601String(), // ✅ SAUVEGARDE ICI
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -551,8 +560,8 @@ class FirebaseService {
           solde: (data['solde'] as num?)?.toDouble() ?? 0,
           monnaie: data['monnaie'] ?? 'FCFA',
           description: data['description'] ?? '',
-          createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
-          updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
+          createdAt: parseFirestoreDateOrNull(data['createdAt']),
+          updatedAt: parseFirestoreDateOrNull(data['updatedAt']),
         );
       }).toList();
     } catch (e) {
@@ -606,8 +615,8 @@ class FirebaseService {
           categorieLabel: data['categorieLabel'] ?? 'Autre',
           categorieEmoji: data['categorieEmoji'] ?? '📌',
           note: data['note'],
-          dateTransaction: (data['dateTransaction'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+          dateTransaction: parseFirestoreDate(data['dateTransaction']),
+          createdAt: parseFirestoreDate(data['createdAt']),
         );
       }).toList();
     } catch (e) {
@@ -645,7 +654,8 @@ class FirebaseService {
     });
   }
 
-  Future<void> updateTransaction(TransactionModel oldTx, TransactionModel newTx) async {}
+  Future<void> updateTransaction(
+      TransactionModel oldTx, TransactionModel newTx) async {}
   Future<void> deleteTransaction(TransactionModel transaction) async {}
 
   // ============================================
@@ -655,24 +665,69 @@ class FirebaseService {
   Future<void> _initDefaultCategories(String userId) async {
     final categories = [
       // Dépenses
-      {'id': 'nourriture', 'label': 'Alimentation', 'emoji': '🍽️', 'type': 'depense'},
-      {'id': 'transport', 'label': 'Transport', 'emoji': '🚗', 'type': 'depense'},
+      {
+        'id': 'nourriture',
+        'label': 'Alimentation',
+        'emoji': '🍽️',
+        'type': 'depense'
+      },
+      {
+        'id': 'transport',
+        'label': 'Transport',
+        'emoji': '🚗',
+        'type': 'depense'
+      },
       {'id': 'facture', 'label': 'Facture', 'emoji': '📄', 'type': 'depense'},
       {'id': 'logement', 'label': 'Logement', 'emoji': '🏠', 'type': 'depense'},
       {'id': 'sante', 'label': 'Santé', 'emoji': '🏥', 'type': 'depense'},
-      {'id': 'education', 'label': 'Éducation', 'emoji': '📚', 'type': 'depense'},
+      {
+        'id': 'education',
+        'label': 'Éducation',
+        'emoji': '📚',
+        'type': 'depense'
+      },
       {'id': 'loisirs', 'label': 'Loisirs', 'emoji': '🎮', 'type': 'depense'},
-      {'id': 'shopping', 'label': 'Shopping', 'emoji': '🛍️', 'type': 'depense'},
-      {'id': 'restaurant', 'label': 'Restaurant', 'emoji': '🍜', 'type': 'depense'},
+      {
+        'id': 'shopping',
+        'label': 'Shopping',
+        'emoji': '🛍️',
+        'type': 'depense'
+      },
+      {
+        'id': 'restaurant',
+        'label': 'Restaurant',
+        'emoji': '🍜',
+        'type': 'depense'
+      },
 
       // Revenus
       {'id': 'salaire', 'label': 'Salaire', 'emoji': '💰', 'type': 'revenu'},
-      {'id': 'freelance', 'label': 'Freelance', 'emoji': '💻', 'type': 'revenu'},
-      {'id': 'investissement', 'label': 'Investissement', 'emoji': '📈', 'type': 'revenu'},
+      {
+        'id': 'freelance',
+        'label': 'Freelance',
+        'emoji': '💻',
+        'type': 'revenu'
+      },
+      {
+        'id': 'investissement',
+        'label': 'Investissement',
+        'emoji': '📈',
+        'type': 'revenu'
+      },
       {'id': 'cadeau', 'label': 'Cadeau', 'emoji': '🎁', 'type': 'revenu'},
-      {'id': 'remboursement', 'label': 'Remboursement', 'emoji': '🔄', 'type': 'revenu'},
+      {
+        'id': 'remboursement',
+        'label': 'Remboursement',
+        'emoji': '🔄',
+        'type': 'revenu'
+      },
       {'id': 'interet', 'label': 'Intérêt', 'emoji': '🏦', 'type': 'revenu'},
-      {'id': 'autre_revenu', 'label': 'Autre revenu', 'emoji': '💵', 'type': 'revenu'},
+      {
+        'id': 'autre_revenu',
+        'label': 'Autre revenu',
+        'emoji': '💵',
+        'type': 'revenu'
+      },
     ];
 
     final batch = _firestore.batch();
@@ -705,10 +760,12 @@ class FirebaseService {
           .where('uid', isEqualTo: userId)
           .get();
 
-      _categories = snap.docs.map((d) => {
-        'id': d.id,
-        ...d.data(),
-      }).toList();
+      _categories = snap.docs
+          .map((d) => {
+                'id': d.id,
+                ...d.data(),
+              })
+          .toList();
     } catch (e) {
       Logger.error('❌ Erreur chargement catégories: $e');
       _categories = [];
@@ -717,13 +774,21 @@ class FirebaseService {
 
   List<Map<String, dynamic>> getCategories() => _categories;
 
+  /// ✅ NOUVELLE MÉTHODE : Recharge depuis Firestore ET retourne la liste
+  /// Utilise cette méthode au lieu de getCategories() pour forcer le refresh
+  Future<List<Map<String, dynamic>>> reloadCategoriesFromFirestore() async {
+    await _loadCategories();
+    return List<Map<String, dynamic>>.from(_categories);
+  }
+
   Future<void> addCategory(Map<String, dynamic> category) async {
     final userId = getCurrentUserId();
     if (userId == null) {
       throw Exception('Utilisateur non authentifié');
     }
 
-    final id = category['id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString();
+    final id = category['id'] as String? ??
+        DateTime.now().millisecondsSinceEpoch.toString();
     final label = category['label'] as String? ?? 'Autre';
     final emoji = category['emoji'] as String? ?? '📌';
     final type = category['type'] as String? ?? 'depense';
@@ -831,10 +896,7 @@ class FirebaseService {
     final userId = getCurrentUserId();
     if (userId == null) return;
 
-    await _firestore
-        .collection('epargnes_programmees')
-        .doc(epargne.id)
-        .update({
+    await _firestore.collection('epargnes_programmees').doc(epargne.id).update({
       'montantEpargne': epargne.montantEpargne,
       'updatedAt': FieldValue.serverTimestamp(),
     });
@@ -942,7 +1004,8 @@ class FirebaseService {
   Future<double> getTotalRevenusReels(int mois, int annee) =>
       _sommeTransactions(mois, annee, 'revenu');
 
-  Future<double> getDepensesReellesByCategorie(String categorieId, int mois, int annee) async {
+  Future<double> getDepensesReellesByCategorie(
+      String categorieId, int mois, int annee) async {
     final userId = getCurrentUserId();
     if (userId == null) return 0.0;
 
@@ -1017,7 +1080,8 @@ class FirebaseService {
         'nombre_transactions': transactions.length,
         'revenus_prevus': revenusPrevus,
         'depenses_prevues': depensesPrevues,
-        'taux_depense': depensesPrevues > 0 ? (totalDepenses / depensesPrevues) : 0.0,
+        'taux_depense':
+            depensesPrevues > 0 ? (totalDepenses / depensesPrevues) : 0.0,
         'taux_revenu': revenusPrevus > 0 ? (totalRevenus / revenusPrevus) : 0.0,
       };
     } catch (e) {
@@ -1058,7 +1122,8 @@ class FirebaseService {
         rethrow;
       }
     } else {
-      Logger.warning('⚠️ marquerOnboardingVu: aucun userId, Firestore non mis à jour');
+      Logger.warning(
+          '⚠️ marquerOnboardingVu: aucun userId, Firestore non mis à jour');
     }
   }
 
@@ -1066,7 +1131,8 @@ class FirebaseService {
   // NOTIFICATIONS
   // ============================================
 
-  bool get notificationsActivees => _prefs?.getBool('notifications_activees') ?? true;
+  bool get notificationsActivees =>
+      _prefs?.getBool('notifications_activees') ?? true;
   Future<void> setNotifications(bool value) async =>
       await _prefs?.setBool('notifications_activees', value);
 

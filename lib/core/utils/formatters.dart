@@ -5,9 +5,8 @@ import 'package:intl/intl.dart';
 class Fmt {
   /// Formate un montant avec séparateur de milliers et devise
   static String montant(double val, {String monnaie = 'FCFA'}) {
-    final n = NumberFormat('#,###', 'fr_FR')
-        .format(val.round())
-        .replaceAll(',', ' ');
+    final n =
+        NumberFormat('#,###', 'fr_FR').format(val.round()).replaceAll(',', ' ');
     return '$n $monnaie';
   }
 
@@ -69,23 +68,30 @@ class Fmt {
   }
 
   /// Affiche une date courte (ex: "15/10")
-  static String dateCourte(DateTime d) =>
-      '${d.day}/${d.month}';
+  static String dateCourte(DateTime d) => '${d.day}/${d.month}';
 
   /// Affiche une date complète (ex: "15/10/2026")
-  static String dateComplete(DateTime d) =>
-      '${d.day}/${d.month}/${d.year}';
+  static String dateComplete(DateTime d) => '${d.day}/${d.month}/${d.year}';
 
   /// Affiche une date complète avec mois en lettres (ex: "15 octobre 2026")
   static String dateLongue(DateTime d) {
     const mois = [
-      'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+      'janvier',
+      'février',
+      'mars',
+      'avril',
+      'mai',
+      'juin',
+      'juillet',
+      'août',
+      'septembre',
+      'octobre',
+      'novembre',
+      'décembre'
     ];
     return '${d.day} ${mois[d.month - 1]} ${d.year}';
   }
 
   /// Génère un ID unique basé sur le timestamp
-  static String genId() =>
-      DateTime.now().millisecondsSinceEpoch.toString();
+  static String genId() => DateTime.now().millisecondsSinceEpoch.toString();
 }

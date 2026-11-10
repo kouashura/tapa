@@ -9,7 +9,8 @@ class LinkService {
     try {
       String url = 'https://wa.me/2250160254102';
       if (message.isNotEmpty) {
-        url = 'https://wa.me/2250160254102?text=${Uri.encodeComponent(message)}';
+        url =
+            'https://wa.me/2250160254102?text=${Uri.encodeComponent(message)}';
       }
 
       final uri = Uri.parse(url);
@@ -30,6 +31,19 @@ class LinkService {
     } catch (e) {
       print('Erreur WhatsApp: $e');
       rethrow;
+    }
+  }
+
+  static Future<void> ouvrirSiteWeb(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        throw Exception("Impossible d'ouvrir le site web");
+      }
+    } catch (e) {
+      print('Erreur ouverture site web: $e');
     }
   }
 
@@ -112,7 +126,7 @@ class LinkService {
           children: [
             const Text(
               'Impossible d\'ouvrir la boutique automatiquement.\n'
-                  'Vous pouvez copier le lien ci-dessous et l\'ouvrir dans votre navigateur :',
+              'Vous pouvez copier le lien ci-dessous et l\'ouvrir dans votre navigateur :',
               style: TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 16),

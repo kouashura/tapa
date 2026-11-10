@@ -37,7 +37,6 @@ class AppTheme {
       brightness: Brightness.light,
       primaryColor: TAPAColors.navy,
       scaffoldBackgroundColor: TAPAColors.background,
-
       colorScheme: const ColorScheme.light(
         primary: TAPAColors.navy,
         secondary: TAPAColors.gold,
@@ -48,7 +47,6 @@ class AppTheme {
         onSurface: TAPAColors.textPrimary,
         onError: TAPAColors.white,
       ),
-
       appBarTheme: const AppBarTheme(
         elevation: 0,
         centerTitle: true,
@@ -65,7 +63,6 @@ class AppTheme {
           size: 24,
         ),
       ),
-
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: TAPAColors.navy,
@@ -84,7 +81,6 @@ class AppTheme {
           ),
         ),
       ),
-
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: TAPAColors.surface,
@@ -119,7 +115,6 @@ class AppTheme {
         prefixIconColor: TAPAColors.textHint,
         suffixIconColor: TAPAColors.textHint,
       ),
-
       cardTheme: CardTheme(
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -128,13 +123,11 @@ class AppTheme {
         color: TAPAColors.surface,
         margin: const EdgeInsets.all(8),
       ),
-
       dividerTheme: const DividerThemeData(
         color: TAPAColors.border,
         thickness: 1,
         space: 0,
       ),
-
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -146,7 +139,6 @@ class AppTheme {
           fontSize: 14,
         ),
       ),
-
       dialogTheme: DialogTheme(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
@@ -161,7 +153,6 @@ class AppTheme {
           color: TAPAColors.textSecond,
         ),
       ),
-
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: TAPAColors.surface,
         shape: RoundedRectangleBorder(

@@ -8,7 +8,7 @@ import '../../../domain/usecases/transaction/add_transaction_usecase.dart';
 import '../../../domain/usecases/transaction/get_transactions_usecase.dart';
 import '../../../domain/usecases/transaction/delete_transaction_usecase.dart';
 import '../../../domain/usecases/transaction/update_transaction_usecase.dart';
-import '../wallet/wallet_provider.dart';  // ✅ Utiliser wallet_provider
+import '../wallet/wallet_provider.dart'; // ✅ Utiliser wallet_provider
 import '../../../core/utils/logger.dart';
 
 // ============================================
@@ -23,7 +23,8 @@ final transactionRepositoryProvider = Provider<ITransactionRepository>((ref) {
 /// Provider du Use Case pour ajouter une transaction
 final addTransactionUseCaseProvider = Provider<AddTransactionUseCase>((ref) {
   final transactionRepo = ref.watch(transactionRepositoryProvider);
-  final walletRepo = ref.watch(walletRepositoryProvider);  // ✅ Utilisé depuis wallet_provider
+  final walletRepo =
+      ref.watch(walletRepositoryProvider); // ✅ Utilisé depuis wallet_provider
   return AddTransactionUseCase(
     transactionRepository: transactionRepo,
     walletRepository: walletRepo,
@@ -36,12 +37,14 @@ final getTransactionsUseCaseProvider = Provider<GetTransactionsUseCase>((ref) {
 });
 
 /// Provider du Use Case pour écouter les transactions
-final watchTransactionsUseCaseProvider = Provider<WatchTransactionsUseCase>((ref) {
+final watchTransactionsUseCaseProvider =
+    Provider<WatchTransactionsUseCase>((ref) {
   return WatchTransactionsUseCase(ref.watch(transactionRepositoryProvider));
 });
 
 /// Provider du Use Case pour supprimer une transaction
-final deleteTransactionUseCaseProvider = Provider<DeleteTransactionUseCase>((ref) {
+final deleteTransactionUseCaseProvider =
+    Provider<DeleteTransactionUseCase>((ref) {
   final transactionRepo = ref.watch(transactionRepositoryProvider);
   final walletRepo = ref.watch(walletRepositoryProvider);
   return DeleteTransactionUseCase(
@@ -51,7 +54,8 @@ final deleteTransactionUseCaseProvider = Provider<DeleteTransactionUseCase>((ref
 });
 
 /// Provider du Use Case pour mettre à jour une transaction
-final updateTransactionUseCaseProvider = Provider<UpdateTransactionUseCase>((ref) {
+final updateTransactionUseCaseProvider =
+    Provider<UpdateTransactionUseCase>((ref) {
   return UpdateTransactionUseCase(ref.watch(transactionRepositoryProvider));
 });
 
@@ -60,13 +64,15 @@ final updateTransactionUseCaseProvider = Provider<UpdateTransactionUseCase>((ref
 // ============================================
 
 /// Liste des transactions en temps réel
-final transactionListProvider = StreamProvider.family<List<TransactionModel>, String>((ref, uid) {
+final transactionListProvider =
+    StreamProvider.family<List<TransactionModel>, String>((ref, uid) {
   final useCase = ref.watch(watchTransactionsUseCaseProvider);
   return useCase.execute(uid, limit: 50);
 });
 
 /// Liste des transactions avec limite personnalisée
-final transactionListWithLimitProvider = StreamProvider.family<List<TransactionModel>, TransactionListParams>(
+final transactionListWithLimitProvider =
+    StreamProvider.family<List<TransactionModel>, TransactionListParams>(
   (ref, params) {
     final useCase = ref.watch(watchTransactionsUseCaseProvider);
     return useCase.execute(params.uid, limit: params.limit);
@@ -78,24 +84,28 @@ final transactionListWithLimitProvider = StreamProvider.family<List<TransactionM
 // ============================================
 
 /// Provider pour ajouter une transaction
-final addTransactionProvider = FutureProvider.family<AddTransactionResult, AddTransactionParams>(
+final addTransactionProvider =
+    FutureProvider.family<AddTransactionResult, AddTransactionParams>(
   (ref, params) async {
     final useCase = ref.watch(addTransactionUseCaseProvider);
     final result = await useCase.execute(params);
-    
+
     if (result.success) {
       Logger.success('✅ Transaction ajoutée: ${result.transaction?.id}');
-      ref.read(transactionStateProvider.notifier).addTransactionLocally(result.transaction!);
+      ref
+          .read(transactionStateProvider.notifier)
+          .addTransactionLocally(result.transaction!);
     } else {
       Logger.error('❌ Erreur ajout transaction: ${result.message}');
     }
-    
+
     return result;
   },
 );
 
 /// Provider pour récupérer les transactions (une seule fois)
-final getTransactionsProvider = FutureProvider.family<GetTransactionsResult, GetTransactionsParams>(
+final getTransactionsProvider =
+    FutureProvider.family<GetTransactionsResult, GetTransactionsParams>(
   (ref, params) async {
     final useCase = ref.watch(getTransactionsUseCaseProvider);
     return await useCase.execute(
@@ -107,35 +117,41 @@ final getTransactionsProvider = FutureProvider.family<GetTransactionsResult, Get
 );
 
 /// Provider pour supprimer une transaction
-final deleteTransactionProvider = FutureProvider.family<DeleteTransactionResult, String>(
+final deleteTransactionProvider =
+    FutureProvider.family<DeleteTransactionResult, String>(
   (ref, transactionId) async {
     final useCase = ref.watch(deleteTransactionUseCaseProvider);
     final result = await useCase.execute(transactionId);
-    
+
     if (result.success) {
       Logger.success('🗑️ Transaction supprimée: $transactionId');
-      ref.read(transactionStateProvider.notifier).deleteTransactionLocally(transactionId);
+      ref
+          .read(transactionStateProvider.notifier)
+          .deleteTransactionLocally(transactionId);
     } else {
       Logger.error('❌ Erreur suppression transaction: ${result.message}');
     }
-    
+
     return result;
   },
 );
 
 /// Provider pour mettre à jour une transaction
-final updateTransactionProvider = FutureProvider.family<UpdateTransactionResult, UpdateTransactionParams>(
+final updateTransactionProvider =
+    FutureProvider.family<UpdateTransactionResult, UpdateTransactionParams>(
   (ref, params) async {
     final useCase = ref.watch(updateTransactionUseCaseProvider);
     final result = await useCase.execute(params);
-    
+
     if (result.success) {
       Logger.success('📝 Transaction mise à jour: ${result.transaction?.id}');
-      ref.read(transactionStateProvider.notifier).updateTransactionLocally(result.transaction!);
+      ref
+          .read(transactionStateProvider.notifier)
+          .updateTransactionLocally(result.transaction!);
     } else {
       Logger.error('❌ Erreur mise à jour transaction: ${result.message}');
     }
-    
+
     return result;
   },
 );
@@ -145,7 +161,8 @@ final updateTransactionProvider = FutureProvider.family<UpdateTransactionResult,
 // ============================================
 
 /// Provider pour l'état des transactions
-final transactionStateProvider = StateNotifierProvider<TransactionNotifier, TransactionState>((ref) {
+final transactionStateProvider =
+    StateNotifierProvider<TransactionNotifier, TransactionState>((ref) {
   return TransactionNotifier(ref);
 });
 
@@ -214,16 +231,17 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
   TransactionNotifier(this._ref) : super(const TransactionState());
 
   /// Charge les transactions
-  Future<void> loadTransactions(String uid, {int limit = 50, TransactionFilters? filters}) async {
+  Future<void> loadTransactions(String uid,
+      {int limit = 50, TransactionFilters? filters}) async {
     if (uid.isEmpty) return;
 
     state = state.copyWith(isLoading: true);
-    
+
     try {
       final result = await _ref.read(getTransactionsProvider(
         GetTransactionsParams(uid: uid, limit: limit, filters: filters),
       ).future);
-      
+
       if (result.success) {
         state = TransactionState.calculate(result.transactions);
       } else {
@@ -251,13 +269,14 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
     final updatedTransactions = state.transactions.map((tx) {
       return tx.id == updatedTransaction.id ? updatedTransaction : tx;
     }).toList();
-    
+
     state = TransactionState.calculate(updatedTransactions);
   }
 
   /// Supprime une transaction localement
   void deleteTransactionLocally(String transactionId) {
-    final updatedTransactions = state.transactions.where((tx) => tx.id != transactionId).toList();
+    final updatedTransactions =
+        state.transactions.where((tx) => tx.id != transactionId).toList();
     state = TransactionState.calculate(updatedTransactions);
   }
 
@@ -273,7 +292,8 @@ class TransactionNotifier extends StateNotifier<TransactionState> {
       if (categorieId != null && tx.categorieId != categorieId) return false;
       if (type != null && tx.type != type) return false;
       if (walletId != null && tx.walletId != walletId) return false;
-      if (dateDebut != null && tx.dateTransaction.isBefore(dateDebut)) return false;
+      if (dateDebut != null && tx.dateTransaction.isBefore(dateDebut))
+        return false;
       if (dateFin != null && tx.dateTransaction.isAfter(dateFin)) return false;
       return true;
     }).toList();
@@ -347,19 +367,24 @@ final transactionCountProvider = Provider<int>((ref) {
 });
 
 /// Provider pour les transactions d'un portefeuille
-final walletTransactionsProvider = Provider.family<List<TransactionModel>, String>((ref, walletId) {
+final walletTransactionsProvider =
+    Provider.family<List<TransactionModel>, String>((ref, walletId) {
   final state = ref.watch(transactionStateProvider);
   return state.transactions.where((tx) => tx.walletId == walletId).toList();
 });
 
 /// Provider pour les transactions d'une catégorie
-final categoryTransactionsProvider = Provider.family<List<TransactionModel>, String>((ref, categorieId) {
+final categoryTransactionsProvider =
+    Provider.family<List<TransactionModel>, String>((ref, categorieId) {
   final state = ref.watch(transactionStateProvider);
-  return state.transactions.where((tx) => tx.categorieId == categorieId).toList();
+  return state.transactions
+      .where((tx) => tx.categorieId == categorieId)
+      .toList();
 });
 
 /// Provider pour les transactions du mois
-final currentMonthTransactionsProvider = Provider<List<TransactionModel>>((ref) {
+final currentMonthTransactionsProvider =
+    Provider<List<TransactionModel>>((ref) {
   final state = ref.watch(transactionStateProvider);
   final now = DateTime.now();
   return state.transactions.where((tx) {

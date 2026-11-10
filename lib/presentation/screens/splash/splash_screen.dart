@@ -65,7 +65,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
       // Rediriger vers la page appropriée
       _navigateToAppropriateScreen();
-
     } catch (e) {
       Logger.error('❌ Erreur lors de l\'initialisation: $e');
       if (mounted) {
@@ -171,7 +170,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             // ============================================
             // TITRE DE L'APPLICATION
             // ============================================
-             RichText(
+            RichText(
               text: const TextSpan(
                 children: [
                   TextSpan(

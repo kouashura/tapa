@@ -41,23 +41,33 @@ class DBService {
   // TRANSACTIONS
   // ============================================
 
-  Future<List<TransactionModel>> getTransactions() async => await _firebase.getTransactions();
-  Future<void> addTransaction(TransactionModel transaction) async => await _firebase.addTransaction(transaction);
-  Future<void> updateTransaction(TransactionModel oldTx, TransactionModel newTx) async => await _firebase.updateTransaction(oldTx, newTx);
-  Future<void> deleteTransaction(TransactionModel transaction) async => await _firebase.deleteTransaction(transaction);
+  Future<List<TransactionModel>> getTransactions() async =>
+      await _firebase.getTransactions();
+  Future<void> addTransaction(TransactionModel transaction) async =>
+      await _firebase.addTransaction(transaction);
+  Future<void> updateTransaction(
+          TransactionModel oldTx, TransactionModel newTx) async =>
+      await _firebase.updateTransaction(oldTx, newTx);
+  Future<void> deleteTransaction(TransactionModel transaction) async =>
+      await _firebase.deleteTransaction(transaction);
 
   // ============================================
   // PORTEFEUILLES
   // ============================================
 
   Future<List<WalletModel>> getWallets() async => await _firebase.getWallets();
-  Future<void> saveWallet(WalletModel wallet) async => await _firebase.saveWallet(wallet);
+  Future<void> saveWallet(WalletModel wallet) async =>
+      await _firebase.saveWallet(wallet);
 
   // ============================================
   // CATÉGORIES
   // ============================================
 
   List<Map<String, dynamic>> getCategories() => _firebase.getCategories();
+
+  /// ✅ NOUVELLE MÉTHODE : Recharge les catégories depuis Firestore
+  Future<List<Map<String, dynamic>>> reloadCategoriesFromFirestore() =>
+      _firebase.reloadCategoriesFromFirestore();
 
   Future<void> addCategory(Map<String, dynamic> category) async {
     try {
@@ -79,31 +89,39 @@ class DBService {
     }
   }
 
-  Future<void> deleteCategory(String categoryId) async => await _firebase.deleteCategory(categoryId);
+  Future<void> deleteCategory(String categoryId) async =>
+      await _firebase.deleteCategory(categoryId);
 
   // ============================================
   // ÉCHÉANCES
   // ============================================
 
   List<EcheanceModel> getEcheances() => _firebase.getEcheances();
-  Future<void> saveEcheance(EcheanceModel echeance) async => await _firebase.saveEcheance(echeance);
-  Future<void> supprimerEcheance(String id) async => await _firebase.supprimerEcheance(id);
+  Future<void> saveEcheance(EcheanceModel echeance) async =>
+      await _firebase.saveEcheance(echeance);
+  Future<void> supprimerEcheance(String id) async =>
+      await _firebase.supprimerEcheance(id);
 
   // ============================================
   // ÉPARGNE PROGRAMMÉE
   // ============================================
 
-  List<EpargneProgrammeeModel> getEpargnesProgrammees() => _firebase.getEpargnesProgrammees();
-  Future<void> saveEpargneProgrammee(EpargneProgrammeeModel epargne) async => await _firebase.saveEpargneProgrammee(epargne);
-  Future<void> supprimerEpargneProgrammee(String id) async => await _firebase.supprimerEpargneProgrammee(id);
-  Future<void> effectuerDepotEpargne(EpargneProgrammeeModel epargne) async => await _firebase.effectuerDepotEpargne(epargne);
+  List<EpargneProgrammeeModel> getEpargnesProgrammees() =>
+      _firebase.getEpargnesProgrammees();
+  Future<void> saveEpargneProgrammee(EpargneProgrammeeModel epargne) async =>
+      await _firebase.saveEpargneProgrammee(epargne);
+  Future<void> supprimerEpargneProgrammee(String id) async =>
+      await _firebase.supprimerEpargneProgrammee(id);
+  Future<void> effectuerDepotEpargne(EpargneProgrammeeModel epargne) async =>
+      await _firebase.effectuerDepotEpargne(epargne);
 
   // ============================================
   // OBJECTIFS ÉPARGNE
   // ============================================
 
   List<SavingsGoalModel> getSavingsGoals() => _firebase.getSavingsGoals();
-  Future<void> addSavingsGoal(SavingsGoalModel goal) async => await _firebase.addSavingsGoal(goal);
+  Future<void> addSavingsGoal(SavingsGoalModel goal) async =>
+      await _firebase.addSavingsGoal(goal);
 
   // ============================================
   // DETTES
@@ -115,33 +133,43 @@ class DBService {
   // BUDGET
   // ============================================
 
-  Future<BudgetMensuel?> getBudget(int mois, int annee) async => await _firebase.getBudget(mois, annee);
-  Future<double> getTotalDepensesReelles(int mois, int annee) async => await _firebase.getTotalDepensesReelles(mois, annee);
-  Future<double> getTotalRevenusReels(int mois, int annee) async => await _firebase.getTotalRevenusReels(mois, annee);
-  Future<double> getDepensesReellesByCategorie(String categorieId, int mois, int annee) async => await _firebase.getDepensesReellesByCategorie(categorieId, mois, annee);
-  Future<void> saveBudget(BudgetMensuel budget) async => await _firebase.saveBudget(budget);
-  Future<void> deleteBudget(int mois, int annee) async => await _firebase.deleteBudget(mois, annee);
+  Future<BudgetMensuel?> getBudget(int mois, int annee) async =>
+      await _firebase.getBudget(mois, annee);
+  Future<double> getTotalDepensesReelles(int mois, int annee) async =>
+      await _firebase.getTotalDepensesReelles(mois, annee);
+  Future<double> getTotalRevenusReels(int mois, int annee) async =>
+      await _firebase.getTotalRevenusReels(mois, annee);
+  Future<double> getDepensesReellesByCategorie(
+          String categorieId, int mois, int annee) async =>
+      await _firebase.getDepensesReellesByCategorie(categorieId, mois, annee);
+  Future<void> saveBudget(BudgetMensuel budget) async =>
+      await _firebase.saveBudget(budget);
+  Future<void> deleteBudget(int mois, int annee) async =>
+      await _firebase.deleteBudget(mois, annee);
 
   // ============================================
   // ONBOARDING
   // ============================================
 
   bool get onboardingVu => _firebase.onboardingVu;
-  Future<void> marquerOnboardingVu() async => await _firebase.marquerOnboardingVu();
+  Future<void> marquerOnboardingVu() async =>
+      await _firebase.marquerOnboardingVu();
 
   // ============================================
   // NOTIFICATIONS
   // ============================================
 
   bool get notificationsActivees => _firebase.notificationsActivees;
-  Future<void> setNotifications(bool value) async => await _firebase.setNotifications(value);
+  Future<void> setNotifications(bool value) async =>
+      await _firebase.setNotifications(value);
 
   // ============================================
   // GESTION DE L'ESSAI GRATUIT ET ACCÈS
   // ============================================
 
   bool get essaiGratuitExpire => _firebase.essaiGratuitExpire;
-  Future<bool> isEssaiGratuitExpire() async => await _firebase.isEssaiGratuitExpire();
+  Future<bool> isEssaiGratuitExpire() async =>
+      await _firebase.isEssaiGratuitExpire();
   int get joursRestantsEssai => _firebase.joursRestantsEssai;
   bool get aAccesAVie => _firebase.aAccesAVie;
   bool get isRootUser => _firebase.isRootUser;
@@ -160,7 +188,8 @@ class DBService {
   // STATISTIQUES - ✅ CORRIGÉ
   // ============================================
 
-  Future<Map<String, dynamic>> getStatistics() async => await _firebase.getStatistics();
+  Future<Map<String, dynamic>> getStatistics() async =>
+      await _firebase.getStatistics();
 
   // ============================================
   // NETTOYAGE
@@ -174,7 +203,9 @@ class DBService {
   // ============================================
 
   Future<void> initDefaultWallets() async {}
-  Future<void> addWallet(WalletModel wallet) async => await _firebase.saveWallet(wallet);
-  Future<void> updateWallet(WalletModel wallet) async => await _firebase.saveWallet(wallet);
+  Future<void> addWallet(WalletModel wallet) async =>
+      await _firebase.saveWallet(wallet);
+  Future<void> updateWallet(WalletModel wallet) async =>
+      await _firebase.saveWallet(wallet);
   Future<void> deleteWallet(String walletId) async {}
 }

@@ -11,6 +11,7 @@
     "africastalking": "^0.5.9",
     "axios": "^1.19.0",
     "cors": "^2.8.6",
+    "digitalpaye-node": "^1.0.0",
     "dotenv": "^16.6.1",
     "express": "^4.22.2",
     "express-rate-limit": "^6.11.2",

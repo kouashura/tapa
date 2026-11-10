@@ -1,7 +1,7 @@
 // lib/data/repositories/budget_repository_impl.dart
 
 import '../../domain/repositories/i_budget_repository.dart';
-import '../models/models.dart';  // ✅ Utiliser models.dart au lieu de domain/entities
+import '../models/models.dart'; // ✅ Utiliser models.dart au lieu de domain/entities
 import '../datasources/remote/firebase/firebase_firestore_datasource.dart';
 import '../../core/errors/error_handler.dart';
 import '../../core/utils/logger.dart';
@@ -12,13 +12,14 @@ class BudgetRepositoryImpl implements IBudgetRepository {
 
   BudgetRepositoryImpl({
     FirebaseFirestoreDatasource? firestoreDatasource,
-  }) : _firestoreDatasource = firestoreDatasource ?? FirebaseFirestoreDatasource();
+  }) : _firestoreDatasource =
+            firestoreDatasource ?? FirebaseFirestoreDatasource();
 
   @override
   Future<BudgetMensuel?> getBudget(String uid, int mois, int annee) async {
     try {
       final budget = await _firestoreDatasource.getBudget(uid, mois, annee);
-      return budget;  // ✅ Déjà un BudgetMensuel?
+      return budget; // ✅ Déjà un BudgetMensuel?
     } catch (e) {
       Logger.error('❌ Erreur récupération budget: $e');
       throw ErrorHandler().handleException(e);

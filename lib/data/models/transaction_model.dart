@@ -1,5 +1,7 @@
 // lib/data/models/transaction_model.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 /// Types de transactions
 enum TransactionType {
   revenu,
@@ -49,8 +51,8 @@ class TransactionModel {
       'categorieLabel': categorieLabel,
       'categorieEmoji': categorieEmoji,
       'note': note,
-      'dateTransaction': dateTransaction.toIso8601String(),
-      'createdAt': createdAt.toIso8601String(),
+      'dateTransaction': Timestamp.fromDate(dateTransaction),
+      'createdAt': Timestamp.fromDate(createdAt),
     };
   }
 
@@ -61,7 +63,7 @@ class TransactionModel {
       walletId: map['walletId'] ?? '',
       montant: (map['montant'] as num?)?.toDouble() ?? 0,
       type: TransactionType.values.firstWhere(
-            (e) => e.name == map['type'],
+        (e) => e.name == map['type'],
         orElse: () => TransactionType.depense,
       ),
       categorieId: map['categorieId'] ?? 'autre',

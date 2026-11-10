@@ -107,7 +107,6 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
     });
   }
 
-
   Future<void> _payerMaintenant() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -129,8 +128,7 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
         throw Exception('Aucun utilisateur connecte');
       }
 
-      final reference =
-          'ASSUR-${DateTime.now().millisecondsSinceEpoch}';
+      final reference = 'ASSUR-${DateTime.now().millisecondsSinceEpoch}';
 
       Logger.info('Paiement assurance initie:');
       Logger.info('   - Produit: ${widget.produitNom}');
@@ -140,7 +138,8 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
       final paiementPro = PaiementProService();
       final success = await paiementPro.payerAvecPaiementPro(
         amount: _montantTotal,
-        description: 'Assurance ${widget.produitNom} - ${_nbMoisCtrl.text} mois',
+        description:
+            'Assurance ${widget.produitNom} - ${_nbMoisCtrl.text} mois',
         referenceNumber: reference,
         customerEmail: currentUser.email.isNotEmpty
             ? currentUser.email
@@ -151,8 +150,7 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
             ? _telephoneCtrl.text.trim()
             : currentUser.phoneNumber,
         channel: '',
-        notificationURL:
-            'https://wallet-notify.tapa-invest.workers.dev',
+        notificationURL: 'https://wallet-notify.tapa-invest.workers.dev',
         returnURL: 'tapa-budget://assurance/success',
         returnContext:
             '{"userId":"${currentUser.id}","type":"assurance","produitNom":"${widget.produitNom}","reference":"$reference"}',
@@ -372,7 +370,7 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
           children: [
             const Text(
               'Impossible d\'ouvrir WhatsApp automatiquement.\n'
-                  'Copiez le message et envoyez-le manuellement.',
+              'Copiez le message et envoyez-le manuellement.',
               style: TextStyle(
                 fontSize: 14,
                 height: 1.5,
@@ -534,154 +532,108 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
       ),
       body: _isLoading
           ? const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: TAPAColors.gold),
-            SizedBox(height: 16),
-            Text(
-              'Envoi de votre demande...',
-              style: TextStyle(
-                color: TAPAColors.textSecond,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      )
-          : SingleChildScrollView(
-        padding: EdgeInsets.all(paddingSize),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // En-tête
-              Container(
-                padding: EdgeInsets.all(containerPadding),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [TAPAColors.navy, Color(0xFF1A2B4A)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(isSmall ? 12 : 16),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(isSmall ? 8 : 10),
-                      decoration: BoxDecoration(
-                        color: TAPAColors.gold.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(isSmall ? 8 : 12),
-                      ),
-                      child: Icon(
-                        Icons.description_outlined,
-                        color: TAPAColors.gold,
-                        size: isSmall ? 20 : 28,
-                      ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: TAPAColors.gold),
+                  SizedBox(height: 16),
+                  Text(
+                    'Envoi de votre demande...',
+                    style: TextStyle(
+                      color: TAPAColors.textSecond,
+                      fontSize: 14,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                ],
+              ),
+            )
+          : SingleChildScrollView(
+              padding: EdgeInsets.all(paddingSize),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // En-tête
+                    Container(
+                      padding: EdgeInsets.all(containerPadding),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [TAPAColors.navy, Color(0xFF1A2B4A)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(isSmall ? 12 : 16),
+                      ),
+                      child: Row(
                         children: [
-                          Text(
-                            'Devis ${widget.produitNom}',
-                            style: TextStyle(
-                              fontSize: isSmall ? 16 : (isTablet ? 20 : 18),
-                              fontWeight: FontWeight.w800,
-                              color: TAPAColors.white,
+                          Container(
+                            padding: EdgeInsets.all(isSmall ? 8 : 10),
+                            decoration: BoxDecoration(
+                              color: TAPAColors.gold.withOpacity(0.2),
+                              borderRadius:
+                                  BorderRadius.circular(isSmall ? 8 : 12),
+                            ),
+                            child: Icon(
+                              Icons.description_outlined,
+                              color: TAPAColors.gold,
+                              size: isSmall ? 20 : 28,
                             ),
                           ),
-                          Text(
-                            'Remplissez les informations ci-dessous',
-                            style: TextStyle(
-                              fontSize: isSmall ? 10 : (isTablet ? 14 : 12),
-                              color: Colors.white.withOpacity(0.7),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Devis ${widget.produitNom}',
+                                  style: TextStyle(
+                                    fontSize:
+                                        isSmall ? 16 : (isTablet ? 20 : 18),
+                                    fontWeight: FontWeight.w800,
+                                    color: TAPAColors.white,
+                                  ),
+                                ),
+                                Text(
+                                  'Remplissez les informations ci-dessous',
+                                  style: TextStyle(
+                                    fontSize:
+                                        isSmall ? 10 : (isTablet ? 14 : 12),
+                                    color: Colors.white.withOpacity(0.7),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-              SizedBox(height: spacingSize * 2),
+                    SizedBox(height: spacingSize * 2),
 
-              // Section Informations personnelles
-              _sectionTitle('Informations personnelles', isSmall),
-              SizedBox(height: spacingSize),
+                    // Section Informations personnelles
+                    _sectionTitle('Informations personnelles', isSmall),
+                    SizedBox(height: spacingSize),
 
-              if (isSmall || isTablet)
-                Column(
-                  children: [
-                    _textField(
-                      controller: _nomCtrl,
-                      label: 'Nom *',
-                      hint: 'Votre nom',
-                      icon: Icons.person_outline,
-                      isSmall: isSmall,
-                    ),
-                    SizedBox(height: spacingSize),
-                    _textField(
-                      controller: _prenomCtrl,
-                      label: 'Prénom *',
-                      hint: 'Votre prénom',
-                      icon: Icons.person_outline,
-                      isSmall: isSmall,
-                    ),
-                    SizedBox(height: spacingSize),
-                    _textField(
-                      controller: _telephoneCtrl,
-                      label: 'Téléphone *',
-                      hint: '01 23 45 67 89',
-                      icon: Icons.phone_outlined,
-                      keyboardType: TextInputType.phone,
-                      isSmall: isSmall,
-                    ),
-                    SizedBox(height: spacingSize),
-                    _textField(
-                      controller: _emailCtrl,
-                      label: 'Email',
-                      hint: 'votre@email.com',
-                      icon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                      isSmall: isSmall,
-                    ),
-                  ],
-                )
-              else
-                Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _textField(
+                    if (isSmall || isTablet)
+                      Column(
+                        children: [
+                          _textField(
                             controller: _nomCtrl,
                             label: 'Nom *',
                             hint: 'Votre nom',
                             icon: Icons.person_outline,
                             isSmall: isSmall,
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _textField(
+                          SizedBox(height: spacingSize),
+                          _textField(
                             controller: _prenomCtrl,
                             label: 'Prénom *',
                             hint: 'Votre prénom',
                             icon: Icons.person_outline,
                             isSmall: isSmall,
                           ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: spacingSize),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _textField(
+                          SizedBox(height: spacingSize),
+                          _textField(
                             controller: _telephoneCtrl,
                             label: 'Téléphone *',
                             hint: '01 23 45 67 89',
@@ -689,10 +641,8 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
                             keyboardType: TextInputType.phone,
                             isSmall: isSmall,
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _textField(
+                          SizedBox(height: spacingSize),
+                          _textField(
                             controller: _emailCtrl,
                             label: 'Email',
                             hint: 'votre@email.com',
@@ -700,396 +650,462 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
                             keyboardType: TextInputType.emailAddress,
                             isSmall: isSmall,
                           ),
+                        ],
+                      )
+                    else
+                      Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _textField(
+                                  controller: _nomCtrl,
+                                  label: 'Nom *',
+                                  hint: 'Votre nom',
+                                  icon: Icons.person_outline,
+                                  isSmall: isSmall,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _textField(
+                                  controller: _prenomCtrl,
+                                  label: 'Prénom *',
+                                  hint: 'Votre prénom',
+                                  icon: Icons.person_outline,
+                                  isSmall: isSmall,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: spacingSize),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _textField(
+                                  controller: _telephoneCtrl,
+                                  label: 'Téléphone *',
+                                  hint: '01 23 45 67 89',
+                                  icon: Icons.phone_outlined,
+                                  keyboardType: TextInputType.phone,
+                                  isSmall: isSmall,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _textField(
+                                  controller: _emailCtrl,
+                                  label: 'Email',
+                                  hint: 'votre@email.com',
+                                  icon: Icons.email_outlined,
+                                  keyboardType: TextInputType.emailAddress,
+                                  isSmall: isSmall,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    SizedBox(height: spacingSize * 2),
+
+                    // Section véhicule
+                    _sectionTitle('Informations du véhicule', isSmall),
+                    SizedBox(height: spacingSize),
+
+                    Container(
+                      padding: EdgeInsets.all(containerPadding),
+                      decoration: BoxDecoration(
+                        color: TAPAColors.surface,
+                        borderRadius: BorderRadius.circular(isSmall ? 12 : 16),
+                        border: Border.all(
+                          color: TAPAColors.border,
+                          width: 0.5,
                         ),
-                      ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: _setModeManuel,
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 250),
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: isSmall ? 8 : 12),
+                                    decoration: BoxDecoration(
+                                      color: _modeSaisie == 0
+                                          ? TAPAColors.navy
+                                          : TAPAColors.surface,
+                                      borderRadius: BorderRadius.circular(
+                                          isSmall ? 6 : 10),
+                                      border: Border.all(
+                                        color: _modeSaisie == 0
+                                            ? TAPAColors.navy
+                                            : TAPAColors.border,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.edit_outlined,
+                                          color: _modeSaisie == 0
+                                              ? TAPAColors.gold
+                                              : TAPAColors.textSecond,
+                                          size: isSmall ? 14 : 18,
+                                        ),
+                                        SizedBox(width: isSmall ? 4 : 6),
+                                        Text(
+                                          isSmall
+                                              ? 'Manuel'
+                                              : 'Saisie manuelle',
+                                          style: TextStyle(
+                                            fontSize: isSmall
+                                                ? 10
+                                                : (isTablet ? 14 : 12),
+                                            fontWeight: FontWeight.w700,
+                                            color: _modeSaisie == 0
+                                                ? TAPAColors.gold
+                                                : TAPAColors.textSecond,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: isSmall ? 6 : 8),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: _setModeScan,
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 250),
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: isSmall ? 8 : 12),
+                                    decoration: BoxDecoration(
+                                      color: _modeSaisie == 1
+                                          ? TAPAColors.navy
+                                          : TAPAColors.surface,
+                                      borderRadius: BorderRadius.circular(
+                                          isSmall ? 6 : 10),
+                                      border: Border.all(
+                                        color: _modeSaisie == 1
+                                            ? TAPAColors.navy
+                                            : TAPAColors.border,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.document_scanner_outlined,
+                                          color: _modeSaisie == 1
+                                              ? TAPAColors.gold
+                                              : TAPAColors.textSecond,
+                                          size: isSmall ? 14 : 18,
+                                        ),
+                                        SizedBox(width: isSmall ? 4 : 6),
+                                        Text(
+                                          isSmall ? 'Scanner' : 'Scanner CG',
+                                          style: TextStyle(
+                                            fontSize: isSmall
+                                                ? 10
+                                                : (isTablet ? 14 : 12),
+                                            fontWeight: FontWeight.w700,
+                                            color: _modeSaisie == 1
+                                                ? TAPAColors.gold
+                                                : TAPAColors.textSecond,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: spacingSize),
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: _modeSaisie == 0
+                                ? _buildFormulaireManuel(isSmall, spacingSize)
+                                : _buildScanCarteGrise(isSmall, spacingSize),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              SizedBox(height: spacingSize * 2),
+                    SizedBox(height: spacingSize * 2),
 
-              // Section véhicule
-              _sectionTitle('Informations du véhicule', isSmall),
-              SizedBox(height: spacingSize),
+                    // Section Demande
+                    _sectionTitle('Votre demande', isSmall),
+                    SizedBox(height: spacingSize),
 
-              Container(
-                padding: EdgeInsets.all(containerPadding),
-                decoration: BoxDecoration(
-                  color: TAPAColors.surface,
-                  borderRadius: BorderRadius.circular(isSmall ? 12 : 16),
-                  border: Border.all(
-                    color: TAPAColors.border,
-                    width: 0.5,
-                  ),
-                ),
-                child: Column(
-                  children: [
+                    _textField(
+                      controller: _nbMoisCtrl,
+                      onChanged: _calculerTarif,
+                      label: 'Nombre de mois *',
+                      hint: '12',
+                      icon: Icons.timer_outlined,
+                      keyboardType: TextInputType.number,
+                      suffix: 'mois',
+                      isSmall: isSmall,
+                    ),
+                    SizedBox(height: spacingSize),
+                    _textField(
+                      controller: _notesCtrl,
+                      label: 'Notes supplémentaires',
+                      hint: 'Informations complémentaires...',
+                      icon: Icons.notes_outlined,
+                      maxLines: isSmall ? 2 : 3,
+                      isSmall: isSmall,
+                    ),
+                    SizedBox(height: spacingSize * 2),
+
+                    // Carte du montant calcule
+                    if (_afficherTarif) ...[
+                      SizedBox(height: spacingSize * 2),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(containerPadding),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF27AE60), Color(0xFF1E8449)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius:
+                              BorderRadius.circular(isSmall ? 12 : 16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF27AE60).withOpacity(0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.calculate_outlined,
+                                  color: Colors.white.withOpacity(0.9),
+                                  size: isSmall ? 18 : 22,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Votre tarif',
+                                  style: TextStyle(
+                                    fontSize: isSmall ? 12 : 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white.withOpacity(0.9),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Flexible(
+                                  child: Text(
+                                    'Prime mensuelle',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white70,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    TarifAssuranceAuto.formater(_tarifCalcule),
+                                    style: TextStyle(
+                                      fontSize: isSmall ? 13 : 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Flexible(
+                                  child: Text(
+                                    'Duree',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.white70,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    '${_nbMoisCtrl.text} mois',
+                                    style: TextStyle(
+                                      fontSize: isSmall ? 13 : 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              height: 1,
+                              color: Colors.white.withOpacity(0.3),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Flexible(
+                                  child: Text(
+                                    'Total a payer',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Flexible(
+                                  child: Text(
+                                    TarifAssuranceAuto.formater(_montantTotal),
+                                    style: TextStyle(
+                                      fontSize: isSmall ? 16 : 20,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: spacingSize),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _isLoading ? null : _payerMaintenant,
+                          icon: Icon(
+                            Icons.payment,
+                            size: isSmall ? 18 : 22,
+                          ),
+                          label: Text(
+                            'Payer maintenant',
+                            style: TextStyle(
+                              fontSize: isSmall ? 14 : 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF27AE60),
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(
+                              vertical: isSmall ? 14 : 18,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(isSmall ? 10 : 14),
+                            ),
+                            elevation: 4,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: spacingSize * 2),
+                    ],
+
+                    // Boutons WhatsApp et Copier
+
                     Row(
                       children: [
                         Expanded(
-                          child: GestureDetector(
-                            onTap: _setModeManuel,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 250),
-                              padding: EdgeInsets.symmetric(vertical: isSmall ? 8 : 12),
-                              decoration: BoxDecoration(
-                                color: _modeSaisie == 0
-                                    ? TAPAColors.navy
-                                    : TAPAColors.surface,
-                                borderRadius: BorderRadius.circular(isSmall ? 6 : 10),
-                                border: Border.all(
-                                  color: _modeSaisie == 0
-                                      ? TAPAColors.navy
-                                      : TAPAColors.border,
-                                  width: 1.5,
-                                ),
+                          child: ElevatedButton.icon(
+                            onPressed: _envoyerDevis,
+                            icon: const Icon(Icons.send_outlined, size: 18),
+                            label: Text(
+                              isSmall ? 'WhatsApp' : 'WhatsApp',
+                              style: TextStyle(
+                                fontSize: isSmall ? 12 : 14,
+                                fontWeight: FontWeight.w700,
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.edit_outlined,
-                                    color: _modeSaisie == 0
-                                        ? TAPAColors.gold
-                                        : TAPAColors.textSecond,
-                                    size: isSmall ? 14 : 18,
-                                  ),
-                                  SizedBox(width: isSmall ? 4 : 6),
-                                  Text(
-                                    isSmall ? 'Manuel' : 'Saisie manuelle',
-                                    style: TextStyle(
-                                      fontSize: isSmall ? 10 : (isTablet ? 14 : 12),
-                                      fontWeight: FontWeight.w700,
-                                      color: _modeSaisie == 0
-                                          ? TAPAColors.gold
-                                          : TAPAColors.textSecond,
-                                    ),
-                                  ),
-                                ],
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF25D366),
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.symmetric(
+                                vertical: isSmall ? 12 : 16,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(isSmall ? 8 : 12),
                               ),
                             ),
                           ),
                         ),
-                        SizedBox(width: isSmall ? 6 : 8),
+                        const SizedBox(width: 10),
                         Expanded(
-                          child: GestureDetector(
-                            onTap: _setModeScan,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 250),
-                              padding: EdgeInsets.symmetric(vertical: isSmall ? 8 : 12),
-                              decoration: BoxDecoration(
-                                color: _modeSaisie == 1
-                                    ? TAPAColors.navy
-                                    : TAPAColors.surface,
-                                borderRadius: BorderRadius.circular(isSmall ? 6 : 10),
-                                border: Border.all(
-                                  color: _modeSaisie == 1
-                                      ? TAPAColors.navy
-                                      : TAPAColors.border,
-                                  width: 1.5,
-                                ),
+                          child: OutlinedButton.icon(
+                            onPressed: _copierMessage,
+                            icon: const Icon(Icons.copy, size: 18),
+                            label: Text(
+                              isSmall ? 'Copier' : 'Copier',
+                              style: TextStyle(
+                                fontSize: isSmall ? 12 : 14,
+                                fontWeight: FontWeight.w700,
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.document_scanner_outlined,
-                                    color: _modeSaisie == 1
-                                        ? TAPAColors.gold
-                                        : TAPAColors.textSecond,
-                                    size: isSmall ? 14 : 18,
-                                  ),
-                                  SizedBox(width: isSmall ? 4 : 6),
-                                  Text(
-                                    isSmall ? 'Scanner' : 'Scanner CG',
-                                    style: TextStyle(
-                                      fontSize: isSmall ? 10 : (isTablet ? 14 : 12),
-                                      fontWeight: FontWeight.w700,
-                                      color: _modeSaisie == 1
-                                          ? TAPAColors.gold
-                                          : TAPAColors.textSecond,
-                                    ),
-                                  ),
-                                ],
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: TAPAColors.navy,
+                              padding: EdgeInsets.symmetric(
+                                vertical: isSmall ? 12 : 16,
                               ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(isSmall ? 8 : 12),
+                              ),
+                              side: const BorderSide(color: TAPAColors.navy),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: spacingSize),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: _modeSaisie == 0
-                          ? _buildFormulaireManuel(isSmall, spacingSize)
-                          : _buildScanCarteGrise(isSmall, spacingSize),
+                    const SizedBox(height: 8),
+                    Center(
+                      child: Text(
+                        '📱 Envoyé via WhatsApp - Réponse sous 24h',
+                        style: TextStyle(
+                          fontSize: isSmall ? 9 : (isTablet ? 13 : 11),
+                          color: TAPAColors.textSecond,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
                     ),
+                    SizedBox(height: isSmall ? 20 : 40),
                   ],
                 ),
               ),
-              SizedBox(height: spacingSize * 2),
-
-              // Section Demande
-              _sectionTitle('Votre demande', isSmall),
-              SizedBox(height: spacingSize),
-
-              _textField(
-                controller: _nbMoisCtrl,
-                onChanged: _calculerTarif,
-                label: 'Nombre de mois *',
-                hint: '12',
-                icon: Icons.timer_outlined,
-                keyboardType: TextInputType.number,
-                suffix: 'mois',
-                isSmall: isSmall,
-              ),
-              SizedBox(height: spacingSize),
-              _textField(
-                controller: _notesCtrl,
-                label: 'Notes supplémentaires',
-                hint: 'Informations complémentaires...',
-                icon: Icons.notes_outlined,
-                maxLines: isSmall ? 2 : 3,
-                isSmall: isSmall,
-              ),
-              SizedBox(height: spacingSize * 2),
-
-              // Carte du montant calcule
-              if (_afficherTarif) ...[
-                SizedBox(height: spacingSize * 2),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(containerPadding),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF27AE60), Color(0xFF1E8449)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(isSmall ? 12 : 16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF27AE60).withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calculate_outlined,
-                            color: Colors.white.withOpacity(0.9),
-                            size: isSmall ? 18 : 22,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Votre tarif',
-                            style: TextStyle(
-                              fontSize: isSmall ? 12 : 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Flexible(
-                            child: Text(
-                              'Prime mensuelle',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white70,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              TarifAssuranceAuto.formater(_tarifCalcule),
-                              style: TextStyle(
-                                fontSize: isSmall ? 13 : 15,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Flexible(
-                            child: Text(
-                              'Duree',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.white70,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              '${_nbMoisCtrl.text} mois',
-                              style: TextStyle(
-                                fontSize: isSmall ? 13 : 15,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        height: 1,
-                        color: Colors.white.withOpacity(0.3),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Flexible(
-                            child: Text(
-                              'Total a payer',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              TarifAssuranceAuto.formater(_montantTotal),
-                              style: TextStyle(
-                                fontSize: isSmall ? 16 : 20,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: spacingSize),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _payerMaintenant,
-                    icon: Icon(
-                      Icons.payment,
-                      size: isSmall ? 18 : 22,
-                    ),
-                    label: Text(
-                      'Payer maintenant',
-                      style: TextStyle(
-                        fontSize: isSmall ? 14 : 16,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF27AE60),
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(
-                        vertical: isSmall ? 14 : 18,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(isSmall ? 10 : 14),
-                      ),
-                      elevation: 4,
-                    ),
-                  ),
-                ),
-                SizedBox(height: spacingSize * 2),
-              ],
-
-              // Boutons WhatsApp et Copier
-
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _envoyerDevis,
-                      icon: const Icon(Icons.send_outlined, size: 18),
-                      label: Text(
-                        isSmall ? 'WhatsApp' : 'WhatsApp',
-                        style: TextStyle(
-                          fontSize: isSmall ? 12 : 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF25D366),
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(
-                          vertical: isSmall ? 12 : 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(isSmall ? 8 : 12),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _copierMessage,
-                      icon: const Icon(Icons.copy, size: 18),
-                      label: Text(
-                        isSmall ? 'Copier' : 'Copier',
-                        style: TextStyle(
-                          fontSize: isSmall ? 12 : 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: TAPAColors.navy,
-                        padding: EdgeInsets.symmetric(
-                          vertical: isSmall ? 12 : 16,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(isSmall ? 8 : 12),
-                        ),
-                        side: const BorderSide(color: TAPAColors.navy),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: Text(
-                  '📱 Envoyé via WhatsApp - Réponse sous 24h',
-                  style: TextStyle(
-                    fontSize: isSmall ? 9 : (isTablet ? 13 : 11),
-                    color: TAPAColors.textSecond,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ),
-              SizedBox(height: isSmall ? 20 : 40),
-            ],
-          ),
-        ),
-      ),
+            ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
@@ -1190,20 +1206,20 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
               decoration: BoxDecoration(
                 gradient: isActive
                     ? const LinearGradient(
-                  colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
+                        colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
                     : null,
                 borderRadius: BorderRadius.circular(14),
                 boxShadow: isActive
                     ? [
-                  BoxShadow(
-                    color: const Color(0xFF1A237E).withOpacity(0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
+                        BoxShadow(
+                          color: const Color(0xFF1A237E).withOpacity(0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
                     : null,
               ),
               child: Icon(
@@ -1218,7 +1234,8 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
               style: TextStyle(
                 fontSize: isActive ? 10 : 9,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive ? const Color(0xFF1A237E) : Colors.grey.shade500,
+                color:
+                    isActive ? const Color(0xFF1A237E) : Colors.grey.shade500,
                 letterSpacing: 0.1,
               ),
               maxLines: 1,
@@ -1248,101 +1265,101 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
         SizedBox(height: spacing),
         isSmall
             ? Column(
-          children: [
-            _textField(
-              controller: _marqueCtrl,
-              onChanged: _calculerTarif,
-              label: 'Marque *',
-              hint: 'Toyota',
-              icon: Icons.directions_car_outlined,
-              isSmall: isSmall,
-            ),
-            SizedBox(height: spacing),
-            _textField(
-              controller: _modeleCtrl,
-              label: 'Modèle *',
-              hint: 'Yaris',
-              icon: Icons.directions_car_outlined,
-              isSmall: isSmall,
-            ),
-          ],
-        )
+                children: [
+                  _textField(
+                    controller: _marqueCtrl,
+                    onChanged: _calculerTarif,
+                    label: 'Marque *',
+                    hint: 'Toyota',
+                    icon: Icons.directions_car_outlined,
+                    isSmall: isSmall,
+                  ),
+                  SizedBox(height: spacing),
+                  _textField(
+                    controller: _modeleCtrl,
+                    label: 'Modèle *',
+                    hint: 'Yaris',
+                    icon: Icons.directions_car_outlined,
+                    isSmall: isSmall,
+                  ),
+                ],
+              )
             : Row(
-          children: [
-            Expanded(
-              child: _textField(
-                controller: _marqueCtrl,
-                onChanged: _calculerTarif,
-                label: 'Marque *',
-                hint: 'Toyota',
-                icon: Icons.directions_car_outlined,
-                isSmall: isSmall,
+                children: [
+                  Expanded(
+                    child: _textField(
+                      controller: _marqueCtrl,
+                      onChanged: _calculerTarif,
+                      label: 'Marque *',
+                      hint: 'Toyota',
+                      icon: Icons.directions_car_outlined,
+                      isSmall: isSmall,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _textField(
+                      controller: _modeleCtrl,
+                      label: 'Modèle *',
+                      hint: 'Yaris',
+                      icon: Icons.directions_car_outlined,
+                      isSmall: isSmall,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _textField(
-                controller: _modeleCtrl,
-                label: 'Modèle *',
-                hint: 'Yaris',
-                icon: Icons.directions_car_outlined,
-                isSmall: isSmall,
-              ),
-            ),
-          ],
-        ),
         SizedBox(height: spacing),
         isSmall
             ? Column(
-          children: [
-            _textField(
-              controller: _anneeCtrl,
-              onChanged: _calculerTarif,
-              label: 'Année *',
-              hint: '2020',
-              icon: Icons.calendar_today_outlined,
-              keyboardType: TextInputType.number,
-              isSmall: isSmall,
-            ),
-            SizedBox(height: spacing),
-            _textField(
-              controller: _puissanceCtrl,
-              onChanged: _calculerTarif,
-              label: 'Puissance (CV)',
-              hint: '75',
-              icon: Icons.speed_outlined,
-              keyboardType: TextInputType.number,
-              isSmall: isSmall,
-            ),
-          ],
-        )
+                children: [
+                  _textField(
+                    controller: _anneeCtrl,
+                    onChanged: _calculerTarif,
+                    label: 'Année *',
+                    hint: '2020',
+                    icon: Icons.calendar_today_outlined,
+                    keyboardType: TextInputType.number,
+                    isSmall: isSmall,
+                  ),
+                  SizedBox(height: spacing),
+                  _textField(
+                    controller: _puissanceCtrl,
+                    onChanged: _calculerTarif,
+                    label: 'Puissance (CV)',
+                    hint: '75',
+                    icon: Icons.speed_outlined,
+                    keyboardType: TextInputType.number,
+                    isSmall: isSmall,
+                  ),
+                ],
+              )
             : Row(
-          children: [
-            Expanded(
-              child: _textField(
-                controller: _anneeCtrl,
-                onChanged: _calculerTarif,
-                label: 'Année *',
-                hint: '2020',
-                icon: Icons.calendar_today_outlined,
-                keyboardType: TextInputType.number,
-                isSmall: isSmall,
+                children: [
+                  Expanded(
+                    child: _textField(
+                      controller: _anneeCtrl,
+                      onChanged: _calculerTarif,
+                      label: 'Année *',
+                      hint: '2020',
+                      icon: Icons.calendar_today_outlined,
+                      keyboardType: TextInputType.number,
+                      isSmall: isSmall,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _textField(
+                      controller: _puissanceCtrl,
+                      onChanged: _calculerTarif,
+                      label: 'Puissance (CV)',
+                      hint: '75',
+                      icon: Icons.speed_outlined,
+                      keyboardType: TextInputType.number,
+                      isSmall: isSmall,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _textField(
-                controller: _puissanceCtrl,
-                onChanged: _calculerTarif,
-                label: 'Puissance (CV)',
-                hint: '75',
-                icon: Icons.speed_outlined,
-                keyboardType: TextInputType.number,
-                isSmall: isSmall,
-              ),
-            ),
-          ],
-        ),
       ],
     );
   }
@@ -1368,9 +1385,8 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
                   style: TextStyle(fontSize: isSmall ? 10 : 12),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _carteGriseScannee
-                      ? Colors.green
-                      : TAPAColors.navy,
+                  backgroundColor:
+                      _carteGriseScannee ? Colors.green : TAPAColors.navy,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: isSmall ? 8 : 12),
                   shape: RoundedRectangleBorder(
@@ -1392,12 +1408,10 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
                   style: TextStyle(fontSize: isSmall ? 10 : 12),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _carteGriseScannee
-                      ? Colors.green
-                      : Colors.grey.shade200,
-                  foregroundColor: _carteGriseScannee
-                      ? Colors.white
-                      : TAPAColors.navy,
+                  backgroundColor:
+                      _carteGriseScannee ? Colors.green : Colors.grey.shade200,
+                  foregroundColor:
+                      _carteGriseScannee ? Colors.white : TAPAColors.navy,
                   padding: EdgeInsets.symmetric(vertical: isSmall ? 8 : 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(isSmall ? 6 : 10),

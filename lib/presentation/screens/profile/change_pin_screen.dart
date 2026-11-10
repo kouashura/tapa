@@ -27,23 +27,18 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
     if (_step == 0 && _ancien.length < 4) {
       setState(() => _ancien += d);
       if (_ancien.length == 4) {
-        Future.delayed(
-            const Duration(milliseconds: 200),
-            _validateAncien);
+        Future.delayed(const Duration(milliseconds: 200), _validateAncien);
       }
     } else if (_step == 1 && _nouveau.length < 4) {
       setState(() => _nouveau += d);
       if (_nouveau.length == 4) {
         Future.delayed(
-            const Duration(milliseconds: 200),
-                () => setState(() => _step = 2));
+            const Duration(milliseconds: 200), () => setState(() => _step = 2));
       }
     } else if (_step == 2 && _confirm.length < 4) {
       setState(() => _confirm += d);
       if (_confirm.length == 4) {
-        Future.delayed(
-            const Duration(milliseconds: 200),
-            _validerNouveau);
+        Future.delayed(const Duration(milliseconds: 200), _validerNouveau);
       }
     }
   }
@@ -51,14 +46,11 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
   void _delete() {
     if (_isLoading) return;
     if (_step == 0 && _ancien.isNotEmpty) {
-      setState(() => _ancien =
-          _ancien.substring(0, _ancien.length - 1));
+      setState(() => _ancien = _ancien.substring(0, _ancien.length - 1));
     } else if (_step == 1 && _nouveau.isNotEmpty) {
-      setState(() => _nouveau =
-          _nouveau.substring(0, _nouveau.length - 1));
+      setState(() => _nouveau = _nouveau.substring(0, _nouveau.length - 1));
     } else if (_step == 2 && _confirm.isNotEmpty) {
-      setState(() => _confirm =
-          _confirm.substring(0, _confirm.length - 1));
+      setState(() => _confirm = _confirm.substring(0, _confirm.length - 1));
     }
   }
 
@@ -155,28 +147,25 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
         child: Column(children: [
           const SizedBox(height: 30),
           Text(_title,
-              style: const TextStyle(fontSize: 20,
+              style: const TextStyle(
+                  fontSize: 20,
                   fontWeight: FontWeight.w700,
                   color: TAPAColors.white)),
           const SizedBox(height: 12),
           Padding(
-            padding: const EdgeInsets
-                .symmetric(horizontal: 40),
+            padding: const EdgeInsets.symmetric(horizontal: 40),
             child: ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: LinearProgressIndicator(
                     value: (_step + 1) / 3,
                     backgroundColor: Colors.white12,
                     valueColor:
-                    const AlwaysStoppedAnimation<Color>(
-                        TAPAColors.gold))),
+                        const AlwaysStoppedAnimation<Color>(TAPAColors.gold))),
           ),
           if (_error) ...[
             const SizedBox(height: 8),
             Text(_errorMsg,
-                style: const TextStyle(
-                    color: TAPAColors.red,
-                    fontSize: 12)),
+                style: const TextStyle(color: TAPAColors.red, fontSize: 12)),
           ],
           if (_isLoading) ...[
             const SizedBox(height: 8),
@@ -187,35 +176,32 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
           ],
           const SizedBox(height: 32),
           Row(
-            mainAxisAlignment:
-            MainAxisAlignment.center,
-            children: List.generate(4, (i) =>
-                Container(
-                  margin: const EdgeInsets
-                      .symmetric(horizontal: 10),
-                  width: 18, height: 18,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: i < _currentPin.length
-                          ? TAPAColors.gold
-                          : Colors.transparent,
-                      border: Border.all(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+                4,
+                (i) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
                           color: i < _currentPin.length
                               ? TAPAColors.gold
-                              : Colors.white38,
-                          width: 2)),
-                )),
+                              : Colors.transparent,
+                          border: Border.all(
+                              color: i < _currentPin.length
+                                  ? TAPAColors.gold
+                                  : Colors.white38,
+                              width: 2)),
+                    )),
           ),
           const SizedBox(height: 40),
           Padding(
-            padding: const EdgeInsets
-                .symmetric(horizontal: 40),
+            padding: const EdgeInsets.symmetric(horizontal: 40),
             child: GridView.builder(
                 shrinkWrap: true,
-                physics:
-                const NeverScrollableScrollPhysics(),
-                gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     childAspectRatio: 1.8,
                     crossAxisSpacing: 12,
@@ -225,30 +211,27 @@ class _ChangePinScreenState extends State<ChangePinScreen> {
                   if (i == 9) return const SizedBox();
                   if (i == 11) {
                     return GestureDetector(
-                      onTap: _delete,
-                      child: Container(
-                          decoration: BoxDecoration(
-                              color: Colors.white10,
-                              borderRadius:
-                              BorderRadius.circular(12)),
-                          child: const Icon(
-                              Icons.backspace_outlined,
-                              color: Colors.white60,
-                              size: 22)));
+                        onTap: _delete,
+                        child: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.white10,
+                                borderRadius: BorderRadius.circular(12)),
+                            child: const Icon(Icons.backspace_outlined,
+                                color: Colors.white60, size: 22)));
                   }
-                  final d = i == 10 ? '0' : '${i+1}';
+                  final d = i == 10 ? '0' : '${i + 1}';
                   return GestureDetector(
                       onTap: () => _press(d),
                       child: Container(
                           decoration: BoxDecoration(
                               color: Colors.white10,
-                              borderRadius:
-                              BorderRadius.circular(12)),
-                          child: Center(child: Text(d,
-                              style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w500,
-                                  color: TAPAColors.white)))));
+                              borderRadius: BorderRadius.circular(12)),
+                          child: Center(
+                              child: Text(d,
+                                  style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w500,
+                                      color: TAPAColors.white)))));
                 }),
           ),
         ]),

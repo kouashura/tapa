@@ -91,15 +91,14 @@ class UpdateWalletUseCase {
         );
       }
 
-      // Récupérer le portefeuille existant
-      final wallets = await _walletRepository.getWalletsOnce(params.walletId);
-      if (wallets.isEmpty) {
+      // Récupérer le portefeuille existant par son ID
+      final existingWallet =
+          await _walletRepository.getWalletById(params.walletId);
+      if (existingWallet == null) {
         return UpdateWalletResult.error(
           'Portefeuille non trouvé.',
         );
       }
-
-      final existingWallet = wallets.first;
 
       // Créer le portefeuille mis à jour
       final updatedWallet = existingWallet.copyWith(
@@ -157,13 +156,12 @@ class UpdateWalletBalanceUseCase {
         return UpdateWalletResult.error('Le solde ne peut pas être négatif.');
       }
 
-      // Récupérer le portefeuille
-      final wallets = await _walletRepository.getWalletsOnce(walletId);
-      if (wallets.isEmpty) {
+      // Récupérer le portefeuille par son ID
+      final wallet = await _walletRepository.getWalletById(walletId);
+      if (wallet == null) {
         return UpdateWalletResult.error('Portefeuille non trouvé.');
       }
 
-      final wallet = wallets.first;
       final updatedWallet = wallet.copyWith(
         solde: newBalance,
         updatedAt: DateTime.now(),

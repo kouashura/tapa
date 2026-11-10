@@ -33,16 +33,13 @@ class _PinScreenState extends ConsumerState<PinScreen> {
       _errorMessage = '';
     });
     if (_pin.length == 4) {
-      Future.delayed(
-          const Duration(milliseconds: 200),
-          _validate);
+      Future.delayed(const Duration(milliseconds: 200), _validate);
     }
   }
 
   void _delete() {
     if (_pin.isNotEmpty) {
-      setState(() => _pin =
-          _pin.substring(0, _pin.length - 1));
+      setState(() => _pin = _pin.substring(0, _pin.length - 1));
     }
   }
 
@@ -106,7 +103,8 @@ class _PinScreenState extends ConsumerState<PinScreen> {
           essaiExpire = false;
         }
 
-        Logger.info('🔍 Navigation - Essai expiré: $essaiExpire, Accès: $aAcces, Root: $isRoot');
+        Logger.info(
+            '🔍 Navigation - Essai expiré: $essaiExpire, Accès: $aAcces, Root: $isRoot');
 
         // ✅ CORRECTION: Vérifier mounted après chaque await
         if (!mounted) return;
@@ -127,7 +125,8 @@ class _PinScreenState extends ConsumerState<PinScreen> {
         Logger.error('❌ Erreur lors de la sauvegarde du PIN: $e');
         setState(() {
           _error = true;
-          _errorMessage = 'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
+          _errorMessage =
+              'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
           _isLoading = false;
         });
       }
@@ -139,7 +138,8 @@ class _PinScreenState extends ConsumerState<PinScreen> {
 
       try {
         final isValid = await authNotifier.verifyPin(_pin);
-        Logger.info('🔍 Vérification PIN: ${isValid ? "✅ Valide" : "❌ Invalide"}');
+        Logger.info(
+            '🔍 Vérification PIN: ${isValid ? "✅ Valide" : "❌ Invalide"}');
 
         // ✅ CORRECTION: Vérifier mounted après await
         if (!mounted) return;
@@ -194,7 +194,8 @@ class _PinScreenState extends ConsumerState<PinScreen> {
         Logger.error('❌ Erreur vérification PIN: $e');
         setState(() {
           _error = true;
-          _errorMessage = 'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
+          _errorMessage =
+              'Erreur: ${e.toString().replaceAll('Exception: ', '')}';
           _isLoading = false;
         });
       }
@@ -204,9 +205,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
   @override
   Widget build(BuildContext context) {
     final title = widget.isSetup
-        ? (_confirmMode
-        ? 'Confirme ton code'
-        : 'Choisis ton code PIN')
+        ? (_confirmMode ? 'Confirme ton code' : 'Choisis ton code PIN')
         : 'Entre ton code PIN';
 
     return Scaffold(
@@ -268,24 +267,22 @@ class _PinScreenState extends ConsumerState<PinScreen> {
             const SizedBox(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(4, (i) =>
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                    width: 18,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: i < _pin.length
-                          ? TAPAColors.gold
-                          : Colors.transparent,
-                      border: Border.all(
-                        color: i < _pin.length
-                            ? TAPAColors.gold
-                            : Colors.white38,
-                        width: 2,
-                      ),
+              children: List.generate(
+                4,
+                (i) => Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  width: 18,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color:
+                        i < _pin.length ? TAPAColors.gold : Colors.transparent,
+                    border: Border.all(
+                      color: i < _pin.length ? TAPAColors.gold : Colors.white38,
+                      width: 2,
                     ),
                   ),
+                ),
               ),
             ),
             const SizedBox(height: 48),
@@ -313,19 +310,19 @@ class _PinScreenState extends ConsumerState<PinScreen> {
                     if (i == 9) return const SizedBox();
                     if (i == 11) {
                       return GestureDetector(
-                      onTap: _delete,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white10,
-                          borderRadius: BorderRadius.circular(12),
+                        onTap: _delete,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white10,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.backspace_outlined,
+                            color: Colors.white60,
+                            size: 22,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.backspace_outlined,
-                          color: Colors.white60,
-                          size: 22,
-                        ),
-                      ),
-                    );
+                      );
                     }
                     final digit = i == 10 ? '0' : '${i + 1}';
                     return GestureDetector(

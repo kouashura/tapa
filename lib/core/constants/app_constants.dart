@@ -117,7 +117,11 @@ class AppConstants {
   // MONNAIES SUPPORTÉES
   // ============================================
   static const List<Map<String, String>> monnaies = [
-    {'symbole': 'FCFA', 'nom': 'Franc CFA', 'pays': 'Côte d\'Ivoire, Sénégal, etc.'},
+    {
+      'symbole': 'FCFA',
+      'nom': 'Franc CFA',
+      'pays': 'Côte d\'Ivoire, Sénégal, etc.'
+    },
     {'symbole': 'NGN', 'nom': 'Naira', 'pays': 'Nigeria'},
     {'symbole': 'GHS', 'nom': 'Cedi', 'pays': 'Ghana'},
     {'symbole': 'EUR', 'nom': 'Euro', 'pays': 'Europe'},
@@ -129,16 +133,76 @@ class AppConstants {
   // PAYS SUPPORTÉS
   // ============================================
   static const List<Map<String, String>> pays = [
-    {'code': 'CI', 'nom': 'Côte d\'Ivoire', 'indicatif': '+225', 'flag': '🇨🇮', 'monnaie': 'FCFA'},
-    {'code': 'SN', 'nom': 'Sénégal', 'indicatif': '+221', 'flag': '🇸🇳', 'monnaie': 'FCFA'},
-    {'code': 'BF', 'nom': 'Burkina Faso', 'indicatif': '+226', 'flag': '🇧🇫', 'monnaie': 'FCFA'},
-    {'code': 'ML', 'nom': 'Mali', 'indicatif': '+223', 'flag': '🇲🇱', 'monnaie': 'FCFA'},
-    {'code': 'BJ', 'nom': 'Bénin', 'indicatif': '+229', 'flag': '🇧🇯', 'monnaie': 'FCFA'},
-    {'code': 'TG', 'nom': 'Togo', 'indicatif': '+228', 'flag': '🇹🇬', 'monnaie': 'FCFA'},
-    {'code': 'NG', 'nom': 'Nigeria', 'indicatif': '+234', 'flag': '🇳🇬', 'monnaie': 'NGN'},
-    {'code': 'GH', 'nom': 'Ghana', 'indicatif': '+233', 'flag': '🇬🇭', 'monnaie': 'GHS'},
-    {'code': 'FR', 'nom': 'France', 'indicatif': '+33', 'flag': '🇫🇷', 'monnaie': 'EUR'},
-    {'code': 'US', 'nom': 'États-Unis', 'indicatif': '+1', 'flag': '🇺🇸', 'monnaie': 'USD'},
+    {
+      'code': 'CI',
+      'nom': 'Côte d\'Ivoire',
+      'indicatif': '+225',
+      'flag': '🇨🇮',
+      'monnaie': 'FCFA'
+    },
+    {
+      'code': 'SN',
+      'nom': 'Sénégal',
+      'indicatif': '+221',
+      'flag': '🇸🇳',
+      'monnaie': 'FCFA'
+    },
+    {
+      'code': 'BF',
+      'nom': 'Burkina Faso',
+      'indicatif': '+226',
+      'flag': '🇧🇫',
+      'monnaie': 'FCFA'
+    },
+    {
+      'code': 'ML',
+      'nom': 'Mali',
+      'indicatif': '+223',
+      'flag': '🇲🇱',
+      'monnaie': 'FCFA'
+    },
+    {
+      'code': 'BJ',
+      'nom': 'Bénin',
+      'indicatif': '+229',
+      'flag': '🇧🇯',
+      'monnaie': 'FCFA'
+    },
+    {
+      'code': 'TG',
+      'nom': 'Togo',
+      'indicatif': '+228',
+      'flag': '🇹🇬',
+      'monnaie': 'FCFA'
+    },
+    {
+      'code': 'NG',
+      'nom': 'Nigeria',
+      'indicatif': '+234',
+      'flag': '🇳🇬',
+      'monnaie': 'NGN'
+    },
+    {
+      'code': 'GH',
+      'nom': 'Ghana',
+      'indicatif': '+233',
+      'flag': '🇬🇭',
+      'monnaie': 'GHS'
+    },
+    {
+      'code': 'FR',
+      'nom': 'France',
+      'indicatif': '+33',
+      'flag': '🇫🇷',
+      'monnaie': 'EUR'
+    },
+    {
+      'code': 'US',
+      'nom': 'États-Unis',
+      'indicatif': '+1',
+      'flag': '🇺🇸',
+      'monnaie': 'USD'
+    },
   ];
 
   // ============================================
@@ -188,10 +252,13 @@ class AppConstants {
   // ============================================
   // MESSAGES D'ERREUR
   // ============================================
-  static const String errorGeneric = 'Une erreur est survenue. Veuillez réessayer.';
-  static const String errorNetwork = 'Problème de connexion. Vérifiez votre réseau.';
+  static const String errorGeneric =
+      'Une erreur est survenue. Veuillez réessayer.';
+  static const String errorNetwork =
+      'Problème de connexion. Vérifiez votre réseau.';
   static const String errorTimeout = 'Délai dépassé. Veuillez réessayer.';
-  static const String errorServer = 'Erreur serveur. Veuillez réessayer plus tard.';
+  static const String errorServer =
+      'Erreur serveur. Veuillez réessayer plus tard.';
   static const String errorAuth = 'Session expirée. Veuillez vous reconnecter.';
   static const String errorPinIncorrect = 'Code PIN incorrect. Réessayez.';
   static const String errorPinBlocked = 'PIN bloqué. Réessayez dans 5 minutes.';

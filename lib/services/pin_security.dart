@@ -104,8 +104,10 @@ class PinSecurity {
 
     if (attempts >= maxAttempts) {
       final lockedUntil = DateTime.now().add(lockoutDuration);
-      await prefs.setInt('$prefix$_kLockedUntilKey', lockedUntil.millisecondsSinceEpoch);
-      Logger.warning('🔒 PIN verrouillé après $attempts tentatives pour $userId');
+      await prefs.setInt(
+          '$prefix$_kLockedUntilKey', lockedUntil.millisecondsSinceEpoch);
+      Logger.warning(
+          '🔒 PIN verrouillé après $attempts tentatives pour $userId');
       return PinCheckResult(
         success: false,
         isLocked: true,
@@ -123,7 +125,8 @@ class PinSecurity {
     );
   }
 
-  static Future<void> _resetAttempts(SharedPreferences prefs, String userId) async {
+  static Future<void> _resetAttempts(
+      SharedPreferences prefs, String userId) async {
     final prefix = '${userId}_';
     await prefs.remove('$prefix$_kAttemptsKey');
     await prefs.remove('$prefix$_kLockedUntilKey');
@@ -138,7 +141,8 @@ class PinSecurity {
   }
 
   /// Migre un PIN depuis Firestore vers le stockage local
-  static Future<void> migrateFromFirestore(String userId, String hashedPin) async {
+  static Future<void> migrateFromFirestore(
+      String userId, String hashedPin) async {
     final prefs = await SharedPreferences.getInstance();
     final prefix = '${userId}_';
 

@@ -165,7 +165,8 @@ class CreateBudgetUseCase {
       await _budgetRepository.saveBudget(budget);
 
       Logger.success('✅ Budget créé pour ${budget.moisLabel}');
-      Logger.info('💰 Revenus: ${budget.totalRevenusPrevu}, Dépenses: ${budget.totalDepensesPrevu}');
+      Logger.info(
+          '💰 Revenus: ${budget.totalRevenusPrevu}, Dépenses: ${budget.totalDepensesPrevu}');
 
       return CreateBudgetResult.success(budget);
     } catch (e) {

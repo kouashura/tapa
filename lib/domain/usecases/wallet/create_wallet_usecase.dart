@@ -87,9 +87,12 @@ class CreateWalletUseCase {
         );
       }
 
-      // Créer le portefeuille
+      // Générer un ID unique AVANT la sauvegarde
+      final walletId = DateTime.now().millisecondsSinceEpoch.toString();
+
+      // Créer le portefeuille avec l'ID
       final wallet = WalletModel(
-        id: '', // L'ID sera généré par le repository
+        id: walletId,
         uid: params.uid,
         nom: params.nom,
         emoji: params.emoji,
@@ -102,12 +105,13 @@ class CreateWalletUseCase {
       );
 
       // Sauvegarder
-      final walletId = await _walletRepository.addWallet(wallet);
+      await _walletRepository.addWallet(wallet);
 
       // Récupérer le portefeuille créé
-      final createdWallet = wallet.copyWith(id: walletId);
+      final createdWallet = wallet;
 
-      Logger.success('✅ Portefeuille créé: ${createdWallet.nom} (ID: $walletId)');
+      Logger.success(
+          '✅ Portefeuille créé: ${createdWallet.nom} (ID: $walletId)');
 
       return CreateWalletResult.success(createdWallet);
     } catch (e) {

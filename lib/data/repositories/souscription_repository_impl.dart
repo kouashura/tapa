@@ -40,7 +40,8 @@ class SouscriptionRepositoryImpl implements ISouscriptionRepository {
   @override
   Future<SouscriptionModel?> getSouscriptionById(String reference) async {
     try {
-      final souscriptions = await _firestoreDatasource.getSouscriptions(reference);
+      final souscriptions =
+          await _firestoreDatasource.getSouscriptions(reference);
       if (souscriptions.isEmpty) return null;
       return souscriptions.firstWhere(
         (s) => s.reference == reference,
