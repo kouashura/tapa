@@ -140,18 +140,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ]),
 
-            // ---- Section Admin ----
-            _sectionTitle('ADMINISTRATION'),
-            _group([
-              _menuItem(
-                icon: Icons.admin_panel_settings,
-                iconColor: TAPAColors.red,
-                bgColor: Colors.red.shade50,
-                title: 'Demandes de retrait',
-                subtitle: 'Gérer les retraits en attente',
-                onTap: () => context.push('/admin/withdraws'),
-              ),
-            ]),
+                        if (user != null &&
+                (user.id == 'YkqBGtNLqWVYR3GuVDYqvmmqY1I2' ||
+                    user.id == 'S6yXw1W7vEhRh8cL5glKTldvRm13' ||
+                    user.email == 'kouassishura2025@gmail.com' ||
+                    user.email == 'infosservices2015@gmail.com' ||
+                    user.phoneNumber == 'kouassishura2025@gmail.com' ||
+                    user.phoneNumber == 'infosservices2015@gmail.com')) ...[
+              // ---- Section Admin ----
+              _sectionTitle('ADMINISTRATION'),
+              _group([
+                _menuItem(
+                  icon: Icons.admin_panel_settings,
+                  iconColor: TAPAColors.red,
+                  bgColor: Colors.red.shade50,
+                  title: 'Demandes de retrait',
+                  subtitle: 'Gérer les retraits en attente',
+                  onTap: () => context.push('/admin/withdraws'),
+                ),
+              ]),
+            ],
 
             // ---- Section Mon compte ----
             _sectionTitle('MON COMPTE'),
@@ -208,6 +216,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 title: "Guide d'utilisation",
                 subtitle: 'Apprendre à utiliser TAPA Invest',
                 onTap: () => context.push('/guide'),
+              ),
+              _menuItem(
+                icon: Icons.support_agent,
+                iconColor: TAPAColors.navy,
+                bgColor: const Color(0xFFE8EAF6),
+                title: 'Assistance & Aide',
+                subtitle: 'Parler à un agent sur WhatsApp',
+                onTap: () => context.push('/help'),
               ),
               _menuItem(
                 icon: Icons.picture_as_pdf_outlined,
