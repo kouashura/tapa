@@ -85,4 +85,42 @@ class DigitalPayService {
       throw Exception('Erreur ouverture navigateur: $e');
     }
   }
+
+  /// Initie un retrait (payout) vers un compte Mobile Money
+  Future<bool> retirerAvecDigitalPay({
+    required String userId,
+    required int amount,
+    required String operator,
+    required String phone,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_backendUrl/payout/request'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'userId': userId,
+          'amount': amount,
+          'operator': operator,
+          'phone': phone,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          Logger.success('✅ Retrait initié: ${data['requestId']}');
+          return true;
+        } else {
+          Logger.error('❌ Erreur retrait: ${data['error']}');
+          return false;
+        }
+      } else {
+        Logger.error('❌ Erreur HTTP retrait ${response.statusCode}: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      Logger.error('❌ Erreur retrait: $e');
+      return false;
+    }
+  }
 }

@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../services/paiement_pro_service.dart';
+import '../../../services/digital_pay_service.dart';
 import 'package:tapa_budget/presentation/providers/providers.dart';
 import 'package:tapa_budget/presentation/providers/payment_wallet_provider.dart';
 import '../../../data/models/models.dart'; // Pour WalletModel
@@ -41,6 +41,8 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     super.dispose();
   }
 
+  String _selectedOperator = 'WAVE';
+
   Future<void> _ajouterFonds() async {
     // ✅ 1. Vérifier que l'utilisateur et son téléphone sont présents
     final currentUser = ref.read(currentUserProvider);
@@ -71,27 +73,19 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final paiementPro = PaiementProService();
-      final success = await paiementPro.payerAvecPaiementPro(
+      final digitalPay = DigitalPayService();
+      final success = await digitalPay.payerAvecDigitalPay(
+        userId: currentUser.id,
         amount: montant,
+        operator: _selectedOperator == 'WAVE'
+            ? 'WAVE_MONEY_CI'
+            : _selectedOperator == 'ORANGE'
+                ? 'ORANGE_MONEY_CI'
+                : _selectedOperator == 'MTN'
+                    ? 'MTN_MONEY_CI'
+                    : 'MOOV_MONEY_CI',
+        phone: currentUser.phoneNumber.trim().isNotEmpty ? currentUser.phoneNumber : '+2250700000000',
         description: 'Rechargement wallet ${_selectedWallet!.nom}',
-        referenceNumber: 'WALLET-${DateTime.now().millisecondsSinceEpoch}',
-        customerEmail: currentUser.email.isNotEmpty
-            ? currentUser.email
-            : 'client@tapa.com',
-        customerFirstName: currentUser.prenom,
-        customerLastname: currentUser.prenom,
-        // ✅ Si le profil n'a pas de numéro, on met un placeholder.
-        // L'utilisateur saisira son vrai numéro sur la page PaiementPro.
-        customerPhoneNumber: currentUser.phoneNumber.trim().isNotEmpty
-            ? currentUser.phoneNumber
-            : '+2250700000000',
-        channel: 'WAVE',
-        notificationURL: 'https://wallet-notify.tapa-invest.workers.dev',
-        returnURL: 'tapa://wallet/success',
-        // ✅ On passe l'ID du portefeuille ET le montant pour que le webhook sache quoi créditer
-        returnContext:
-            '{"userId":"${currentUser.id}", "walletId":"${_selectedWallet!.id}", "amount":$montant}',
       );
 
       if (success && mounted) {
@@ -211,30 +205,26 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                       setDialogState(() => isLoading = true);
 
                       try {
-                        final response = await http
-                            .post(
-                              Uri.parse(
-                                  'https://tapa-budget-server.onrender.com/api/withdraw'),
-                              headers: {'Content-Type': 'application/json'},
-                              body: jsonEncode({
-                                'userId': currentUser.id,
-                                'amount': montant,
-                                'phone': phoneCtrl.text,
-                                'operator': operator,
-                              }),
-                            )
-                            .timeout(const Duration(seconds: 90));
+                        // On mappe l'opérateur simple vers le code DigitalPaye
+                        String dpOperator = operator;
+                        if (operator == 'WAVE') dpOperator = 'WAVE_MONEY_CI';
+                        else if (operator == 'ORANGE') dpOperator = 'ORANGE_MONEY_CI';
+                        else if (operator == 'MTN') dpOperator = 'MTN_MONEY_CI';
+                        else if (operator == 'MOOV') dpOperator = 'MOOV_MONEY_CI';
 
-                        if (response.statusCode == 200) {
-                          final data = jsonDecode(response.body);
-                          Navigator.pop(ctx, data);
+                        final digitalPay = DigitalPayService();
+                        final success = await digitalPay.retirerAvecDigitalPay(
+                          userId: currentUser.id,
+                          amount: montant,
+                          operator: dpOperator,
+                          phone: phoneCtrl.text,
+                        );
+
+                        if (success) {
+                          Navigator.pop(ctx, {'success': true});
                         } else {
-                          final data = jsonDecode(response.body);
-                          _showSnackBar(data['error'] ?? 'Erreur serveur');
+                          _showSnackBar('Erreur lors de la demande de retrait');
                         }
-                      } on TimeoutException {
-                        _showSnackBar(
-                            'Le serveur met du temps à répondre. Veuillez patienter et réessayer.');
                       } catch (e) {
                         _showSnackBar('Erreur réseau: $e');
                       } finally {
@@ -506,7 +496,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
                         ),
                         SizedBox(height: 2),
                         Text(
-                          'En partenariat sécurisé avec PaiementPro',
+                          'En partenariat sécurisé avec DigitalPaye',
                           style: TextStyle(
                             fontSize: 11,
                             color: TAPAColors.textSecond,
@@ -545,6 +535,21 @@ class _WalletScreenState extends ConsumerState<WalletScreen> {
               ),
             ),
 
+            DropdownButtonFormField<String>(
+              value: _selectedOperator,
+              decoration: const InputDecoration(
+                labelText: 'Opérateur de paiement',
+                border: OutlineInputBorder(),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'WAVE', child: Text('Wave')),
+                DropdownMenuItem(value: 'ORANGE', child: Text('Orange Money')),
+                DropdownMenuItem(value: 'MTN', child: Text('MTN MoMo')),
+                DropdownMenuItem(value: 'MOOV', child: Text('Moov Flooz')),
+              ],
+              onChanged: (v) => setState(() => _selectedOperator = v!),
+            ),
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               height: 52,

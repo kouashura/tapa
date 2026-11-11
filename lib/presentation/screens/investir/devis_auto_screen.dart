@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'dart:io';
 import '../../../core/theme/app_theme.dart';
 import '../../../domain/models/tarif_assurance_auto.dart';
-import '../../../services/paiement_pro_service.dart';
+import '../../../services/digital_pay_service.dart';
 import 'package:tapa_budget/presentation/providers/providers.dart';
 import '../../../core/utils/logger.dart';
 import '../../../data/models/models.dart';
@@ -135,25 +135,13 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
       Logger.info('   - Montant: $_montantTotal FCFA');
       Logger.info('   - Reference: $reference');
 
-      final paiementPro = PaiementProService();
-      final success = await paiementPro.payerAvecPaiementPro(
+      final digitalPay = DigitalPayService();
+      final success = await digitalPay.payerAvecDigitalPay(
+        userId: currentUser.id,
         amount: _montantTotal,
-        description:
-            'Assurance ${widget.produitNom} - ${_nbMoisCtrl.text} mois',
-        referenceNumber: reference,
-        customerEmail: currentUser.email.isNotEmpty
-            ? currentUser.email
-            : 'client@tapa.com',
-        customerFirstName: currentUser.prenom,
-        customerLastname: currentUser.prenom,
-        customerPhoneNumber: _telephoneCtrl.text.trim().isNotEmpty
-            ? _telephoneCtrl.text.trim()
-            : currentUser.phoneNumber,
-        channel: '',
-        notificationURL: 'https://wallet-notify.tapa-invest.workers.dev',
-        returnURL: 'tapa-budget://assurance/success',
-        returnContext:
-            '{"userId":"${currentUser.id}","type":"assurance","produitNom":"${widget.produitNom}","reference":"$reference"}',
+        operator: 'WAVE_MONEY_CI',
+        phone: _telephoneCtrl.text.trim().isNotEmpty ? _telephoneCtrl.text.trim() : currentUser.phoneNumber,
+        description: 'Assurance  -  mois',
       );
 
       if (success && mounted) {
