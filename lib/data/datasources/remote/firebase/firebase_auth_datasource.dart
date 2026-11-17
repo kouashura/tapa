@@ -173,33 +173,19 @@ class FirebaseAuthDatasource {
     required String monnaie,
   }) async {
     try {
-      // Mot de passe derive de l'email (passwordless)
-      final password = 'TAPA_${email}_secure_2024';
+      // 🔒 SÉCURITÉ : plus de mot de passe déterministe.
+      // Session Firebase anonyme ; l'email est un identifiant métier
+      // stocké dans Firestore. La sécurité de connexion repose sur le
+      // PIN local (haché+salté) + la persistance du token Firebase.
 
-      UserCredential credential;
-      try {
-        // Essayer de creer un compte
-        Logger.info('Creation compte Firebase pour: $email');
-        credential = await _auth.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'email-already-in-use') {
-          // Email deja utilise -> se connecter
-          Logger.info('Email existant, connexion: $email');
-          credential = await _auth.signInWithEmailAndPassword(
-            email: email,
-            password: password,
-          );
-        } else {
-          rethrow;
-        }
+      User? firebaseUser = _auth.currentUser;
+      if (firebaseUser == null) {
+        final credential = await _auth.signInAnonymously();
+        firebaseUser = credential.user;
       }
 
-      final firebaseUser = credential.user;
       if (firebaseUser == null) {
-        throw Exception('Impossible de creer un utilisateur Firebase');
+        throw Exception('Impossible de créer la session Firebase');
       }
 
       final user = AppUser(
@@ -220,7 +206,8 @@ class FirebaseAuthDatasource {
             user.toMap(),
             SetOptions(merge: true),
           );
-      Logger.info('Utilisateur cree/connecte: ${user.prenom} (${user.id})');
+
+      Logger.info('Utilisateur créé: ${user.prenom} (${user.id})');
       return user;
     } catch (e) {
       Logger.error('Erreur createUser: $e');

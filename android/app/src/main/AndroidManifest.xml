@@ -96,6 +96,15 @@
                     android:pathPrefix="/verify-email" />
             </intent-filter>
 
+
+            <!-- Deep Link pour le retour apres paiement DigitalPaye -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="tapa" android:host="wallet" />
+            </intent-filter>
+        
         </activity>
 
         <!-- ============================================

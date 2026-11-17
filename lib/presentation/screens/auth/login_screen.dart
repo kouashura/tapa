@@ -1,10 +1,8 @@
-// lib/screens/auth/login_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/logger.dart';
+import '../../providers/auth/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -14,246 +12,196 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  final TextEditingController _emailController =
-      TextEditingController(); // ✅ CHANGÉ : email
+  String _pin = '';
   bool _isLoading = false;
   String? _error;
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    super.dispose();
-  }
-
-  // ✅ AJOUT : Validation d'email
-  bool _isValidEmail(String email) {
-    final emailRegex =
-        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    return emailRegex.hasMatch(email);
-  }
-
-  Future<void> _login() async {
-    final email = _emailController.text.trim();
-    if (email.isEmpty || !_isValidEmail(email)) {
-      setState(() => _error = 'Veuillez entrer un email valide.');
-      return;
+  void _onPinDigit(String digit) {
+    if (_pin.length < 4 && !_isLoading) {
+      setState(() {
+        _pin += digit;
+        _error = null;
+      });
+      if (_pin.length == 4) {
+        _verifyPin();
+      }
     }
+  }
 
+  void _onBackspace() {
+    if (_pin.isNotEmpty && !_isLoading) {
+      setState(() {
+        _pin = _pin.substring(0, _pin.length - 1);
+        _error = null;
+      });
+    }
+  }
+
+  Future<void> _verifyPin() async {
     setState(() {
       _isLoading = true;
       _error = null;
     });
 
     try {
-      if (mounted) {
-        // ✅ CHANGÉ : Envoyer l'email
-        context.push('/verify-phone', extra: {
-          'prenom': 'Utilisateur',
-          'telephone':
-              email, // L'email est envoyé comme "telephone" pour compatibilité
-          'indicatif': '',
-          'codePays': 'CI',
-          'monnaie': 'FCFA',
+      final authNotifier = ref.read(authStateProvider.notifier);
+      final success = await authNotifier.verifyPin(_pin);
+
+      if (success && mounted) {
+        context.go('/home');
+      } else {
+        setState(() {
+          _error = 'PIN incorrect. Réessayez.';
+          _pin = '';
         });
       }
     } catch (e) {
       setState(() {
-        _error = e.toString().replaceAll('Exception: ', '');
-        _isLoading = false;
+        _error = 'Erreur : ${e.toString()}';
+        _pin = '';
       });
-      Logger.error('❌ Erreur login: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isSmall = MediaQuery.of(context).size.width < 360;
-
     return Scaffold(
       backgroundColor: TAPAColors.navy,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: isSmall ? 20 : 32,
-            vertical: 40,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Logo
-              Center(
-                child: Column(
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: TAPAColors.gold.withOpacity(0.15),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: TAPAColors.gold,
-                          width: 2,
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.account_balance_wallet,
-                        color: TAPAColors.gold,
-                        size: 36,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    RichText(
-                      text: const TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'TAPA',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w800,
-                              color: TAPAColors.gold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' Invest',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w400,
-                              color: TAPAColors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Votre coach financier intelligent',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white54,
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 20),
+              // Logo / Titre
+              const Text(
+                'TAPA Invest',
+                style: TextStyle(
+                  color: TAPAColors.gold,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 48),
-
-              // Formulaire
-              Text(
-                'Se connecter',
+              const SizedBox(height: 12),
+              const Text(
+                'Content de te revoir !',
                 style: TextStyle(
-                  fontSize: isSmall ? 20 : 24,
-                  fontWeight: FontWeight.w700,
-                  color: TAPAColors.white,
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 8),
               const Text(
-                'Entrez votre adresse email',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white54,
-                ),
+                'Entre ton code PIN à 4 chiffres.',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
 
-              // ✅ CHANGÉ : Champ email
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                textCapitalization: TextCapitalization.none,
-                style: const TextStyle(color: TAPAColors.white),
-                enabled: !_isLoading,
-                decoration: InputDecoration(
-                  labelText: 'Adresse Email',
-                  hintText: 'Ex: kouassi@gmail.com',
-                  prefixIcon:
-                      const Icon(Icons.email_outlined, color: Colors.white54),
-                  labelStyle: const TextStyle(color: Colors.white54),
-                  hintStyle: const TextStyle(color: Colors.white38),
-                  filled: true,
-                  fillColor: Colors.white10,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: TAPAColors.gold, width: 2),
-                  ),
-                  errorText: _error,
-                  errorStyle: const TextStyle(color: TAPAColors.red),
-                ),
-                onSubmitted: (_) => _login(),
-              ),
-              const SizedBox(height: 16),
-
-              // Bouton connexion
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: TAPAColors.gold,
-                    foregroundColor: TAPAColors.navy,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              // Indicateurs de PIN (4 cercles)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(4, (index) {
+                  final filled = index < _pin.length;
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white54, width: 2),
+                      color: filled ? TAPAColors.gold : Colors.transparent,
                     ),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: TAPAColors.navy,
-                          ),
-                        )
-                      : const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Se connecter',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
+                  );
+                }),
+              ),
+
+              if (_error != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  _error!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.redAccent, fontSize: 13),
+                ),
+              ],
+
+              const SizedBox(height: 40),
+
+              // Pavé numérique
+              Column(
+                children: [
+                  for (var row in [
+                    ['1', '2', '3'],
+                    ['4', '5', '6'],
+                    ['7', '8', '9'],
+                    ['', '0', '⌫'],
+                  ])
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: row.map((digit) {
+                          if (digit.isEmpty) {
+                            return const SizedBox(width: 70, height: 70);
+                          }
+                          return InkWell(
+                            onTap: _isLoading
+                                ? null
+                                : () {
+                                    if (digit == '⌫') {
+                                      _onBackspace();
+                                    } else {
+                                      _onPinDigit(digit);
+                                    }
+                                  },
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              width: 70,
+                              height: 70,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                digit,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
-                            SizedBox(width: 8),
-                            Icon(Icons.arrow_forward_rounded, size: 20),
-                          ],
-                        ),
-                ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                ],
               ),
+
+              const SizedBox(height: 20),
+
+              if (_isLoading)
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(color: TAPAColors.gold),
+                ),
+
               const SizedBox(height: 24),
 
-              // Lien inscription
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Pas encore de compte ? ',
-                      style: TextStyle(
-                        color: Colors.white54,
-                        fontSize: 14,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => context.go('/inscription'),
-                      child: const Text(
-                        'S\'inscrire',
-                        style: TextStyle(
-                          color: TAPAColors.gold,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
+              // Bouton S'inscrire
+              TextButton(
+                onPressed: _isLoading ? null : () => context.push('/inscription'),
+                child: const Text(
+                  'Pas encore de compte ? S\'inscrire',
+                  style: TextStyle(color: TAPAColors.gold, fontSize: 14),
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),

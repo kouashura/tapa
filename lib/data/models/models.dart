@@ -33,6 +33,7 @@ class AppUser {
   final DateTime? dernierActive;
   final String email;
   final bool emailVerifie;
+  final String role; // 'user' | 'admin'
 
   AppUser({
     required this.id,
@@ -47,7 +48,10 @@ class AppUser {
     this.dernierActive,
     this.email = '',
     this.emailVerifie = false,
+    this.role = 'user',
   });
+
+  bool get isAdmin => role == 'admin';
 
   factory AppUser.fromMap(Map<String, dynamic> map, String id) {
     return AppUser(
@@ -63,6 +67,7 @@ class AppUser {
       dernierActive: map['dernierActive']?.toDate(),
       email: map['email'] ?? '',
       emailVerifie: map['emailVerifie'] ?? false,
+      role: (map['role'] as String?) ?? 'user',
     );
   }
 
@@ -79,6 +84,7 @@ class AppUser {
       'dernierActive': dernierActive,
       'email': email,
       'emailVerifie': emailVerifie,
+      'role': role,
     };
   }
 
@@ -95,6 +101,7 @@ class AppUser {
     DateTime? dernierActive,
     String? email,
     bool? emailVerifie,
+    String? role,
   }) {
     return AppUser(
       id: id ?? this.id,
@@ -110,6 +117,7 @@ class AppUser {
       dernierActive: dernierActive ?? this.dernierActive,
       email: email ?? this.email,
       emailVerifie: emailVerifie ?? this.emailVerifie,
+      role: role ?? this.role,
     );
   }
 }

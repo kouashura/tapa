@@ -135,10 +135,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<bool> verifyCodeSingle(String smsCode) async {
     try {
+      // ⚠️ On capture verificationId AVANT de changer le state,
+      // sinon verifying() l'écrase par null.
+      final verificationId = state.verificationId ?? '';
+
       state = AuthState.verifying();
       _appStateNotifier.setLoading(true);
 
-      final verificationId = state.verificationId ?? '';
       final user = await _authRepository.verifyPhoneNumber(
         verificationId,
         smsCode,
@@ -167,38 +170,46 @@ class AuthNotifier extends StateNotifier<AuthState> {
       'https://brevo-proxy.tapa-budget.workers.dev';
 
   Future<void> envoyerCodeVerificationEmail(String email) async {
+    // ⚠️ Le paramètre 'email' est en fait le numéro de téléphone (ex: 2250700000000)
+    final phone = email;
+    
     try {
       state = state.copyWith(isLoading: true);
       _appStateNotifier.setLoading(true);
 
       final code = (100000 + Random().nextInt(900000)).toString();
 
+      // 1. Sauvegarder le code dans Firestore
       await FirebaseFirestore.instance
           .collection('email_verifications')
-          .doc(email)
+          .doc(phone)
           .set({
         'code': code,
-        'email': email,
+        'phone': phone,
         'expiresAt': Timestamp.fromDate(
           DateTime.now().add(const Duration(minutes: 15)),
         ),
       });
 
+      // 2. Appeler TON backend Render (qui a la clé Brevo)
       final response = await http.post(
-        Uri.parse(_brevoWorkerUrl),
+        Uri.parse('https://tapa-budget-server.onrender.com/api/send-sms'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'code': code}),
+        body: jsonEncode({
+          'phone': phone,
+          'code': code,
+        }),
       );
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        throw Exception('Erreur envoi email: ${response.body}');
+      if (response.statusCode != 200) {
+        throw Exception('Erreur envoi SMS: ${response.body}');
       }
 
-      Logger.success('✅ Code de vérification envoyé à $email');
+      Logger.success('✅ Code de vérification envoyé par SMS à $phone');
     } catch (e) {
       state = AuthState.error(e.toString());
       _appStateNotifier.setError(e.toString());
-      Logger.error('❌ Erreur envoi code email: $e');
+      Logger.error('❌ Erreur envoi code SMS: $e');
       rethrow;
     } finally {
       _appStateNotifier.setLoading(false);
@@ -324,6 +335,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(isLoading: true);
       _appStateNotifier.setLoading(true);
 
+      Logger.info('🔍 Vérification PIN pour userId: ${firebase_auth.FirebaseAuth.instance.currentUser?.uid}');
       final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid;
       if (userId == null) {
         throw Exception('Aucun utilisateur connecté');
@@ -349,18 +361,33 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(isLoading: true);
       _appStateNotifier.setLoading(true);
 
-      final userId = firebase_auth.FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) {
-        Logger.warning('⚠️ Aucun utilisateur connecté pour vérifier le PIN');
-        return false;
+      // Identité : Firebase si dispo, sinon identifiant local persistant.
+      // → le PIN reste vérifiable même si le token Firebase a expiré.
+      String userId;
+      final firebaseUser = firebase_auth.FirebaseAuth.instance.currentUser;
+      if (firebaseUser != null) {
+        userId = firebaseUser.uid;
+      } else {
+        userId = await PinSecurity.getOrCreateLocalUserId();
+        Logger.warning('⚠️ Firebase absent, fallback identité locale');
       }
 
       final result = await PinSecurity.verifyPin(userId, pin);
 
       if (result.success) {
         Logger.success('✅ PIN vérifié');
+
+        // Recharger l'utilisateur pour synchroniser le state
+        // (sinon home lira user == null).
+        final user = await _authRepository.getCurrentUser();
+        if (user != null) {
+          state = AuthState.authenticated(user);
+          _appStateNotifier.setAuthenticatedUser(user);
+        }
       } else {
         Logger.warning('⚠️ PIN incorrect: ${result.message}');
+        // On peut exposer le message au state pour l'UI
+        state = state.copyWith(error: result.message);
       }
 
       return result.success;

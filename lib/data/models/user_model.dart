@@ -10,6 +10,7 @@ class UserModel {
   final bool hasAccessVie;
   final bool onboardingVu;
   final bool notificationsActivees;
+  final String role; // 'user' | 'admin'
   final DateTime? createdAt;
   final DateTime? dernierActive;
 
@@ -22,9 +23,12 @@ class UserModel {
     this.hasAccessVie = false,
     this.onboardingVu = false,
     this.notificationsActivees = true,
+    this.role = 'user',
     this.createdAt,
     this.dernierActive,
   });
+
+  bool get isAdmin => role == 'admin';
 
   factory UserModel.fromMap(Map<String, dynamic> map, String id) {
     return UserModel(
@@ -36,6 +40,7 @@ class UserModel {
       hasAccessVie: map['hasAccessVie'] ?? false,
       onboardingVu: map['onboardingVu'] ?? false,
       notificationsActivees: map['notificationsActivees'] ?? true,
+      role: (map['role'] as String?) ?? 'user',
       createdAt: map['createdAt']?.toDate(),
       dernierActive: map['dernierActive']?.toDate(),
     );
@@ -50,6 +55,7 @@ class UserModel {
       'hasAccessVie': hasAccessVie,
       'onboardingVu': onboardingVu,
       'notificationsActivees': notificationsActivees,
+      'role': role,
       'createdAt': createdAt,
       'dernierActive': dernierActive,
     };
@@ -64,6 +70,7 @@ class UserModel {
     bool? hasAccessVie,
     bool? onboardingVu,
     bool? notificationsActivees,
+    String? role,
     DateTime? createdAt,
     DateTime? dernierActive,
   }) {
@@ -77,6 +84,7 @@ class UserModel {
       onboardingVu: onboardingVu ?? this.onboardingVu,
       notificationsActivees:
           notificationsActivees ?? this.notificationsActivees,
+      role: role ?? this.role,
       createdAt: createdAt ?? this.createdAt,
       dernierActive: dernierActive ?? this.dernierActive,
     );

@@ -11,10 +11,7 @@ pluginManagement {
     includeBuild("${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle")
 
     repositories {
-        // ✅ Miroirs Aliyun ajoutés AVANT google()
-        maven { url 'https://maven.aliyun.com/repository/public' }
-        maven { url 'https://maven.aliyun.com/repository/google' }
-        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+        // ✅ Sources officielles en premier
         google()
         mavenCentral()
         gradlePluginPortal()

@@ -3,6 +3,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/providers.dart';
+import '../providers/admin/admin_access_provider.dart';
 import '../../services/db_service_mysql.dart';
 import '../../core/utils/logger.dart';
 
@@ -11,6 +12,7 @@ import '../../core/utils/logger.dart';
 // ============================================
 import '../screens/splash/splash_screen.dart';
 import '../screens/auth/inscription_screen.dart';
+import '../screens/auth/login_screen.dart';
 import '../screens/auth/pin_screen.dart';
 import '../screens/auth/verify_phone_screen.dart';
 import '../screens/auth/activation_screen.dart';
@@ -48,6 +50,7 @@ import '../screens/investir/fcp_screen.dart';
 import '../screens/investir/produit_detail_screen.dart';
 import '../screens/investir/portefeuille_screen.dart';
 import '../screens/investir/assurance_screen.dart';
+import '../screens/profile/help_screen.dart';
 import '../screens/investir/assurance_detail_screen.dart';
 import '../screens/investir/devis_auto_screen.dart';
 import '../screens/investir/assurance_success_screen.dart';
@@ -56,7 +59,10 @@ import '../screens/profile/historique_paiements_screen.dart';
 import '../screens/admin/admin_tarifs_screen.dart';
 import '../screens/admin/admin_souscriptions_screen.dart';
 import '../screens/migration/migration_page.dart';
-import '../screens/admin/admin_withdraw_screen.dart';
+import '../screens/admin/admin_withdraws_list_screen.dart';
+import '../screens/admin/admin_users_list_screen.dart';
+import '../screens/admin/admin_user_detail_screen.dart';
+import '../screens/admin/admin_dashboard_screen.dart';
 import '../screens/investir/my_sonam_contracts_screen.dart';
 
 class AppRouter {
@@ -79,11 +85,20 @@ class AppRouter {
 
   static GoRouter _buildRouter(WidgetRef ref) {
     return GoRouter(
-      initialLocation: '/splash',
+      initialLocation: '/login',
       redirect: (context, state) async {
         final isAuthenticated = ref.read(isAuthenticatedProvider);
         final user = ref.read(currentUserProvider);
         final location = state.matchedLocation;
+
+        // Protection des routes admin
+        if (location.startsWith('/admin')) {
+          if (!isAuthenticated) return '/login';
+          if (!ref.read(isAdminProvider)) {
+            Logger.warning('Acces admin refuse a $location');
+            return '/home';
+          }
+        }
 
         final isOnboardingScreen = location == '/onboarding';
         final isPinScreen =
@@ -96,10 +111,11 @@ class AppRouter {
 
         // ---- Utilisateur NON connecté ----
         if (!isAuthenticated) {
-          if (location == '/splash' || isAuthScreen) {
+          // On laisse passer /login et /inscription
+          if (location == '/login' || location == '/inscription' || location == '/splash' || isAuthScreen) {
             return null;
           }
-          return '/inscription';
+          return '/login'; // ✅ Redirection vers /login au lieu de /inscription
         }
 
         // ---- Utilisateur connecté ----
@@ -129,6 +145,10 @@ class AppRouter {
         GoRoute(
           path: '/splash',
           builder: (context, state) => const SplashScreen(),
+        ),
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const LoginScreen(),
         ),
         GoRoute(
           path: '/inscription',
@@ -176,13 +196,24 @@ class AppRouter {
           builder: (context, state) => const HomeScreen(),
         ),
         GoRoute(
-          path: '/admin/withdraws',
-          builder: (context, state) => const AdminWithdrawScreen(),
+          path: '/admin/dashboard',
+          builder: (context, state) => const AdminDashboardScreen(),
         ),
-        // ✅ Route Admin (accès réservé)
         GoRoute(
           path: '/admin/withdraws',
-          builder: (context, state) => const AdminWithdrawScreen(),
+          builder: (context, state) => const AdminWithdrawsListScreen(),
+        ),
+        GoRoute(
+          path: '/admin/users',
+          builder: (context, state) => const AdminUsersListScreen(),
+        ),
+        GoRoute(
+          path: '/admin/users/:id',
+          builder: (context, state) => AdminUserDetailScreen(userId: state.pathParameters['id']!),
+        ),
+        GoRoute(
+          path: '/help',
+          builder: (context, state) => const HelpScreen(),
         ),
         GoRoute(
           path: '/profile',
