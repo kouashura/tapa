@@ -170,8 +170,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       'https://brevo-proxy.tapa-budget.workers.dev';
 
   Future<void> envoyerCodeVerificationEmail(String email) async {
-    // ⚠️ Le paramètre 'email' est en fait le numéro de téléphone (ex: 2250700000000)
-    final phone = email;
+    // ✅ Envoi du code par EMAIL via Brevo (backend Render)
+    final cleanEmail = email.trim();
     
     try {
       state = state.copyWith(isLoading: true);
@@ -182,10 +182,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // 1. Sauvegarder le code dans Firestore
       await FirebaseFirestore.instance
           .collection('email_verifications')
-          .doc(phone)
+          .doc(cleanEmail)
           .set({
         'code': code,
-        'phone': phone,
+        'email': cleanEmail,
         'expiresAt': Timestamp.fromDate(
           DateTime.now().add(const Duration(minutes: 15)),
         ),
@@ -196,7 +196,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         Uri.parse('https://tapa-budget-server.onrender.com/api/send-sms'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'phone': phone,
+          'email': cleanEmail,
           'code': code,
         }),
       );
@@ -205,7 +205,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         throw Exception('Erreur envoi SMS: ${response.body}');
       }
 
-      Logger.success('✅ Code de vérification envoyé par SMS à $phone');
+      Logger.success('✅ Code de vérification envoyé par EMAIL à $cleanEmail');
     } catch (e) {
       state = AuthState.error(e.toString());
       _appStateNotifier.setError(e.toString());
