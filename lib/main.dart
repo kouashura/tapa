@@ -1,6 +1,8 @@
 // lib/main.dart
 
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:app_links/app_links.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'services/firebase_service.dart';
 // ✅ CHEMIN CORRIGÉ
+import 'package:go_router/go_router.dart';
 import 'presentation/routes/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/logger.dart';
@@ -79,6 +82,58 @@ void main() async {
   );
 }
 
+/// Provider global du router GoRouter, pour pouvoir naviguer depuis
+/// n'importe où (deep links, notifs, etc.).
+final goRouterProvider = Provider<GoRouter>((ref) {
+  final appRouter = AppRouter(ref as WidgetRef);
+  return appRouter.router;
+});
+
+class DeepLinkHandler extends ConsumerStatefulWidget {
+  const DeepLinkHandler({super.key});
+
+  @override
+  ConsumerState<DeepLinkHandler> createState() => _DeepLinkHandlerState();
+}
+
+class _DeepLinkHandlerState extends ConsumerState<DeepLinkHandler> {
+  final AppLinks _appLinks = AppLinks();
+  StreamSubscription<Uri>? _sub;
+
+  @override
+  void initState() {
+    super.initState();
+    _sub = _appLinks.uriLinkStream.listen((uri) {
+      _handleUri(uri);
+    }, onError: (e) {
+      Logger.error('DeepLink error: $e');
+    });
+
+    // Gérer aussi le cas où l'app est ouverte via le deep link
+    _appLinks.getInitialLink().then((uri) {
+      if (uri != null) _handleUri(uri);
+    });
+  }
+
+  void _handleUri(Uri uri) {
+    Logger.info('Deep Link recu: $uri');
+    if (uri.scheme == 'tapa' && uri.host == 'wallet') {
+      // Navigation vers le wallet
+      final router = ref.read(goRouterProvider);
+      router.go('/wallet');
+    }
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
+}
+
 class TapaBudgetApp extends ConsumerWidget {
   const TapaBudgetApp({super.key});
 
@@ -102,6 +157,14 @@ class TapaBudgetApp extends ConsumerWidget {
         Locale('en', 'US'),
       ],
       routerConfig: router.router,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const DeepLinkHandler(),
+          ],
+        );
+      },
     );
   }
 }
