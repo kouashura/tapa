@@ -63,6 +63,7 @@ import '../screens/admin/admin_withdraws_list_screen.dart';
 import '../screens/admin/admin_users_list_screen.dart';
 import '../screens/admin/admin_user_detail_screen.dart';
 import '../screens/admin/admin_dashboard_screen.dart';
+import '../screens/admin/admin_sonam_contracts_screen.dart';
 import '../screens/investir/my_sonam_contracts_screen.dart';
 
 class AppRouter {
@@ -210,6 +211,10 @@ class AppRouter {
         GoRoute(
           path: '/admin/users/:id',
           builder: (context, state) => AdminUserDetailScreen(userId: state.pathParameters['id']!),
+        ),
+        GoRoute(
+          path: '/admin/sonam',
+          builder: (context, state) => const AdminSonamContractsScreen(),
         ),
         GoRoute(
           path: '/help',

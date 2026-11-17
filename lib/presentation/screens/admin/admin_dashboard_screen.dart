@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../providers/admin/admin_provider.dart';
+import '../../providers/admin/admin_sonam_provider.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
@@ -87,6 +88,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            _SonamStatRow(),
             const SizedBox(height: 24),
             _buildAdminCard(
               context,
@@ -111,6 +114,14 @@ class AdminDashboardScreen extends ConsumerWidget {
               icon: Icons.receipt_long,
               color: const Color(0xFF27AE60),
               onTap: () => context.push('/admin/souscriptions'),
+            ),
+            _buildAdminCard(
+              context,
+              title: 'Contrats SONAM',
+              subtitle: 'Valider ou rejeter les contrats d\'assurance',
+              icon: Icons.shield_outlined,
+              color: const Color(0xFF1E88E5),
+              onTap: () => context.push('/admin/sonam'),
             ),
             _buildAdminCard(
               context,
@@ -224,6 +235,59 @@ class _StatCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class _SonamStatRow extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stats = ref.watch(adminSonamStatsProvider);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF1E88E5).withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.shield_outlined, color: Color(0xFF1E88E5), size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Contrats SONAM',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${stats.enAttente} en attente • ${stats.actifs} actifs',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: TAPAColors.navy,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '${stats.total}',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1E88E5),
+            ),
           ),
         ],
       ),
