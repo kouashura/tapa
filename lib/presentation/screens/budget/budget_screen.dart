@@ -821,9 +821,10 @@ class _BudgetEditorSheetState extends State<_BudgetEditorSheet> {
               child: Row(
                 children: [
                   _summaryItem(
-                      'Dépenses prévues', _total('depense'), _alertOnNavy),
+                      'Revenus prévus', _total('revenu'), _okOnNavy),
                   const SizedBox(width: 12),
-                  _summaryItem('Revenus prévus', _total('revenu'), _okOnNavy),
+                  _summaryItem(
+                      'Dépenses prévues', _total('depense'), _alertOnNavy),
                 ],
               ),
             ),

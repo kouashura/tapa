@@ -371,7 +371,7 @@ class _WalletScreenState extends ConsumerState<WalletScreen>
                   ),
                   const SizedBox(width: 14),
                   const Text(
-                    'Mon Wallet',
+                    'Ma réserve',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,

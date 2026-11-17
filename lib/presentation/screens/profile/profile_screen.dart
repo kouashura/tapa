@@ -146,7 +146,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 icon: Icons.account_balance_wallet,
                 iconColor: TAPAColors.gold,
                 bgColor: Colors.amber.shade50,
-                title: 'Mon Wallet',
+                title: 'Ma réserve',
                 subtitle: 'Ajouter des fonds pour investir',
                 onTap: () => context.push('/wallet'),
               ),
