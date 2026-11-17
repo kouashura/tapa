@@ -16,65 +16,7 @@ class AssuranceScreen extends ConsumerStatefulWidget {
 
 class _AssuranceScreenState extends ConsumerState<AssuranceScreen>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
   int _selectedIndex = 1;
-
-  static const List<Map<String, dynamic>> produitsAssuranceVie = [
-    {
-      'id': 'assurance_deces',
-      'nom': 'Assurance Décès',
-      'emoji': '🛡️',
-      'description':
-          'Protégez votre famille en cas de décès. Vos proches reçoivent un capital garanti.',
-      'primeMin': 5000,
-      'primeMax': 50000,
-      'garantie': 'Capital décès jusqu\'à 10 000 000 FCFA',
-      'duree': '1 an renouvelable',
-      'couleurValue': 0xFF1A237E,
-      'avantages': [
-        'Souscription rapide',
-        'Pas de visite médicale',
-        'Capital versé en 72h',
-        'Bénéficiaire au choix'
-      ],
-    },
-    {
-      'id': 'assurance_epargne',
-      'nom': 'ÉPARGNE DE PRÉCAUTIONS',
-      'emoji': '💰',
-      'description':
-          'Épargnez tout en étant protégé. Constituez un capital garanti à terme.',
-      'primeMin': 10000,
-      'primeMax': 100000,
-      'garantie': 'Capital garanti + rendement annuel',
-      'duree': '5 à 20 ans',
-      'couleurValue': 0xFFC9A227,
-      'avantages': [
-        'Rendement garanti',
-        'Protection décès incluse',
-        'Retrait partiel possible',
-        'Déductible fiscalement'
-      ],
-    },
-    {
-      'id': 'assurance_education',
-      'nom': 'Assurance Éducation',
-      'emoji': '🎓',
-      'description':
-          'Garantissez l\'avenir scolaire de vos enfants. Un capital est versé à chaque rentrée.',
-      'primeMin': 5000,
-      'primeMax': 30000,
-      'garantie': 'Capital versé à chaque rentrée scolaire',
-      'duree': 'Jusqu\'à la majorité de l\'enfant',
-      'couleurValue': 0xFF3498DB,
-      'avantages': [
-        'Versements programmés',
-        'Protection parents incluse',
-        'Continue si parent décède',
-        'Adapté au rythme africain'
-      ],
-    },
-  ];
 
   static const List<Map<String, dynamic>> produitsAssuranceAuto = [
     {
@@ -136,13 +78,6 @@ class _AssuranceScreenState extends ConsumerState<AssuranceScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   void _navigateTo(String route, int index) {
@@ -160,48 +95,22 @@ class _AssuranceScreenState extends ConsumerState<AssuranceScreen>
     return Scaffold(
       backgroundColor: TAPAColors.background,
       appBar: AppBar(
-        title: const Text('Assurances'),
+        title: const Text('Assurance Auto'),
         backgroundColor: TAPAColors.navy,
         foregroundColor: TAPAColors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => context.go('/home'),
         ),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Assurance Vie'),
-            Tab(text: 'Assurance Auto'),
-          ],
-          indicatorColor: TAPAColors.gold,
-          labelColor: TAPAColors.gold,
-          unselectedLabelColor: Colors.white54,
-          indicatorSize: TabBarIndicatorSize.tab,
-          indicatorWeight: 3.0,
-        ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildAssuranceList(
-            context,
-            produitsAssuranceVie,
-            monnaie,
-            isSmall,
-            isTablet,
-            paddingSize,
-            false,
-          ),
-          _buildAssuranceList(
-            context,
-            produitsAssuranceAuto,
-            monnaie,
-            isSmall,
-            isTablet,
-            paddingSize,
-            true,
-          ),
-        ],
+      body: _buildAssuranceList(
+        context,
+        produitsAssuranceAuto,
+        monnaie,
+        isSmall,
+        isTablet,
+        paddingSize,
+        false,
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );

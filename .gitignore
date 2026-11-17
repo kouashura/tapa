@@ -50,3 +50,4 @@ _backups_hors_lib/
 
 # macOS
 .DS_Store
+lib_backup_*/

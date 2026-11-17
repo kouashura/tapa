@@ -72,7 +72,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
           // En cas d'erreur, aller vers l'écran de connexion
-          context.go('/inscription');
+          context.go('/login'); // ✅ Redirection vers /login
         }
       }
     }
@@ -96,8 +96,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     if (!mounted) return;
 
     if (!isAuthenticated) {
-      Logger.info('👤 Utilisateur non authentifié → /inscription');
-      context.go('/inscription');
+      Logger.info('👤 Utilisateur non authentifié → /login');
+      context.go('/login'); // ✅ Redirection vers l'écran de login (PIN)
       return;
     }
 

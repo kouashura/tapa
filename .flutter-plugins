@@ -1,4 +1,7 @@
 # This is a generated file; do not edit or check into version control.
+app_links=/Users/kouassi/.pub-cache/hosted/pub.dev/app_links-6.3.3/
+app_links_linux=/Users/kouassi/.pub-cache/hosted/pub.dev/app_links_linux-1.0.3/
+app_links_web=/Users/kouassi/.pub-cache/hosted/pub.dev/app_links_web-1.0.4/
 camera=/Users/kouassi/.pub-cache/hosted/pub.dev/camera-0.10.6/
 camera_android=/Users/kouassi/.pub-cache/hosted/pub.dev/camera_android-0.10.10/
 camera_avfoundation=/Users/kouassi/.pub-cache/hosted/pub.dev/camera_avfoundation-0.9.19/
@@ -30,6 +33,7 @@ flutter_native_splash=/Users/kouassi/.pub-cache/hosted/pub.dev/flutter_native_sp
 flutter_plugin_android_lifecycle=/Users/kouassi/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.26/
 google_mlkit_commons=/Users/kouassi/.pub-cache/hosted/pub.dev/google_mlkit_commons-0.11.0/
 google_mlkit_text_recognition=/Users/kouassi/.pub-cache/hosted/pub.dev/google_mlkit_text_recognition-0.15.0/
+gtk=/Users/kouassi/.pub-cache/hosted/pub.dev/gtk-2.2.0/
 image_picker=/Users/kouassi/.pub-cache/hosted/pub.dev/image_picker-1.1.2/
 image_picker_android=/Users/kouassi/.pub-cache/hosted/pub.dev/image_picker_android-0.8.12+21/
 image_picker_for_web=/Users/kouassi/.pub-cache/hosted/pub.dev/image_picker_for_web-3.0.6/

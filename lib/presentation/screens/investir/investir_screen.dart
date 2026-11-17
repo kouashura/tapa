@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
+import 'sonam_offres_screen.dart';
 
 class InvestirScreen extends ConsumerStatefulWidget {
   const InvestirScreen({super.key});
@@ -78,62 +79,24 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
           ),
           const SizedBox(height: 20),
 
-          // Fonds Communs de Placement
-          _grandBouton(
-            context: context,
-            titre: 'Fonds Communs de Placement',
-            sousTitre:
-                'Faites fructifier votre épargne\navec nos partenaires SGO agréés',
-            emoji: '📈',
-            couleur: TAPAColors.navy,
-            couleurBg: const Color(0xFFEEF2FF),
-            badge: 'SGO Partenaire',
-            badgeCouleur: TAPAColors.gold,
-            onTap: () => _navigateTo('/investir/fcp', 1),
-          ),
-          const SizedBox(height: 16),
 
-          // Assurance Vie
-          _grandBouton(
-            context: context,
-            titre: 'Assurance Vie',
-            sousTitre:
-                'Protégez votre famille et\nconstruisez votre avenir sereinement',
-            emoji: '🛡️',
-            couleur: const Color(0xFF27AE60),
-            couleurBg: const Color(0xFFEAF7EF),
-            badge: 'SONAM VIE',
-            badgeCouleur: const Color(0xFF27AE60),
-            onTap: () => _navigateTo('/investir/assurance', 1),
-          ),
-          const SizedBox(height: 16),
 
-          // ✅ ÉPARGNE DE PRÉCAUTIONS (SONAM)
+          // ✅ PARTENAIRE UNIQUE : SONAM
           _grandBouton(
             context: context,
-            titre: 'ÉPARGNE DE PRÉCAUTIONS',
+            titre: 'SONAM Assurances',
             sousTitre:
-                'Faites fructifier votre épargne\navec un taux garanti de 4%',
-            emoji: '💰',
-            couleur: TAPAColors.gold,
-            couleurBg: const Color(0xFFFFF8E1),
-            badge: 'SONAM VIE',
-            badgeCouleur: TAPAColors.gold,
-            onTap: () => _navigateTo('/investir/sonam', 1),
-          ),
-          const SizedBox(height: 16),
-
-          // ✅ Mes Contrats SONAM
-          _grandBouton(
-            context: context,
-            titre: 'Mes Contrats SONAM',
-            sousTitre: 'Consultez vos contrats\net effectuez vos paiements',
-            emoji: '📄',
-            couleur: TAPAColors.navy,
-            couleurBg: const Color(0xFFEEF2FF),
-            badge: 'SONAM VIE',
-            badgeCouleur: TAPAColors.navy,
-            onTap: () => _navigateTo('/investir/sonam/contrats', 1),
+                'Assurance vie, épargne\net contrats.',
+            emoji: '',
+            couleur: const Color(0xFF3A0A4D), // Couleur violette SONAM
+            couleurBg: const Color(0xFFF3E5F5),
+            badgeCouleur: const Color(0xFF3A0A4D),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SonamOffresScreen()),
+              );
+            },
           ),
           const SizedBox(height: 24),
 
@@ -199,8 +162,8 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
     required String emoji,
     required Color couleur,
     required Color couleurBg,
-    required String badge,
-    required Color badgeCouleur,
+    String? badge,
+    Color? badgeCouleur,
     required VoidCallback onTap,
   }) {
     final isSmall = MediaQuery.of(context).size.width < 360;
@@ -232,10 +195,20 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Center(
-                child: Text(
-                  emoji,
-                  style: TextStyle(fontSize: iconSize * 0.45),
-                ),
+                child: emoji.isEmpty
+                    ? Image.asset(
+                        'assets/logos/sonam_logo.png',
+                        width: iconSize,
+                        height: iconSize,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(Icons.shield, color: couleur, size: iconSize * 0.5);
+                        },
+                      )
+                    : Text(
+                        emoji,
+                        style: TextStyle(fontSize: iconSize * 0.45),
+                      ),
               ),
             ),
             SizedBox(width: isSmall ? 12 : 16),
@@ -243,25 +216,27 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: badgeCouleur.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      badge,
-                      style: TextStyle(
-                        fontSize: isSmall ? 9 : 10,
-                        fontWeight: FontWeight.w700,
-                        color: badgeCouleur,
+                  if (badge != null && badge.isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: badgeCouleur?.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        badge,
+                        style: TextStyle(
+                          fontSize: isSmall ? 9 : 10,
+                          fontWeight: FontWeight.w700,
+                          color: badgeCouleur,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
+                    const SizedBox(height: 6),
+                  ],
                   Text(
                     titre,
                     style: TextStyle(
@@ -429,7 +404,7 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
               decoration: BoxDecoration(
                 gradient: isActive
                     ? const LinearGradient(
-                        colors: [Color(0xFF1A237E), Color(0xFF0D1444)],
+                        colors: [Color(0xFF1F3A5F), Color(0xFF152A47)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       )
@@ -438,7 +413,7 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
                 boxShadow: isActive
                     ? [
                         BoxShadow(
-                          color: const Color(0xFF1A237E).withOpacity(0.35),
+                          color: const Color(0xFF1F3A5F).withOpacity(0.35),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -458,7 +433,7 @@ class _InvestirScreenState extends ConsumerState<InvestirScreen> {
                 fontSize: isActive ? 10 : 9,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                 color:
-                    isActive ? const Color(0xFF1A237E) : Colors.grey.shade500,
+                    isActive ? const Color(0xFF1F3A5F) : Colors.grey.shade500,
                 letterSpacing: 0.1,
               ),
               maxLines: 1,

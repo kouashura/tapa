@@ -210,6 +210,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       actions: [
                         _buildCoachButton(context),
                         _roundIconButton(
+                          Icons.support_agent,
+                          () => context.push('/help'),
+                        ),
+                        _roundIconButton(
                           Icons.notifications_outlined,
                           () {
                             // TODO: Ouvrir les notifications

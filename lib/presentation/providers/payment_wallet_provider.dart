@@ -29,3 +29,21 @@ final userWalletDocProvider =
       .snapshots()
       .map((snapshot) => snapshot.data());
 });
+
+
+/// Provider qui écoute en temps réel le solde du Wallet TAPA
+/// Stocké dans la collection Firestore `wallets/{userId}`.
+final tapaWalletBalanceProvider =
+    StreamProvider.family<double, String>((ref, userId) {
+  if (userId.isEmpty) return Stream.value(0.0);
+
+  return FirebaseFirestore.instance
+      .collection('wallets')
+      .doc(userId)
+      .snapshots()
+      .map((snapshot) {
+    if (!snapshot.exists) return 0.0;
+    final data = snapshot.data() as Map<String, dynamic>;
+    return (data['solde'] as num?)?.toDouble() ?? 0.0;
+  });
+});

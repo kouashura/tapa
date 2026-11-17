@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class TAPAColors {
   // Couleurs principales
-  static const Color navy = Color(0xFF1A237E);
+  static const Color navy = Color(0xFF1F3A5F);
   static const Color gold = Color(0xFFC9A227);
   static const Color goldLight = Color(0xFFFEF3C7); // ✅ AJOUTÉ
   static const Color white = Color(0xFFFFFFFF);

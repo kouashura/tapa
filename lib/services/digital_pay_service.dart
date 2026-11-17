@@ -1,20 +1,17 @@
-// lib/services/digital_pay_service.dart
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import '../core/utils/logger.dart';
 
 class DigitalPayService {
-  // ⚠️ Remplacer par l'URL de TON backend (pas DigitalPaye directement)
   static const String _backendUrl = 'https://tapa-budget-server.onrender.com/api';
 
-  /// Initie un paiement et retourne l'URL de checkout DigitalPaye.
   Future<String?> initierPaiement({
     required String userId,
     required int amount,
-    required String operator, // 'WAVE', 'ORANGE', 'MTN', 'MOOV'
+    required String operator,
     required String phone,
+    required String sourceWalletId,
     String? description,
   }) async {
     try {
@@ -26,6 +23,7 @@ class DigitalPayService {
           'amount': amount,
           'operator': operator,
           'phone': phone,
+          'sourceWalletId': sourceWalletId,
           'description': description ?? 'Rechargement TAPA Budget',
         }),
       );
@@ -49,12 +47,12 @@ class DigitalPayService {
     }
   }
 
-  /// Initie le paiement ET ouvre la page de checkout dans un Custom Tab.
   Future<bool> payerAvecDigitalPay({
     required String userId,
     required int amount,
     required String operator,
     required String phone,
+    required String sourceWalletId,
     String? description,
   }) async {
     final url = await initierPaiement(
@@ -62,6 +60,7 @@ class DigitalPayService {
       amount: amount,
       operator: operator,
       phone: phone,
+      sourceWalletId: sourceWalletId,
       description: description,
     );
 
@@ -86,7 +85,6 @@ class DigitalPayService {
     }
   }
 
-  /// Initie un retrait (payout) vers un compte Mobile Money
   Future<bool> retirerAvecDigitalPay({
     required String userId,
     required int amount,
@@ -95,7 +93,7 @@ class DigitalPayService {
   }) async {
     try {
       final response = await http.post(
-        Uri.parse('$_backendUrl/payout/request'),
+        Uri.parse('$_backendUrl/withdraw'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'userId': userId,

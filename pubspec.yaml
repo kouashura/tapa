@@ -63,6 +63,7 @@ dependencies:
   flutter_custom_tabs: 2.2.0
   emailjs: ^4.0.0
   speech_to_text: ^7.4.0
+  app_links: 6.3.3
 
 dev_dependencies:
   flutter_test:

@@ -141,6 +141,7 @@ class _DevisAutoScreenState extends ConsumerState<DevisAutoScreen> {
         amount: _montantTotal,
         operator: 'WAVE_MONEY_CI',
         phone: _telephoneCtrl.text.trim().isNotEmpty ? _telephoneCtrl.text.trim() : currentUser.phoneNumber,
+        sourceWalletId: '',
         description: 'Assurance  -  mois',
       );
 

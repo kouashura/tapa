@@ -1,7 +1,6 @@
 // lib/screens/profile/profile_screen.dart
 
 import 'package:flutter/material.dart';
-import '../admin/admin_withdraw_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
@@ -140,28 +139,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ]),
 
-                        if (user != null &&
-                (user.id == 'YkqBGtNLqWVYR3GuVDYqvmmqY1I2' ||
-                    user.id == 'S6yXw1W7vEhRh8cL5glKTldvRm13' ||
-                    user.email == 'kouassishura2025@gmail.com' ||
-                    user.email == 'infosservices2015@gmail.com' ||
-                    user.phoneNumber == 'kouassishura2025@gmail.com' ||
-                    user.phoneNumber == 'infosservices2015@gmail.com')) ...[
-              // ---- Section Admin ----
-              _sectionTitle('ADMINISTRATION'),
-              _group([
-                _menuItem(
-                  icon: Icons.admin_panel_settings,
-                  iconColor: TAPAColors.red,
-                  bgColor: Colors.red.shade50,
-                  title: 'Demandes de retrait',
-                  subtitle: 'Gérer les retraits en attente',
-                  onTap: () => context.push('/admin/withdraws'),
-                ),
-              ]),
-            ],
-
-            // ---- Section Mon compte ----
+            // ---- Section Mon Compte ----
             _sectionTitle('MON COMPTE'),
             _group([
               _menuItem(
@@ -198,8 +176,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ]),
 
-            // ---- Section Support ----
-            _sectionTitle('SUPPORT'),
+            // ---- Section Finances ----
+            _sectionTitle('FINANCES'),
             _group([
               _menuItem(
                 icon: Icons.star_outline,
@@ -208,22 +186,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 title: 'Mon Score TAPA',
                 subtitle: 'Voir ma santé financière',
                 onTap: () => context.push('/score'),
-              ),
-              _menuItem(
-                icon: Icons.menu_book_outlined,
-                iconColor: Colors.blue,
-                bgColor: const Color(0xFFE3F2FD),
-                title: "Guide d'utilisation",
-                subtitle: 'Apprendre à utiliser TAPA Invest',
-                onTap: () => context.push('/guide'),
-              ),
-              _menuItem(
-                icon: Icons.support_agent,
-                iconColor: TAPAColors.navy,
-                bgColor: const Color(0xFFE8EAF6),
-                title: 'Assistance & Aide',
-                subtitle: 'Parler à un agent sur WhatsApp',
-                onTap: () => context.push('/help'),
               ),
               _menuItem(
                 icon: Icons.picture_as_pdf_outlined,
@@ -242,6 +204,35 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onTap: () => context.push('/analyse'),
               ),
               _menuItem(
+                icon: Icons.receipt_long_outlined,
+                iconColor: TAPAColors.gold,
+                bgColor: const Color(0xFFFFF8E1),
+                title: 'Historique des paiements',
+                subtitle: 'Vos souscriptions et paiements',
+                onTap: () => context.push('/historique-paiements'),
+              ),
+            ]),
+
+            // ---- Section Support ----
+            _sectionTitle('SUPPORT'),
+            _group([
+              _menuItem(
+                icon: Icons.menu_book_outlined,
+                iconColor: Colors.blue,
+                bgColor: const Color(0xFFE3F2FD),
+                title: "Guide d'utilisation",
+                subtitle: 'Apprendre à utiliser TAPA Invest',
+                onTap: () => context.push('/guide'),
+              ),
+              _menuItem(
+                icon: Icons.support_agent,
+                iconColor: TAPAColors.navy,
+                bgColor: const Color(0xFFE8EAF6),
+                title: 'Assistance & Aide',
+                subtitle: 'Parler à un agent sur WhatsApp',
+                onTap: () => context.push('/help'),
+              ),
+              _menuItem(
                 icon: Icons.message_outlined,
                 iconColor: const Color(0xFF25D366),
                 bgColor: const Color(0xFFE8F8EE),
@@ -255,16 +246,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 bgColor: const Color(0xFFE3F2FD),
                 title: 'Notre site web',
                 subtitle: 'www.mytapa-ci.com',
-                onTap: () =>
-                    LinkService.ouvrirSiteWeb('https://www.mytapa-ci.com'),
-              ),
-              _menuItem(
-                icon: Icons.receipt_long_outlined,
-                iconColor: TAPAColors.gold,
-                bgColor: const Color(0xFFFFF8E1),
-                title: 'Historique des paiements',
-                subtitle: 'Vos souscriptions et paiements',
-                onTap: () => context.push('/historique-paiements'),
+                onTap: () => LinkService.ouvrirSiteWeb('https://www.mytapa-ci.com'),
               ),
             ]),
 
@@ -289,23 +271,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     user.email == 'infosservices2015@gmail.com' ||
                     user.phoneNumber == 'kouassishura2025@gmail.com' ||
                     user.phoneNumber == 'infosservices2015@gmail.com')) ...[
-              _sectionTitle('ADMIN', color: TAPAColors.gold),
+              _sectionTitle('ADMINISTRATION', color: TAPAColors.gold),
               _group([
                 _menuItem(
                   icon: Icons.admin_panel_settings,
                   iconColor: TAPAColors.gold,
                   bgColor: const Color(0xFFFFF8E1),
-                  title: 'Administration des tarifs',
-                  subtitle: 'Gerer les tarifs assurance auto',
-                  onTap: () => context.push('/admin/tarifs'),
-                ),
-                _menuItem(
-                  icon: Icons.receipt_long,
-                  iconColor: const Color(0xFF27AE60),
-                  bgColor: const Color(0xFFEAF7EF),
-                  title: 'Administration des souscriptions',
-                  subtitle: 'Valider ou annuler les souscriptions',
-                  onTap: () => context.push('/admin/souscriptions'),
+                  title: 'Tableau de bord Admin',
+                  subtitle: 'Gérer l\'application',
+                  onTap: () => context.push('/admin/dashboard'),
                 ),
               ]),
             ],
