@@ -834,10 +834,10 @@ class _BudgetEditorSheetState extends State<_BudgetEditorSheet> {
                 controller: scrollController,
                 padding: const EdgeInsets.only(bottom: 8),
                 children: [
-                  if (depenses.isNotEmpty) _section('Dépenses', depenses),
-                  if (revenus.isNotEmpty) ...[
+                  if (revenus.isNotEmpty) _section('Revenus', revenus),
+                  if (depenses.isNotEmpty) ...[
                     const SizedBox(height: 18),
-                    _section('Revenus', revenus),
+                    _section('Dépenses', depenses),
                   ],
                 ],
               ),
