@@ -101,6 +101,8 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
     try {
       final authNotifier = ref.read(authStateProvider.notifier);
 
+      Logger.info('Creation du profil utilisateur...');
+
       await authNotifier.createUserProfile(
         prenom: widget.prenom,
         email: widget.telephone,
@@ -108,18 +110,34 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
         monnaie: widget.monnaie,
       );
 
+      Logger.success('Profil cree, attente sync auth state...');
+
+      // Attendre que le state Riverpod soit bien propage
+      await Future.delayed(const Duration(milliseconds: 500));
+
       if (!mounted) return;
 
-      final userData = ref.read(currentUserProvider);
-      Logger.success('✅ Compte créé avec succès pour ${userData?.prenom}');
+      final authState = ref.read(authStateProvider);
+      final userData = authState.user;
 
-      if (userData?.onboardingVu ?? false) {
-        context.go('/home');
-      } else {
-        context.go('/onboarding');
+      Logger.info('User apres creation: ${userData?.email}, onboardingVu=${userData?.onboardingVu}');
+
+      if (userData == null) {
+        Logger.error('User null apres creation, fallback vers /onboarding');
+        if (mounted) context.go('/onboarding');
+        return;
       }
-    } catch (e) {
-      Logger.error('❌ Erreur création profil: $e');
+
+      if (userData.onboardingVu) {
+        Logger.info('Navigation vers /home');
+        if (mounted) context.go('/home');
+      } else {
+        Logger.info('Navigation vers /onboarding');
+        if (mounted) context.go('/onboarding');
+      }
+    } catch (e, st) {
+      Logger.error('Erreur creation profil: $e');
+      Logger.error('Stacktrace: $st');
       if (mounted) {
         setState(() {
           _errorMessage =
@@ -311,11 +329,14 @@ class _VerifyPhoneScreenState extends ConsumerState<VerifyPhoneScreen> {
 
         setState(() {
           _isLoading = false;
-          _isVerified = true;
         });
 
         _showSnackBar('✅ Code vérifié avec succès !', isSuccess: true);
+        Logger.info('Code valide, creation du profil...');
+
+        // Creer le profil + naviguer
         await _createUserProfile();
+        Logger.info('Navigation effectuee');
       } else {
         // ❌ CODE INVALIDE
         setState(() {

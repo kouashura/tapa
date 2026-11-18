@@ -1,5 +1,7 @@
 // lib/data/datasources/remote/firebase/firebase_auth_datasource.dart
 
+import 'dart:convert';
+import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/utils/logger.dart';
@@ -173,24 +175,78 @@ class FirebaseAuthDatasource {
     required String monnaie,
   }) async {
     try {
-      // 🔒 SÉCURITÉ : plus de mot de passe déterministe.
-      // Session Firebase anonyme ; l'email est un identifiant métier
-      // stocké dans Firestore. La sécurité de connexion repose sur le
-      // PIN local (haché+salté) + la persistance du token Firebase.
+      final cleanEmail = email.trim().toLowerCase();
 
-      User? firebaseUser = _auth.currentUser;
-      if (firebaseUser == null) {
-        final credential = await _auth.signInAnonymously();
-        firebaseUser = credential.user;
+      if (cleanEmail.isEmpty) {
+        throw const AuthFailure(
+          message: 'Email requis',
+          code: 'INVALID_EMAIL',
+        );
       }
 
+      // ─────────────────────────────────────────────
+      // 1. Chercher un compte existant avec cet email
+      // ─────────────────────────────────────────────
+      final existing = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: cleanEmail)
+          .limit(1)
+          .get();
+
+      if (existing.docs.isNotEmpty) {
+        final doc = existing.docs.first;
+        final data = doc.data();
+        Logger.info('Compte existant detecte: ${doc.id}');
+
+        final storedPassword = data['authPassword'] as String?;
+        if (storedPassword == null || storedPassword.isEmpty) {
+          throw const AuthFailure(
+            message: 'Compte existant. Contactez le support pour vous reconnecter.',
+            code: 'NO_STORED_PASSWORD',
+          );
+        }
+
+        // Reconnecter avec le mot de passe stocke
+        try {
+          final cred = await _auth.signInWithEmailAndPassword(
+            email: cleanEmail,
+            password: storedPassword,
+          );
+          if (cred.user == null) {
+            throw Exception('Reconnexion echouee');
+          }
+          Logger.success('Reconnecte au compte existant: ${doc.id}');
+          return AppUser.fromMap(data, doc.id);
+        } on FirebaseAuthException catch (e) {
+          Logger.error('Echec reconnexion: ${e.code} ${e.message}');
+          throw const AuthFailure(
+            message: 'Compte existant mais reconnexion echouee. Contactez le support.',
+            code: 'RELOGIN_FAILED',
+          );
+        }
+      }
+
+      // ─────────────────────────────────────────────
+      // 2. Nouveau compte : creer avec email/password
+      // ─────────────────────────────────────────────
+      final password = _generateSecurePassword();
+
+      final cred = await _auth.createUserWithEmailAndPassword(
+        email: cleanEmail,
+        password: password,
+      );
+
+      final firebaseUser = cred.user;
       if (firebaseUser == null) {
-        throw Exception('Impossible de créer la session Firebase');
+        throw const AuthFailure(
+          message: 'Impossible de creer la session Firebase',
+          code: 'CREATE_FAILED',
+        );
       }
 
       final user = AppUser(
         id: firebaseUser.uid,
-        email: email,
+        email: cleanEmail,
         phoneNumber: '',
         prenom: prenom,
         monnaie: monnaie,
@@ -202,17 +258,26 @@ class FirebaseAuthDatasource {
         dernierActive: DateTime.now(),
       );
 
-      await _firestore.collection('users').doc(firebaseUser.uid).set(
-            user.toMap(),
-            SetOptions(merge: true),
-          );
+      // Stocker le mot de passe pour permettre la reconnexion future
+      await _firestore.collection('users').doc(firebaseUser.uid).set({
+        ...user.toMap(),
+        'email': cleanEmail,
+        'authPassword': password,
+      }, SetOptions(merge: true));
 
-      Logger.info('Utilisateur créé: ${user.prenom} (${user.id})');
+      Logger.success('Nouveau compte cree: ${user.prenom} (${user.id})');
       return user;
     } catch (e) {
       Logger.error('Erreur createUser: $e');
       throw ErrorHandler().handleException(e);
     }
+  }
+
+  /// Genere un mot de passe fort aleatoire (32 bytes base64url).
+  String _generateSecurePassword() {
+    final rand = Random.secure();
+    final bytes = List<int>.generate(32, (_) => rand.nextInt(256));
+    return base64Url.encode(bytes);
   }
 
   // ============================================
